@@ -1,0 +1,58 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pt-1",
+        "name": [{ "family": "Doe", "given": ["Jane"] }],
+        "birthDate": "1971-04-12",
+        "gender": "female"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-1",
+        "status": "active",
+        "payor": [{ "display": "Acme Health Plan" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-1",
+        "code": {
+          "coding": [
+            { "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "M23.205", "display": "Derangement of unspecified medial meniscus, left knee" }
+          ]
+        },
+        "onsetDateTime": "2025-11-02",
+        "subject": { "reference": "Patient/pt-1" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-mri-1",
+        "status": "final",
+        "code": { "text": "MRI left knee" },
+        "effectiveDateTime": "2026-01-15",
+        "valueString": "Complex tear posterior horn medial meniscus. Mild chondromalacia. No ACL injury.",
+        "subject": { "reference": "Patient/pt-1" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-pt-1",
+        "status": "completed",
+        "code": { "text": "Physical therapy, left knee — 8 weeks" },
+        "performedPeriod": { "start": "2025-11-20", "end": "2026-01-20" },
+        "note": [{ "text": "Persistent mechanical symptoms (locking, catching) despite 8 weeks of conservative therapy including PT and NSAIDs." }],
+        "subject": { "reference": "Patient/pt-1" }
+      }
+    }
+  ]
+}
