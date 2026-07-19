@@ -1,8 +1,8 @@
 """Confidence Gate: route to auto decision or the HITL review queue."""
 
-import json
 from datetime import datetime, timezone
 
+from ..audit_log import append_chained
 from ..config import CONFIDENCE_THRESHOLD, PENDING_QUEUE, DECISIONS_LOG
 from ..state import PriorAuthState
 
@@ -36,15 +36,11 @@ def _case_record(state: PriorAuthState) -> dict:
 
 def auto_decision(state: PriorAuthState) -> PriorAuthState:
     record = _case_record(state) | {"decided_by": "auto"}
-    DECISIONS_LOG.parent.mkdir(parents=True, exist_ok=True)
-    with DECISIONS_LOG.open("a") as f:
-        f.write(json.dumps(record) + "\n")
+    append_chained(DECISIONS_LOG, record)
     return {"final_decision": state["determination"]["decision"]}
 
 
 def hitl_enqueue(state: PriorAuthState) -> PriorAuthState:
     record = _case_record(state) | {"status": "pending_review"}
-    PENDING_QUEUE.parent.mkdir(parents=True, exist_ok=True)
-    with PENDING_QUEUE.open("a") as f:
-        f.write(json.dumps(record) + "\n")
+    append_chained(PENDING_QUEUE, record)
     return {"final_decision": "pending_human_review"}

@@ -3,7 +3,6 @@
 Run: streamlit run src/prior_auth_agent/hitl/review_app.py
 """
 
-import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,38 +11,41 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # src/ on path
 
+from prior_auth_agent.audit_log import append_chained, verify_chain  # noqa: E402
 from prior_auth_agent.config import DECISIONS_LOG, PENDING_QUEUE  # noqa: E402
 
 STATUS_ICONS = {"met": "✅", "not_met": "❌", "insufficient": "⚠️"}
 
 
 def load_pending() -> list[dict]:
-    if not PENDING_QUEUE.exists():
-        return []
-    cases = [json.loads(line) for line in PENDING_QUEUE.read_text().splitlines() if line]
-    return [c for c in cases if c.get("status") == "pending_review"]
+    """Fold the append-only queue: a case is pending unless a later
+    'resolved' event exists for its case_id. The queue is never rewritten —
+    rewriting would invalidate the hash chain, which is the point of it."""
+    events = verify_chain(PENDING_QUEUE)
+    latest: dict[str, dict] = {}
+    for e in events:
+        latest[e["case_id"]] = e
+    return [c for c in latest.values() if c.get("status") == "pending_review"]
 
 
 def save_decision(case: dict, decision: str, reviewer_note: str) -> None:
-    record = case | {
+    record = {k: v for k, v in case.items() if k not in ("prev_hash", "entry_hash")} | {
         "decided_by": "human",
         "final_decision": decision,
         "reviewer_note": reviewer_note,
         "reviewed_at": datetime.now(timezone.utc).isoformat(),
     }
-    DECISIONS_LOG.parent.mkdir(parents=True, exist_ok=True)
-    with DECISIONS_LOG.open("a") as f:
-        f.write(json.dumps(record) + "\n")
+    append_chained(DECISIONS_LOG, record)
 
-    # mark resolved in the pending queue
-    lines = PENDING_QUEUE.read_text().splitlines()
-    updated = []
-    for line in lines:
-        c = json.loads(line)
-        if c["case_id"] == case["case_id"]:
-            c["status"] = "resolved"
-        updated.append(json.dumps(c))
-    PENDING_QUEUE.write_text("\n".join(updated) + "\n")
+    # mark resolved with an append-only event, chained like everything else
+    append_chained(
+        PENDING_QUEUE,
+        {
+            "case_id": case["case_id"],
+            "status": "resolved",
+            "resolved_at": datetime.now(timezone.utc).isoformat(),
+        },
+    )
 
 
 st.set_page_config(page_title="Prior Auth Review Queue", layout="wide")
