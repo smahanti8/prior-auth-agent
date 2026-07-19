@@ -1,0 +1,5 @@
+.env
+.chroma/
+__pycache__/
+*.egg-info/
+data/review_queue/*.jsonl
