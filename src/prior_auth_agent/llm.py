@@ -21,8 +21,13 @@ def structured_call(
 
     Returns the parsed JSON object. `output_config.format` guarantees the first
     text block is valid JSON matching the schema.
+
+    Streams the response: at the token budgets these nodes use (up to 32k), the
+    SDK requires streaming for requests that could exceed its 10-minute
+    non-streaming ceiling. `get_final_message()` still returns the complete
+    message, so callers see no difference.
     """
-    response = client.messages.create(
+    with client.messages.stream(
         model=MODEL,
         max_tokens=max_tokens,
         thinking={"type": "adaptive"},
@@ -31,7 +36,8 @@ def structured_call(
         output_config={
             "format": {"type": "json_schema", "schema": schema}
         },
-    )
+    ) as stream:
+        response = stream.get_final_message()
     if response.stop_reason == "refusal":
         raise RuntimeError("Model refused the request; route case to human review.")
     text = next(b.text for b in response.content if b.type == "text")
