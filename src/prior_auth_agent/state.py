@@ -13,7 +13,8 @@ class Evidence(TypedDict):
     criterion_id: str
     status: Literal["met", "not_met", "insufficient"]
     summary: str
-    citations: list[str]  # FHIR resource references, e.g. "Observation/bmi-1"
+    citations: list[str]  # chart-side FHIR references, e.g. "Observation/bmi-1"
+    policy_quote: str  # policy-side quote establishing the requirement
 
 
 class EvidenceGap(TypedDict):
@@ -52,6 +53,10 @@ class PriorAuthState(TypedDict, total=False):
 
     # --- evidence extraction ---
     evidence: list[Evidence]
+
+    # --- citation gate (hard reject on uncited met claims) ---
+    citation_ok: bool
+    citation_errors: list[str]
 
     # --- determination ---
     determination: Determination

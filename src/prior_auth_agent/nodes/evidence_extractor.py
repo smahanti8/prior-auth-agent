@@ -23,8 +23,15 @@ SCHEMA = {
                         "type": "array",
                         "items": {"type": "string"},
                     },
+                    "policy_quote": {"type": "string"},
                 },
-                "required": ["criterion_id", "status", "summary", "citations"],
+                "required": [
+                    "criterion_id",
+                    "status",
+                    "summary",
+                    "citations",
+                    "policy_quote",
+                ],
                 "additionalProperties": False,
             },
         }
@@ -39,7 +46,12 @@ SYSTEM = (
     "with FHIR references in the form ResourceType/id (e.g. 'Observation/bmi-1'). "
     "Only cite resources that actually appear in the bundle. If the bundle has no "
     "relevant documentation for a criterion, set status='insufficient' with empty "
-    "citations — never infer or fabricate clinical facts."
+    "citations — never infer or fabricate clinical facts.\n"
+    "For every criterion, also set policy_quote to the exact sentence(s) from the "
+    "criterion's policy text that establish the requirement. Any criterion you mark "
+    "'met' MUST carry a non-empty policy_quote AND at least one FHIR citation — a "
+    "met claim without both is rejected downstream, so do not mark 'met' unless you "
+    "can supply both the policy quote and the chart citation."
 )
 
 

@@ -9,6 +9,8 @@ from langgraph.graph import END, StateGraph
 
 from .nodes import (
     auto_decision,
+    citation_gate,
+    citation_reject,
     confidence_gate,
     criteria_mapper,
     determination_drafter,
@@ -29,6 +31,10 @@ def _after_eligibility(state: PriorAuthState) -> str:
     return "policy_rag" if state["eligible"] else "reject"
 
 
+def _after_citation_gate(state: PriorAuthState) -> str:
+    return "determination" if state["citation_ok"] else "citation_reject"
+
+
 def _after_gate(state: PriorAuthState) -> str:
     return "auto_decision" if state["route"] == "auto" else "hitl_enqueue"
 
@@ -46,6 +52,8 @@ def build_graph():
     g.add_node("policy_rag", policy_rag)
     g.add_node("criteria_mapper", criteria_mapper)
     g.add_node("evidence_extractor", evidence_extractor)
+    g.add_node("citation_gate", citation_gate)
+    g.add_node("citation_reject", citation_reject)
     g.add_node("determination", determination_drafter)
     g.add_node("confidence_gate", confidence_gate)
     g.add_node("auto_decision", auto_decision)
@@ -57,11 +65,15 @@ def build_graph():
     g.add_conditional_edges("eligibility", _after_eligibility, ["policy_rag", "reject"])
     g.add_edge("policy_rag", "criteria_mapper")
     g.add_edge("criteria_mapper", "evidence_extractor")
-    g.add_edge("evidence_extractor", "determination")
+    g.add_edge("evidence_extractor", "citation_gate")
+    g.add_conditional_edges(
+        "citation_gate", _after_citation_gate, ["determination", "citation_reject"]
+    )
     g.add_edge("determination", "confidence_gate")
     g.add_conditional_edges("confidence_gate", _after_gate, ["auto_decision", "hitl_enqueue"])
     g.add_edge("auto_decision", END)
     g.add_edge("hitl_enqueue", END)
+    g.add_edge("citation_reject", END)
     g.add_edge("reject", END)
 
     return g.compile()
