@@ -61,15 +61,26 @@ selected = st.sidebar.radio(f"Pending cases ({len(pending)})", case_ids)
 case = next(c for c in pending if c["case_id"] == selected)
 
 det = case["determination"]
+DRAFT_LABELS = {"approve": "Approve", "insufficient_evidence": "Insufficient evidence"}
 col1, col2, col3 = st.columns(3)
 col1.metric("CPT Code", case["cpt_code"])
-col2.metric("Draft Decision", det["decision"].upper())
+col2.metric("Draft Outcome", DRAFT_LABELS.get(det["decision"], det["decision"]))
 col3.metric("Model Confidence", f"{det['confidence']:.0%}")
 
 st.caption(case.get("eligibility_notes", ""))
 
 st.subheader("Draft rationale")
 st.write(det["rationale"])
+
+# The drafter never recommends a denial; it names the evidence still needed.
+# The denial decision is the reviewer's alone (see DECISIONS.md D9).
+gaps = det.get("gaps") or []
+if gaps:
+    st.subheader("Evidence needed to approve")
+    crit_text = {c["id"]: c["text"] for c in case.get("criteria", [])}
+    for gap in gaps:
+        cid = gap["criterion_id"]
+        st.markdown(f"- **{cid}** ({crit_text.get(cid, '?')}): {gap['needed_evidence']}")
 
 st.subheader("Criteria & evidence")
 evidence_by_id = {e["criterion_id"]: e for e in case.get("evidence", [])}

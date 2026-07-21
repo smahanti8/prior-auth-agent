@@ -15,8 +15,8 @@ def confidence_gate(state: PriorAuthState) -> PriorAuthState:
         for e in state["evidence"]
     )
     needs_review = (
-        det["confidence"] < CONFIDENCE_THRESHOLD
-        or det["decision"] in ("deny", "pend")  # denials always get human eyes
+        det["decision"] != "approve"  # only approvals can be auto-finalized
+        or det["confidence"] < CONFIDENCE_THRESHOLD
         or required_insufficient
     )
     return {"route": "hitl" if needs_review else "auto"}

@@ -16,10 +16,18 @@ class Evidence(TypedDict):
     citations: list[str]  # FHIR resource references, e.g. "Observation/bmi-1"
 
 
+class EvidenceGap(TypedDict):
+    criterion_id: str
+    needed_evidence: str  # what documentation would let this criterion be met
+
+
 class Determination(TypedDict):
-    decision: Literal["approve", "deny", "pend"]
+    # The drafter never recommends a denial (see DECISIONS.md D9). It emits
+    # 'approve', or 'insufficient_evidence' with the gaps that block approval.
+    decision: Literal["approve", "insufficient_evidence"]
     rationale: str
     confidence: float  # 0.0 - 1.0
+    gaps: list[EvidenceGap]  # empty when approved
 
 
 class PriorAuthState(TypedDict, total=False):

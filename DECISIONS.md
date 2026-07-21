@@ -9,6 +9,11 @@ not silently rewritten.
 
 ## D1. Denials always route to human review, regardless of confidence
 
+> **Superseded by [D9](#d9-the-ai-never-frames-a-denial-supersedes-d1).**
+> Routing a drafted denial to a human was correct but insufficient: the draft
+> still *contained* a denial recommendation, which anchors the reviewer. D9
+> removes the denial recommendation from the drafter entirely.
+
 **Context.** The confidence gate decides which cases the machine finalizes.
 A threshold alone would let a sufficiently confident denial be auto-finalized
 — and the model draft for a denial can be very confident when a required
@@ -199,3 +204,40 @@ exception is a blunt reviewer experience — an explicit integrity-failure
 screen with file, line, and reason would keep the loudness with better
 operator ergonomics. Compaction would require re-anchoring the chain and is
 deliberately deferred until external anchoring (D7) exists.
+
+---
+
+## D9. The AI never frames a denial (supersedes D1)
+
+**Context.** Under D1 the drafter could recommend `deny`, and the gate routed
+every denial to a human. The routing was correct, but it treated the problem
+as *who finalizes* the denial while ignoring *who frames* it. A reviewer who
+opens a case already labelled "DENY — required criterion c2 not met" is
+anchored: the cognitively cheap action is to ratify the model's denial, and
+human-in-the-loop review quietly degrades into rubber-stamping even though,
+on paper, a human made the call.
+
+**Decision.** The drafter can no longer produce a denial at all. It emits
+either `approve`, or `insufficient_evidence` — which names exactly which
+required criteria lack support and the specific documentation that would
+satisfy each. No code path yields a denial recommendation: the response
+schema's `decision` enum excludes it, the `Determination` type excludes it,
+and structured output constrains the model to that enum. A human forms and
+owns any denial. `tests/test_no_denial.py` asserts the invariant at all three
+layers and exhaustively drives every schema-permitted decision through the
+gate and finalizers to confirm none yields a denial.
+
+**Rationale.** A drafted denial anchors the reviewer toward denying, which
+hollows out human-in-the-loop review even when the routing is technically
+correct — the exact failure D1 left open. Reframing every non-approval as
+"here is the evidence still needed" keeps the reviewer's judgment central and
+hands the requester an actionable path to approval instead of a verdict to
+appeal.
+
+**Counter-argument.** Reviewers lose a useful signal: the model's denial
+rationale was a concise account of *why* a case is weak, and reconstructing
+that from a list of gaps takes work — throughput may drop, and a reviewer
+under load might approve a genuinely deficient case because the draft no
+longer argues against it. The bet is that removing the anchor does more for
+decision quality than the lost signal does, and that the named gaps carry
+most of the same information without the framing.

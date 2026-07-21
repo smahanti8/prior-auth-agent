@@ -33,6 +33,7 @@ def _state(case_id="pa-001", decision="approve", confidence=0.95):
             "decision": decision,
             "confidence": confidence,
             "rationale": "meets criteria",
+            "gaps": [],
         },
     }
 
@@ -114,7 +115,9 @@ def test_hitl_enqueue_writes_chained_entry(tmp_path, monkeypatch):
     queue = tmp_path / "pending.jsonl"
     monkeypatch.setattr(confidence_gate, "PENDING_QUEUE", queue)
 
-    confidence_gate.hitl_enqueue(_state("pa-003", decision="deny", confidence=0.4))
+    confidence_gate.hitl_enqueue(
+        _state("pa-003", decision="insufficient_evidence", confidence=0.4)
+    )
 
     entries = verify_chain(queue)
     assert entries[0]["status"] == "pending_review"
