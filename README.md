@@ -73,6 +73,7 @@ The deterministic parts (intake, eligibility, the citation gate, the audit log) 
 - **Model**: `claude-opus-4-8` with adaptive thinking; structured outputs (`output_config.format`) guarantee schema-valid JSON at every LLM node. Calls are streamed, as the SDK requires above its non-streaming time ceiling.
 - **No AI-drafted denials**: the determination schema can only emit `approve` or `insufficient_evidence`; a denial is made by a human in the review queue, never framed by the model.
 - **Citation gate**: a criterion marked *met* must carry both a policy-side quote and a chart-side FHIR citation, or it is rejected outright — a hard gate, separate from the confidence gate's soft routing.
+- **Design decisions**: the never-deny rule is [DECISIONS.md](DECISIONS.md) D9; the bilateral-citation gate is D10, which extends D2 (citations must be present; existence-against-the-bundle is still unverified).
 - **Confidence gate**: non-approvals, cases below `CONFIDENCE_THRESHOLD` (default 0.85), or any required criterion lacking evidence go to `data/review_queue/pending.jsonl` for human review.
 - **PHI**: this scaffold does no de-identification; do not point it at real patient data without your compliance controls in place.
 
