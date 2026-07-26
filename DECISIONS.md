@@ -241,3 +241,42 @@ under load might approve a genuinely deficient case because the draft no
 longer argues against it. The bet is that removing the anchor does more for
 decision quality than the lost signal does, and that the named gaps carry
 most of the same information without the framing.
+
+---
+
+## D10. A met claim requires both a policy quote and a chart citation (extends D2)
+
+> **Extends [D2](#d2-every-clinical-claim-carries-a-fhir-citation-or-the-criterion-is-insufficient).**
+> D2 established that claims must be citation-backed or fall to `insufficient`
+> and route to a human. D10 hardens that into a hard gate for one specific
+> failure: a claim asserted `met` without its citations.
+
+**Context.** D2 routes honest gaps (`insufficient`) to a human. It does not
+stop the opposite failure: the model marking a criterion `met` while omitting
+the evidence for it. Structured output guarantees the *shape* of an evidence
+row, not that a `met` row actually carries support. An uncited `met` is not
+uncertainty a reviewer should weigh — it is an unsupported assertion.
+
+**Decision.** A criterion with `status == "met"` must carry BOTH a non-empty
+`policy_quote` (the requirement) and at least one chart-side FHIR citation
+(the evidence). A pydantic validator (`validation.py: EvidenceClaim`) *raises*
+on violation; the `citation_gate` node runs it after evidence extraction and
+routes any violation to a hard `citation_reject` terminal — the case never
+reaches the determination. This is a hard gate, not D2's soft routing: an
+uncited `met` is thrown out, not sent to a human. `tests/test_citation_gate.py`
+pins both sides — a met claim with both quotes passes; missing either raises;
+non-`met` statuses need no citation.
+
+**Rationale.** Routing an unsupported claim to a human relaxes the rule back
+into a suggestion and trains reviewers to launder the model's gaps ("the AI
+said met, I'll approve it"). The two failure classes deserve different
+handling: uncertainty (D2's `insufficient`) is a judgment call for a person;
+an unsupported assertion is invalid and is rejected. Keeping enforcement in a
+validator that raises makes it deterministic and testable without an LLM call.
+
+**Counter-argument.** The gate checks that citations are *present*, not that
+they *resolve*: it does not verify that each cited `ResourceType/id` exists in
+the submitted bundle, so a model can still pass the gate with a fabricated
+reference — the open half of D2's gap. Rejecting outright (rather than
+pending) also discards a case a human might have salvaged by supplying the
+missing quote.
