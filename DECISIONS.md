@@ -40,6 +40,10 @@ point of the entry.
 
 ## D2. Every clinical claim carries a FHIR citation, or the criterion is `insufficient`
 
+> **Extended by [D10](#d10-a-met-claim-requires-both-a-policy-quote-and-a-chart-citation-extends-d2).**
+> D10 makes a policy quote and a chart citation a hard requirement on met
+> claims; the existence-of-reference gap below is narrowed, not closed.
+
 **Context.** The evidence extractor searches the patient's FHIR bundle for
 support of each policy criterion. The unforgivable failure mode in this
 domain is an invented clinical fact.
@@ -57,9 +61,12 @@ policy, not enforcement, so the gate independently backstops them: an honest
 insufficiency can never be auto-finalized into a decision.
 
 **Counter-argument.** A prompt cannot guarantee a cited reference is real.
-The missing enforcement layer is a deterministic post-check that every cited
-`ResourceType/id` exists in the bundle, downgrading to `insufficient` when it
-does not — acknowledged as the roadmap's clearest gap. Strictness also pends
+D10 now enforces that a met claim *carries* both a policy quote and a chart
+citation — but not that the cited `ResourceType/id` actually *resolves*
+against the submitted bundle, so a model can still cite a resource that does
+not exist. That existence check (a deterministic post-check resolving every
+citation against the bundle, downgrading to `insufficient` when it fails)
+remains unimplemented and is the clearest open gap. Strictness also pends
 cases where a clinician would trivially infer the fact.
 
 ---
