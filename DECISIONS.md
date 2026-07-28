@@ -42,7 +42,9 @@ point of the entry.
 
 > **Extended by [D10](#d10-a-met-claim-requires-both-a-policy-quote-and-a-chart-citation-extends-d2).**
 > D10 makes a policy quote and a chart citation a hard requirement on met
-> claims; the existence-of-reference gap below is narrowed, not closed.
+> claims. The existence-of-reference gap named in the counter-argument below
+> is now closed by per-citation resolution against the submitted bundle —
+> see the counter-argument for what "closed" does and doesn't mean.
 
 **Context.** The evidence extractor searches the patient's FHIR bundle for
 support of each policy criterion. The unforgivable failure mode in this
@@ -60,14 +62,19 @@ answer, and it routes to the right place — a person. Prompt rules alone are
 policy, not enforcement, so the gate independently backstops them: an honest
 insufficiency can never be auto-finalized into a decision.
 
-**Counter-argument.** A prompt cannot guarantee a cited reference is real.
-D10 now enforces that a met claim *carries* both a policy quote and a chart
-citation — but not that the cited `ResourceType/id` actually *resolves*
-against the submitted bundle, so a model can still cite a resource that does
-not exist. That existence check (a deterministic post-check resolving every
-citation against the bundle, downgrading to `insufficient` when it fails)
-remains unimplemented and is the clearest open gap. Strictness also pends
-cases where a clinician would trivially infer the fact.
+**Counter-argument.** A prompt cannot guarantee a cited reference is real —
+`resolve_citations()` now closes that gap mechanically: every citation on a
+met claim is checked against a `(ResourceType, id)` index built from the
+submitted bundle, and any that don't resolve are stripped. Two honest
+subtleties remain even so. First, resolution proves *existence*, not
+*clinical relevance*: a citation to a real resource in the bundle satisfies
+the check even if that resource has nothing to do with the criterion it's
+attached to (e.g. citing `Patient/patient-1` to support a BMI criterion).
+Second, a criterion can now pass `met` on its surviving citations alone — if
+a model originally supplied three citations and two are stripped as
+unresolvable, the criterion still stands as met on the one real citation
+left, which may or may not be sufficient evidence on its own. Strictness
+also pends cases where a clinician would trivially infer the fact.
 
 ---
 
@@ -281,9 +288,10 @@ handling: uncertainty (D2's `insufficient`) is a judgment call for a person;
 an unsupported assertion is invalid and is rejected. Keeping enforcement in a
 validator that raises makes it deterministic and testable without an LLM call.
 
-**Counter-argument.** The gate checks that citations are *present*, not that
-they *resolve*: it does not verify that each cited `ResourceType/id` exists in
-the submitted bundle, so a model can still pass the gate with a fabricated
-reference — the open half of D2's gap. Rejecting outright (rather than
-pending) also discards a case a human might have salvaged by supplying the
-missing quote.
+**Counter-argument.** Rejecting a met claim outright when even one required
+piece is missing (rather than pending it) discards a case a human might have
+salvaged by supplying the missing quote. Whether a *present* citation's
+`ResourceType/id` actually *resolves* against the bundle is a separate
+question, addressed by resolution rather than presence — see D2's
+counter-argument for what that resolution now closes and the subtleties
+that remain.
