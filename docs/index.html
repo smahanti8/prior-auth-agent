@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prior Authorization Agent · Healthcare AI</title>
+<style>
+:root {
+  --bg: #060b14;
+  --surface: #0d1829;
+  --surface2: #131f35;
+  --border: #1b2d47;
+  --border2: #263f5e;
+  --text: #e6edf6;
+  --text2: #8aaac8;
+  --text3: #4e6a89;
+  --accent: #3b82f6;
+  --accent-dim: #162447;
+  --green: #22c55e;
+  --green-dim: #0e3320;
+  --orange: #f59e0b;
+  --orange-dim: #3a2000;
+  --red: #ef4444;
+  --red-dim: #3b0f0f;
+  --purple: #a855f7;
+  --purple-dim: #2a1050;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(6,11,20,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;overflow-x:auto}
+.nav-logo{font-size:14px;font-weight:800;color:var(--text);padding:14px 20px 14px 0;border-right:1px solid var(--border);margin-right:4px;white-space:nowrap;flex-shrink:0}
+.nav-logo span{color:var(--accent)}
+.nav-tab{padding:14px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.nav-tab:hover{color:var(--text2)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* HERO */
+.hero{padding:60px 28px 44px;max-width:860px;margin:0 auto;text-align:center}
+.eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:14px}
+.hero h1{font-size:44px;font-weight:800;line-height:1.12;color:var(--text);margin-bottom:14px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero-sub{font-size:17px;color:var(--text2);max-width:580px;margin:0 auto 36px;line-height:1.7}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 24px;min-width:120px;text-align:center}
+.stat-n{font-size:30px;font-weight:800;line-height:1}
+.stat-n.orange{color:var(--orange)}
+.stat-n.red{color:var(--red)}
+.stat-n.green{color:var(--green)}
+.stat-n.accent{color:var(--accent)}
+.stat-l{font-size:12px;color:var(--text3);margin-top:4px;line-height:1.4}
+
+/* SECTIONS */
+.section{display:none;max-width:940px;margin:0 auto;padding:36px 28px 60px}
+.section.active{display:block}
+.sec-title{font-size:26px;font-weight:700;color:var(--text);margin-bottom:6px}
+.sec-sub{font-size:15px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+hr.div{border:none;border-top:1px solid var(--border);margin:28px 0}
+
+/* PROBLEM */
+.pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px}
+.pain-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.pain-icon{font-size:26px;margin-bottom:10px}
+.pain-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.pain-body{font-size:12px;color:var(--text2);line-height:1.6}
+.pain-num{font-size:24px;font-weight:800;color:var(--red);margin-top:10px}
+.pain-num-l{font-size:11px;color:var(--text3);margin-top:1px}
+
+.journey-label{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px}
+.journey{display:flex;align-items:flex-start;overflow-x:auto;padding-bottom:10px;gap:0}
+.j-step{display:flex;flex-direction:column;align-items:center;min-width:100px}
+.j-node{width:42px;height:42px;border-radius:50%;border:2px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:15px}
+.j-node.bad{border-color:var(--red);background:var(--red-dim)}
+.j-lbl{font-size:11px;color:var(--text2);text-align:center;margin-top:7px;max-width:95px;line-height:1.4}
+.j-time{font-size:10px;font-weight:700;color:var(--orange);margin-top:3px}
+.j-arr{flex-shrink:0;align-self:flex-start;margin-top:18px;color:var(--border2);font-size:18px;padding:0 2px}
+.footnote{font-size:11px;color:var(--text3);margin-top:10px;font-style:italic}
+
+/* PERSONAS */
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.persona-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.p-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.p-avatar{width:46px;height:46px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.p-name{font-size:14px;font-weight:700;color:var(--text)}
+.p-role{font-size:11px;font-weight:700;color:var(--accent);margin-top:1px}
+.p-org{font-size:11px;color:var(--text3)}
+.p-quote{font-size:12px;color:var(--text2);font-style:italic;border-left:3px solid var(--border2);padding-left:11px;margin-bottom:12px;line-height:1.6}
+.p-list{list-style:none}
+.p-list li{font-size:12px;color:var(--text2);padding:3px 0;display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.p-list li::before{content:"▸";color:var(--red);flex-shrink:0;margin-top:1px}
+.p-list.gains li::before{content:"✓";color:var(--green)}
+.p-div{border:none;border-top:1px solid var(--border);margin:11px 0}
+.gains-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:5px}
+
+/* HOW IT WORKS */
+.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.compare-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.compare-col.after{border-color:var(--accent)}
+.compare-h{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.compare-h.before{color:var(--text3)}
+.compare-h.after-h{color:var(--accent)}
+.cr{display:flex;flex-direction:column;padding:9px 0;border-bottom:1px solid var(--border)}
+.cr:last-child{border-bottom:none}
+.cr-aspect{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:2px}
+.cr-val{font-size:12px;color:var(--text2)}
+.cr-val.bad{color:var(--red)}
+.cr-val.good{color:var(--green)}
+
+.principle-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 20px;margin-top:28px}
+.principle-box p{font-size:13px;color:var(--text2);line-height:1.7}
+.principle-box p+p{margin-top:10px}
+
+/* SIMULATOR */
+.sim-cases{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.sim-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 16px;cursor:pointer;transition:all .15s;text-align:left}
+.sim-btn:hover{border-color:var(--border2)}
+.sim-btn.active{border-color:var(--accent);background:var(--accent-dim)}
+.sim-cpt{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+.sim-name{font-size:12px;font-weight:600;color:var(--text);margin-top:2px}
+.run-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 26px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.run-btn:hover{opacity:.85}
+.run-btn:disabled{opacity:.45;cursor:not-allowed}
+.sim-result{display:none;margin-top:22px}
+.sim-result.show{display:block}
+.sim-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.sim-case-h{font-size:17px;font-weight:700;color:var(--text)}
+.sim-patient{font-size:12px;color:var(--text2);margin-top:2px}
+.sim-timing{text-align:right}
+.sim-timing-l{font-size:10px;color:var(--text3)}
+.sim-timing-v{font-size:20px;font-weight:800;color:var(--green)}
+.crit-section-l{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.crit-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:7px;overflow:hidden}
+.crit-head{display:flex;align-items:center;gap:9px;padding:11px 14px;cursor:pointer;user-select:none}
+.crit-head:hover{background:rgba(255,255,255,.02)}
+.c-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
+.c-icon.met{background:var(--green-dim);color:var(--green)}
+.c-icon.not_met{background:var(--red-dim);color:var(--red)}
+.c-icon.insufficient{background:var(--orange-dim);color:var(--orange)}
+.c-text{flex:1;font-size:12px;color:var(--text);line-height:1.4}
+.c-req{font-size:10px;font-weight:700;padding:2px 5px;border-radius:3px}
+.c-req.r{background:var(--accent-dim);color:var(--accent)}
+.c-req.o{background:var(--surface);color:var(--text3)}
+.c-status{font-size:10px;font-weight:700;margin-left:4px}
+.c-status.met{color:var(--green)}
+.c-status.not_met{color:var(--red)}
+.c-status.insufficient{color:var(--orange)}
+.c-chevron{font-size:11px;color:var(--text3);transition:transform .15s}
+.c-chevron.open{transform:rotate(180deg)}
+.crit-body{display:none;padding:0 14px 12px;border-top:1px solid var(--border)}
+.crit-body.open{display:block}
+.cd{margin-top:9px}
+.cd-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:2px}
+.cd-v{font-size:12px;color:var(--text2);line-height:1.5}
+.cd-v.italic{font-style:italic}
+.cite-tag{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-dim);display:inline-block;padding:2px 7px;border-radius:4px;margin-top:3px}
+.det-box{border-radius:10px;padding:16px 18px;margin:14px 0}
+.det-box.approve{background:var(--green-dim);border:1px solid var(--green)}
+.det-box.insufficient{background:var(--orange-dim);border:1px solid var(--orange)}
+.det-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.det-lbl.approve{color:var(--green)}
+.det-lbl.insufficient{color:var(--orange)}
+.det-dec{font-size:18px;font-weight:800;margin-bottom:7px}
+.det-rat{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.det-conf{display:flex;align-items:center;gap:10px}
+.conf-bar{height:5px;background:var(--border);border-radius:3px;flex:1;overflow:hidden}
+.conf-fill{height:100%;border-radius:3px}
+.conf-fill.high{background:var(--green)}
+.conf-fill.mid{background:var(--orange)}
+.conf-fill.low{background:var(--red)}
+.conf-pct{font-size:13px;font-weight:700}
+.gap-list{list-style:none;margin-top:8px}
+.gap-list li{font-size:12px;color:var(--orange);padding:3px 0;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.gap-list li::before{content:"⚠";font-size:10px;flex-shrink:0;margin-top:2px}
+.route-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:13px}
+.route-icon{font-size:26px}
+.route-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)}
+.route-val{font-size:14px;font-weight:700;margin-top:1px}
+.route-val.auto{color:var(--green)}
+.route-val.hitl{color:var(--orange)}
+
+/* REVIEWER */
+.rev-intro{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:22px;border-left:3px solid var(--accent);padding-left:14px}
+.rev-preview{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.rev-preview-hd{background:var(--surface2);border-bottom:1px solid var(--border);padding:11px 18px;display:flex;align-items:center;gap:10px}
+.rev-preview-title{font-size:12px;font-weight:700;color:var(--text2)}
+.rev-badge{font-size:10px;background:var(--orange-dim);color:var(--orange);padding:2px 7px;border-radius:3px;font-weight:700}
+.rev-body{padding:18px}
+.rev-metrics{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.rev-m{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px}
+.rev-m-l{font-size:10px;color:var(--text3);margin-bottom:1px}
+.rev-m-v{font-size:14px;font-weight:700;color:var(--text)}
+.rev-brief{font-size:12px;color:var(--text2);line-height:1.65;background:var(--surface2);border-radius:8px;padding:13px;margin-bottom:14px}
+.rev-brief strong{color:var(--text)}
+.rev-actions{display:flex;gap:9px;flex-wrap:wrap}
+.rev-btn{border-radius:7px;padding:9px 18px;font-size:12px;font-weight:700;cursor:default;border:none}
+.rev-btn.approve{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.rev-btn.deny{background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+.rev-btn.pend{background:var(--surface2);color:var(--text2);border:1px solid var(--border2)}
+.rev-note{font-size:11px;color:var(--text3);margin-top:10px;font-style:italic}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.why-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px}
+.why-icon{font-size:22px;margin-bottom:7px}
+.why-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px}
+.why-body{font-size:12px;color:var(--text2);line-height:1.55}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:20px}
+footer p{font-size:11px;color:var(--text3)}
+footer a{color:var(--accent);text-decoration:none;font-size:11px}
+footer a:hover{text-decoration:underline}
+
+@media(max-width:680px){
+  .pain-grid,.compare-wrap,.persona-grid,.why-grid{grid-template-columns:1fr}
+  .hero h1{font-size:28px}
+  .stats{flex-direction:column;align-items:stretch}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Prior Auth <span>Agent</span></div>
+  <div class="nav-tab active" onclick="showTab('problem',this)">The Problem</div>
+  <div class="nav-tab" onclick="showTab('personas',this)">Who It's For</div>
+  <div class="nav-tab" onclick="showTab('howworks',this)">How It Changes Things</div>
+  <div class="nav-tab" onclick="showTab('simulator',this)">Try It</div>
+  <div class="nav-tab" onclick="showTab('reviewer',this)">The Reviewer</div>
+</nav>
+
+<div class="hero">
+  <div class="eyebrow">Healthcare AI · Prior Authorization</div>
+  <h1>Authorization decisions in <em>minutes</em>,<br>not days</h1>
+  <p class="hero-sub">An AI agent reads the clinical chart, checks every policy criterion, cites its evidence — and routes cases to the right outcome without delay.</p>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-n orange">14</div>
+      <div class="stat-l">days average manual<br>PA turnaround</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n red">88%</div>
+      <div class="stat-l">of physicians report PA<br>delays care or causes abandonment</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n green">&lt;2</div>
+      <div class="stat-l">minutes for high-confidence<br>auto-approval cases</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n accent">0</div>
+      <div class="stat-l">unsupported decisions —<br>every claim requires a citation</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROBLEM ═══ -->
+<div id="tab-problem" class="section active">
+  <div class="sec-title">The prior authorization problem</div>
+  <p class="sec-sub">Prior authorization affects 38 million Americans annually. Every week, patients wait for procedures their physicians have already decided they need.</p>
+
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon">🏥</div>
+      <div class="pain-title">Care delayed — sometimes abandoned</div>
+      <div class="pain-body">A patient needs a knee replacement. Surgery is scheduled. The PA request sits in a queue — manual policy lookup, chart review, documentation gathering. The OR slot may be gone before the answer arrives.</div>
+      <div class="pain-num">1 in 4</div>
+      <div class="pain-num-l">patients abandon treatment due to PA burden (AMA 2023)</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📋</div>
+      <div class="pain-title">Hours of administrative work, per case</div>
+      <div class="pain-body">Each PA request requires staff to gather records, format documentation, submit to the payer portal, and follow up — repeatedly. Physicians' offices spend an average of 14 hours per week on PA alone.</div>
+      <div class="pain-num">14 hrs</div>
+      <div class="pain-num-l">per physician per week on PA administration (AMA)</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">⚖️</div>
+      <div class="pain-title">Inconsistent decisions</div>
+      <div class="pain-body">Manual review quality varies by reviewer, shift, and daily caseload. The same clinical facts can produce different determinations. Neither providers nor patients can predict the outcome.</div>
+      <div class="pain-num">35%</div>
+      <div class="pain-num-l">of PA appeals are overturned — meaning the first decision was wrong (KFF 2023)</div>
+    </div>
+  </div>
+
+  <div class="journey-label">What today's manual prior authorization looks like</div>
+  <div class="journey">
+    <div class="j-step">
+      <div class="j-node">👨‍⚕️</div>
+      <div class="j-lbl">Physician orders procedure</div>
+    </div>
+    <div class="j-arr">→</div>
+    <div class="j-step">
+      <div class="j-node bad">📠</div>
+      <div class="j-lbl">Admin gathers records &amp; submits to payer portal</div>
+      <div class="j-time">2 – 5 hrs</div>
+    </div>
+    <div class="j-arr">→</div>
+    <div class="j-step">
+      <div class="j-node bad">🕐</div>
+      <div class="j-lbl">Request sits in payer review queue</div>
+      <div class="j-time">3 – 5 days</div>
+    </div>
+    <div class="j-arr">→</div>
+    <div class="j-step">
+      <div class="j-node bad">🔍</div>
+      <div class="j-lbl">UM nurse manually reviews chart and policy</div>
+      <div class="j-time">45 – 90 min</div>
+    </div>
+    <div class="j-arr">→</div>
+    <div class="j-step">
+      <div class="j-node">📩</div>
+      <div class="j-lbl">Decision sent to provider</div>
+    </div>
+    <div class="j-arr">→</div>
+    <div class="j-step">
+      <div class="j-node bad">🔄</div>
+      <div class="j-lbl">Often: pended — more documentation requested</div>
+      <div class="j-time">+ 5 – 10 days</div>
+    </div>
+    <div class="j-arr">→</div>
+    <div class="j-step">
+      <div class="j-node">✅</div>
+      <div class="j-lbl">Final decision — if the patient hasn't given up</div>
+    </div>
+  </div>
+  <p class="footnote">Highlighted nodes are where AI-assisted PA eliminates or dramatically compresses the delay.</p>
+</div>
+
+<!-- ═══ PERSONAS ═══ -->
+<div id="tab-personas" class="section">
+  <div class="sec-title">Who this is built for</div>
+  <p class="sec-sub">Four groups experience the PA bottleneck from different angles. Each carries different pain — and stands to gain differently.</p>
+  <div class="persona-grid">
+
+    <div class="persona-card">
+      <div class="p-header">
+        <div class="p-avatar">🩺</div>
+        <div>
+          <div class="p-name">Dr. Sarah Chen</div>
+          <div class="p-role">Ordering Physician · Orthopedic Surgery</div>
+          <div class="p-org">Mid-size health system</div>
+        </div>
+      </div>
+      <div class="p-quote">"I've already decided this patient needs surgery. Every day waiting for approval is a day they're in pain — and my OR schedule is uncertain."</div>
+      <ul class="p-list">
+        <li>Submits 15+ PA requests per week across multiple payers</li>
+        <li>Each payer has different criteria — and they change without notice</li>
+        <li>Patients call daily for status updates she can't provide</li>
+        <li>Denials require peer-to-peer calls that pull her from patient care</li>
+      </ul>
+      <hr class="p-div">
+      <div class="gains-lbl">What changes with this agent</div>
+      <ul class="p-list gains">
+        <li>High-confidence cases approved same day the request is submitted</li>
+        <li>When documentation is missing, the response names the exact missing item</li>
+        <li>Appeal prep is faster — the AI already identified what was lacking</li>
+      </ul>
+    </div>
+
+    <div class="persona-card">
+      <div class="p-header">
+        <div class="p-avatar">👩‍💼</div>
+        <div>
+          <div class="p-name">Maria Torres</div>
+          <div class="p-role">Utilization Management Nurse</div>
+          <div class="p-org">Payer — regional BlueCross plan</div>
+        </div>
+      </div>
+      <div class="p-quote">"I review 40 to 60 cases a day. Most are straightforward, but I still read every chart note because missing a required criterion exposes the plan to an appeal. It's exhausting and I'm always behind."</div>
+      <ul class="p-list">
+        <li>40–60 case reviews daily, each requiring a full chart read</li>
+        <li>Policy documents are long, CPT-specific, and version-controlled</li>
+        <li>Inconsistency across the team creates appeal and compliance risk</li>
+        <li>Rationale documentation is manual, time-consuming, and varies by reviewer</li>
+      </ul>
+      <hr class="p-div">
+      <div class="gains-lbl">What changes with this agent</div>
+      <ul class="p-list gains">
+        <li>Straightforward cases auto-resolve — she reviews only the ambiguous ones</li>
+        <li>Every case comes with a pre-built criterion-by-criterion briefing</li>
+        <li>Clinical judgment stays with her — the AI prepares, it does not decide</li>
+        <li>Audit trail is automatic and tamper-evident on every case</li>
+      </ul>
+    </div>
+
+    <div class="persona-card">
+      <div class="p-header">
+        <div class="p-avatar">🗂️</div>
+        <div>
+          <div class="p-name">James Kim</div>
+          <div class="p-role">Medical Office Administrator</div>
+          <div class="p-org">Orthopedic practice · 6 physicians</div>
+        </div>
+      </div>
+      <div class="p-quote">"Prior auth is a second job. We fax records, wait a week, get a pend request for something we already sent, and start over. Half the time we don't know why we were pended."</div>
+      <ul class="p-list">
+        <li>3–5 hours per PA request in documentation gathering and submission</li>
+        <li>Pend requests arrive without explaining what specifically is missing</li>
+        <li>Tracking status across payer portals is manual and fragmented</li>
+        <li>Denials rarely cite the specific criterion that wasn't satisfied</li>
+      </ul>
+      <hr class="p-div">
+      <div class="gains-lbl">What changes with this agent</div>
+      <ul class="p-list gains">
+        <li>Pend responses name the exact missing document — no guessing</li>
+        <li>Faster turnaround reduces OR scheduling uncertainty</li>
+        <li>Structured submissions (FHIR) mean less manual reformatting</li>
+      </ul>
+    </div>
+
+    <div class="persona-card">
+      <div class="p-header">
+        <div class="p-avatar">🧑‍🦽</div>
+        <div>
+          <div class="p-name">The Patient</div>
+          <div class="p-role">Waiting for care</div>
+          <div class="p-org">Covered by commercial insurance</div>
+        </div>
+      </div>
+      <div class="p-quote">"My doctor told me I need surgery within 6 weeks. It's been three weeks and I still don't have an answer from my insurance. I can't plan anything. I don't know if my condition is going to get worse while I wait."</div>
+      <ul class="p-list">
+        <li>No visibility into where their request is or why it's stalled</li>
+        <li>Condition may deteriorate during the administrative wait</li>
+        <li>OR scheduling uncertainty cascades into work and family disruption</li>
+        <li>1 in 4 ultimately abandon treatment due to the process</li>
+      </ul>
+      <hr class="p-div">
+      <div class="gains-lbl">What changes with this agent</div>
+      <ul class="p-list gains">
+        <li>Straightforward cases approved the same day the request is submitted</li>
+        <li>When something is missing, the response explains exactly what</li>
+        <li>Fewer care delays for procedures that clearly meet medical necessity criteria</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<div id="tab-howworks" class="section">
+  <div class="sec-title">How it changes the workflow</div>
+  <p class="sec-sub">The agent does not replace clinical judgment. It eliminates the administrative labor that precedes it — and makes human review faster and better informed when it is needed.</p>
+
+  <div class="compare-wrap">
+    <div class="compare-col">
+      <div class="compare-h before">⚙ Without AI assistance</div>
+      <div class="cr"><div class="cr-aspect">Time to first decision</div><div class="cr-val bad">2 – 14 business days</div></div>
+      <div class="cr"><div class="cr-aspect">Policy lookup</div><div class="cr-val bad">UM nurse searches the CPT-specific policy PDF manually</div></div>
+      <div class="cr"><div class="cr-aspect">Chart review</div><div class="cr-val bad">Manual read of the full clinical record — every note, every lab</div></div>
+      <div class="cr"><div class="cr-aspect">Decision consistency</div><div class="cr-val bad">Varies by reviewer, daily case volume, and shift</div></div>
+      <div class="cr"><div class="cr-aspect">When documentation is missing</div><div class="cr-val bad">Vague pend — "additional documentation required"</div></div>
+      <div class="cr"><div class="cr-aspect">Audit trail</div><div class="cr-val bad">Manual, inconsistent, often incomplete</div></div>
+      <div class="cr"><div class="cr-aspect">Reviewer workload</div><div class="cr-val bad">Every case — including obvious, routine approvals</div></div>
+    </div>
+    <div class="compare-col after">
+      <div class="compare-h after-h">✦ With AI-assisted PA</div>
+      <div class="cr"><div class="cr-aspect">Time to first decision</div><div class="cr-val good">Auto: &lt; 2 minutes · HITL: same day</div></div>
+      <div class="cr"><div class="cr-aspect">Policy lookup</div><div class="cr-val good">Automatic retrieval of relevant criteria by CPT code</div></div>
+      <div class="cr"><div class="cr-aspect">Chart review</div><div class="cr-val good">AI reads the full FHIR bundle, criterion by criterion, with citations</div></div>
+      <div class="cr"><div class="cr-aspect">Decision consistency</div><div class="cr-val good">Identical criteria applied uniformly to every case</div></div>
+      <div class="cr"><div class="cr-aspect">When documentation is missing</div><div class="cr-val good">Exact criterion named + what documentation would satisfy it</div></div>
+      <div class="cr"><div class="cr-aspect">Audit trail</div><div class="cr-val good">Automatic, hash-chained, tamper-evident on every case</div></div>
+      <div class="cr"><div class="cr-aspect">Reviewer workload</div><div class="cr-val good">Complex and borderline cases only — where judgment genuinely matters</div></div>
+    </div>
+  </div>
+
+  <div class="principle-box">
+    <p><strong style="color:var(--text)">One rule the AI never breaks: it does not recommend denial.</strong></p>
+    <p>The agent can approve a case, or it can identify insufficient evidence and specify exactly what is missing. The denial decision — with its regulatory implications, appeal rights, and potential impact on patient care — belongs to the human reviewer alone.</p>
+    <p>This is not a limitation. A drafted denial anchors human reviewers toward rejection. Framing unmet criteria as evidence gaps preserves reviewer objectivity and keeps the human in the right role.</p>
+  </div>
+</div>
+
+<!-- ═══ SIMULATOR ═══ -->
+<div id="tab-simulator" class="section">
+  <div class="sec-title">See it in action</div>
+  <p class="sec-sub">Three synthetic cases. Select one, run it through the pipeline, and see exactly how the agent analyzes criteria, cites evidence, and routes the case. All patient data is fictional.</p>
+
+  <div class="sim-cases">
+    <div class="sim-btn active" onclick="selectCase('knee',this)">
+      <div class="sim-cpt">CPT 27447</div>
+      <div class="sim-name">Total Knee Replacement</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('bariatric',this)">
+      <div class="sim-cpt">CPT 43644</div>
+      <div class="sim-name">Bariatric Surgery</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('mri',this)">
+      <div class="sim-cpt">CPT 72148</div>
+      <div class="sim-name">Lumbar Spine MRI</div>
+    </div>
+  </div>
+
+  <button class="run-btn" id="runBtn" onclick="runSim()">▶ Run through pipeline</button>
+
+  <div id="simResult" class="sim-result"></div>
+</div>
+
+<!-- ═══ REVIEWER ═══ -->
+<div id="tab-reviewer" class="section">
+  <div class="sec-title">The human reviewer's experience</div>
+  <p class="sec-sub">When a case routes to human review, the AI does not hand off a pile of records. It hands off a briefing.</p>
+
+  <p class="rev-intro">The utilization management nurse does not start from scratch. The AI has already read the chart, checked every criterion, cited its evidence, and explained exactly what is missing. The reviewer's job is to exercise clinical judgment — not to redo the documentation work.</p>
+
+  <div class="rev-preview">
+    <div class="rev-preview-hd">
+      <span class="rev-preview-title">Review Queue — Case PA-2024-0042</span>
+      <span class="rev-badge">Pending human review</span>
+    </div>
+    <div class="rev-body">
+      <div class="rev-metrics">
+        <div class="rev-m"><div class="rev-m-l">Procedure</div><div class="rev-m-v">CPT 43644</div></div>
+        <div class="rev-m"><div class="rev-m-l">AI Draft</div><div class="rev-m-v" style="color:var(--orange)">Insufficient evidence</div></div>
+        <div class="rev-m"><div class="rev-m-l">AI Confidence</div><div class="rev-m-v" style="color:var(--orange)">54%</div></div>
+        <div class="rev-m"><div class="rev-m-l">Member</div><div class="rev-m-v">Active · PPO Plan</div></div>
+      </div>
+      <div class="rev-brief">
+        <strong>AI RATIONALE</strong><br><br>
+        Criteria c1 (BMI ≥ 40) and c3 (psychological evaluation) are met with valid clinical citations. Criterion c2 — completion of a 6-month physician-supervised dietary program — has no supporting documentation in the patient chart. The AI cannot confirm this criterion is met and has not inferred or fabricated evidence to suggest otherwise.
+        <br><br>
+        <span style="color:var(--orange)"><strong>Evidence gap:</strong></span> 6-month supervised dietary program documentation is absent from the chart. Records from a referring provider or a structured weight-management program would satisfy this criterion.
+      </div>
+      <div class="rev-actions">
+        <button class="rev-btn approve">✓ Approve</button>
+        <button class="rev-btn deny">✗ Deny</button>
+        <button class="rev-btn pend">⏸ Pend — Request Documentation</button>
+      </div>
+      <p class="rev-note">Denial is the reviewer's decision alone. The AI never recommends denial.</p>
+    </div>
+  </div>
+
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon">⚖️</div>
+      <div class="why-title">Regulatory accountability</div>
+      <div class="why-body">Denials carry appeal rights and regulatory obligations under ACA and state law. That decision — and its documentation — must be owned by a licensed clinician, not an AI system.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🔍</div>
+      <div class="why-title">Context the chart does not capture</div>
+      <div class="why-body">A patient may have completed a diet program through an out-of-network provider whose records are not in the FHIR chart. The reviewer can request that information before making a final call.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🧑‍⚕️</div>
+      <div class="why-title">Clinical judgment on edge cases</div>
+      <div class="why-body">Policy criteria do not cover every clinical scenario. A reviewer can weigh factors — comorbidity severity, patient-specific risk — that a policy document never anticipated.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>All patient data shown is synthetic and fictional. No real health information was used.</p>
+  <a href="https://github.com/smahanti8/prior-auth-agent" target="_blank" rel="noopener">View source on GitHub →</a>
+</footer>
+
+<script>
+var selectedCase = 'knee';
+
+var CASES = {
+  knee: {
+    title: 'Total Knee Replacement', cpt: 'CPT 27447',
+    patient: '68F · Severe osteoarthritis · BMI 34 · Failed 8 months conservative treatment',
+    criteria: [
+      { id:'c1', text:'Diagnosis of severe knee osteoarthritis (Kellgren-Lawrence Grade III–IV)', required:true, status:'met',
+        summary:'X-ray confirms Grade IV OA with bone-on-bone contact in the medial compartment, documented 2024-02-10.',
+        policy_quote:'Severe osteoarthritis defined as Grade III or IV on the Kellgren-Lawrence scale, confirmed on standing weight-bearing radiograph.',
+        citation:'ImagingStudy/xray-knee-20240210' },
+      { id:'c2', text:'Failure of conservative management for ≥ 6 months', required:true, status:'met',
+        summary:'Chart documents 8 months of physical therapy and NSAID therapy with documented lack of improvement across two treating providers.',
+        policy_quote:'Conservative management including physical therapy and analgesic medications for a minimum of 6 consecutive months without adequate pain relief or functional improvement.',
+        citation:'Condition/conservative-treatment-failure-2024' },
+      { id:'c3', text:'BMI < 40 at time of surgical evaluation', required:true, status:'met',
+        summary:'BMI documented at 34.2 on 2024-03-15, within the acceptable policy range.',
+        policy_quote:'Body mass index less than 40 kg/m² at the time of surgical evaluation, as documented in the medical record.',
+        citation:'Observation/bmi-20240315' }
+    ],
+    determination:{ decision:'approve', confidence:0.91,
+      rationale:'All three required criteria are met with full bilateral citations. Conservative treatment failure is documented over 8 months. Imaging confirms Grade IV disease. BMI is within the policy-specified range.',
+      gaps:[] },
+    route:'auto', time:'1m 52s'
+  },
+  bariatric: {
+    title: 'Bariatric Surgery (Sleeve Gastrectomy)', cpt: 'CPT 43644',
+    patient: '45M · BMI 41.3 · Type 2 diabetes · Hypertension',
+    criteria: [
+      { id:'c1', text:'BMI ≥ 40 (or ≥ 35 with qualifying comorbidity)', required:true, status:'met',
+        summary:'BMI of 41.3 documented on 2024-04-01. Type 2 diabetes present as a qualifying comorbidity.',
+        policy_quote:'BMI ≥ 40 kg/m², or BMI ≥ 35 kg/m² with at least one obesity-related comorbidity such as type 2 diabetes, hypertension, or sleep apnea.',
+        citation:'Observation/bmi-20240401' },
+      { id:'c2', text:'Completion of 6-month physician-supervised dietary program', required:true, status:'insufficient',
+        summary:'No documentation of a supervised dietary program found in the patient FHIR chart. This criterion cannot be confirmed from available records.',
+        policy_quote:'Documented completion of a physician-supervised dietary and lifestyle modification program for a minimum of 6 consecutive months prior to surgical evaluation.',
+        citation:null },
+      { id:'c3', text:'Pre-surgical psychological evaluation clearance', required:true, status:'met',
+        summary:'Psychological evaluation completed 2024-02-10 by a licensed psychologist. Patient cleared for surgical candidacy.',
+        policy_quote:'Pre-surgical psychological evaluation conducted by a licensed mental health professional, with documented clearance for bariatric surgery candidacy.',
+        citation:'DiagnosticReport/psych-eval-20240210' }
+    ],
+    determination:{ decision:'insufficient_evidence', confidence:0.54,
+      rationale:'Criteria c1 and c3 are met with valid clinical citations. Criterion c2 — the 6-month supervised dietary program — has no supporting documentation in the chart. A determination of approval cannot be made without this documentation.',
+      gaps:['6-month physician-supervised dietary program documentation is not present in the patient chart. Records from a structured weight-management program or referring provider would satisfy this criterion.'] },
+    route:'hitl', time:'2m 08s'
+  },
+  mri: {
+    title: 'Lumbar Spine MRI (Non-contrast)', cpt: 'CPT 72148',
+    patient: '52M · Low back pain · 3-week duration · No neurological symptoms',
+    criteria: [
+      { id:'c1', text:'Persistent low back pain ≥ 6 weeks with conservative management', required:true, status:'not_met',
+        summary:'Chart documents symptom onset 3 weeks prior to this request. Policy requires a minimum of 6 weeks. This criterion is not met at this time.',
+        policy_quote:'Persistent low back or radicular pain for a minimum of 6 weeks despite conservative management, including physical therapy or pharmacologic treatment.',
+        citation:'Condition/lbp-onset-20240618' },
+      { id:'c2', text:'Neurological deficit or red-flag symptom present', required:false, status:'not_met',
+        summary:'Neurological examination documented as normal. No motor deficit, bowel or bladder dysfunction, or saddle anesthesia reported.',
+        policy_quote:'New or progressive neurological deficit (motor weakness, sensory loss), bowel or bladder dysfunction, or saddle anesthesia.',
+        citation:'Observation/neuro-exam-20240618' }
+    ],
+    determination:{ decision:'insufficient_evidence', confidence:0.28,
+      rationale:'Required criterion c1 is not met — documented symptom duration of 3 weeks falls below the 6-week policy threshold. The optional red-flag pathway (c2) is also not met. There is no clinical pathway in the current policy under which this case meets medical necessity criteria at this time.',
+      gaps:[
+        'Symptom duration is 3 weeks. Policy requires 6 weeks minimum. This request may be resubmitted after the 6-week threshold is reached if symptoms persist despite conservative management.',
+        'No neurological deficit is documented that would qualify under the red-flag pathway.'
+      ] },
+    route:'hitl', time:'1m 34s'
+  }
+};
+
+function showTab(tab, el) {
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+function selectCase(key, el) {
+  selectedCase = key;
+  document.querySelectorAll('.sim-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  var r = document.getElementById('simResult');
+  r.classList.remove('show');
+  r.innerHTML = '';
+}
+
+function runSim() {
+  var btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = '⟳ Analyzing...';
+  setTimeout(function(){ renderResult(CASES[selectedCase]); btn.disabled=false; btn.textContent='▶ Run through pipeline'; }, 1900);
+}
+
+function sIcon(s) {
+  var map = {met:'✓',not_met:'✗',insufficient:'!'};
+  return '<span class="c-icon '+s+'">'+(map[s]||'?')+'</span>';
+}
+function sLabel(s) {
+  var map = {met:'MET',not_met:'NOT MET',insufficient:'INSUFFICIENT'};
+  return '<span class="c-status '+s+'">'+map[s]+'</span>';
+}
+
+function renderResult(c) {
+  var isApprove = c.determination.decision === 'approve';
+  var pct = Math.round(c.determination.confidence * 100);
+  var confCls = pct>=80?'high':pct>=55?'mid':'low';
+
+  var crits = c.criteria.map(function(cr,i){
+    var citeHtml = cr.citation
+      ? '<div class="cd"><div class="cd-l">FHIR Citation</div><span class="cite-tag">'+cr.citation+'</span></div>'
+      : '<div class="cd"><div class="cd-l">FHIR Citation</div><span style="color:var(--orange);font-size:12px">⚠ No citation — documentation not found in chart</span></div>';
+    return '<div class="crit-card">'
+      +'<div class="crit-head" onclick="toggleCrit('+i+')">'
+      +sIcon(cr.status)
+      +'<span class="c-text">'+cr.text+'</span>'
+      +'<span class="c-req '+(cr.required?'r':'o')+'">'+(cr.required?'Required':'Optional')+'</span>'
+      +sLabel(cr.status)
+      +'<span class="c-chevron" id="chev-'+i+'">▾</span>'
+      +'</div>'
+      +'<div class="crit-body" id="cbody-'+i+'">'
+      +'<div class="cd"><div class="cd-l">Evidence summary</div><div class="cd-v">'+cr.summary+'</div></div>'
+      +'<div class="cd"><div class="cd-l">Policy quote</div><div class="cd-v italic">"'+cr.policy_quote+'"</div></div>'
+      +citeHtml
+      +'</div></div>';
+  }).join('');
+
+  var gapsHtml = c.determination.gaps.length
+    ? '<ul class="gap-list">'+c.determination.gaps.map(function(g){ return '<li>'+g+'</li>'; }).join('')+'</ul>'
+    : '';
+
+  var decColor = isApprove ? 'var(--green)' : 'var(--orange)';
+  var decText = isApprove ? '✓ Approved' : '⚠ Insufficient Evidence';
+
+  var html = '<div class="sim-row">'
+    +'<div><div class="sim-case-h">'+c.title+' · '+c.cpt+'</div><div class="sim-patient">'+c.patient+'</div></div>'
+    +'<div class="sim-timing"><div class="sim-timing-l">Pipeline completed in</div><div class="sim-timing-v">'+c.time+'</div></div>'
+    +'</div>'
+    +'<div class="crit-section-l">Criteria assessment</div>'
+    +crits
+    +'<div class="det-box '+(isApprove?'approve':'insufficient')+'">'
+    +'<div class="det-lbl '+(isApprove?'approve':'insufficient')+'">AI Determination</div>'
+    +'<div class="det-dec" style="color:'+decColor+'">'+decText+'</div>'
+    +'<div class="det-rat">'+c.determination.rationale+'</div>'
+    +gapsHtml
+    +'<div class="det-conf">'
+    +'<span style="font-size:11px;color:var(--text3)">Confidence</span>'
+    +'<div class="conf-bar"><div class="conf-fill '+confCls+'" style="width:'+pct+'%"></div></div>'
+    +'<span class="conf-pct" style="color:var(--'+(pct>=80?'green':pct>=55?'orange':'red')+')">'+pct+'%</span>'
+    +'</div></div>'
+    +'<div class="route-box">'
+    +'<div class="route-icon">'+(c.route==='auto'?'⚡':'👤')+'</div>'
+    +'<div><div class="route-lbl">Routed to</div>'
+    +'<div class="route-val '+(c.route==='auto'?'auto':'hitl')+'">'
+    +(c.route==='auto'?'Auto-approved — no human review required':'Human review queue — awaiting utilization management decision')
+    +'</div></div></div>';
+
+  var r = document.getElementById('simResult');
+  r.innerHTML = html;
+  r.classList.add('show');
+  r.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function toggleCrit(i) {
+  var body = document.getElementById('cbody-'+i);
+  var chev = document.getElementById('chev-'+i);
+  body.classList.toggle('open');
+  if(chev) chev.classList.toggle('open');
+}
+</script>
+</body>
+</html>
