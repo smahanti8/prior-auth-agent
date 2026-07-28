@@ -4,6 +4,7 @@ import json
 
 from ..llm import structured_call
 from ..state import PriorAuthState
+from ..validation import resolve_citations
 
 SCHEMA = {
     "type": "object",
@@ -65,4 +66,5 @@ def evidence_extractor(state: PriorAuthState) -> PriorAuthState:
         schema=SCHEMA,
         max_tokens=32000,
     )
-    return {"evidence": result["evidence"]}
+    evidence = resolve_citations(result["evidence"], state["fhir_bundle"])
+    return {"evidence": evidence}
