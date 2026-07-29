@@ -2,6 +2,8 @@
 
 An agentic prior-authorization pipeline: it takes a FHIR bundle and a CPT code, validates and checks eligibility, retrieves the applicable payer policy via RAG (ChromaDB), maps policy criteria, and extracts per-criterion clinical evidence with citations. It drafts either an approval or an `insufficient_evidence` result — it never drafts a denial, because a drafted denial anchors the reviewer; a human makes any adverse decision. A hard citation gate rejects any criterion marked *met* that lacks both a policy-side quote and a chart-side FHIR citation ("no citation → no claim"), and non-approved or low-confidence cases route to a human review queue (Streamlit). Every decision is written to a tamper-evident, hash-chained audit log.
 
+**[▶ Live Interactive Demo](https://smahanti8.github.io/prior-auth-agent/)** &nbsp;·&nbsp; [Architecture decisions](DECISIONS.md)
+
 ## Architecture
 
 ```
