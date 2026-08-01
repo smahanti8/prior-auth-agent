@@ -90,7 +90,7 @@ def _build_ref_index(bundle: dict) -> set[tuple[str, str]]:
 
 
 def _parse_citation(raw: str) -> tuple[str, str] | None:
-    """Parse 'ResourceType/id' → (rtype, rid), or None if malformed."""
+    """Parse 'ResourceType/id' -> (rtype, rid), or None if malformed."""
     parts = raw.strip().split("/")
     if len(parts) != 2:
         return None

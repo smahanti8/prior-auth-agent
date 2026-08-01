@@ -1,4 +1,4 @@
-# Decision log
+# Decision Log
 
 The decisions in this pipeline worth arguing about, one entry each: the
 context that forced a choice, the choice, why, and the strongest argument
@@ -42,9 +42,9 @@ point of the entry.
 
 > **Extended by [D10](#d10-a-met-claim-requires-both-a-policy-quote-and-a-chart-citation-extends-d2).**
 > D10 makes a policy quote and a chart citation a hard requirement on met
-> claims. The existence-of-reference gap named in the counter-argument below
-> is now closed by per-citation resolution against the submitted bundle —
-> see the counter-argument for what "closed" does and doesn't mean.
+> claims; a deterministic existence check in the evidence extractor now
+> resolves each citation against the submitted bundle and closes the gap
+> described below.
 
 **Context.** The evidence extractor searches the patient's FHIR bundle for
 support of each policy criterion. The unforgivable failure mode in this
@@ -62,19 +62,18 @@ answer, and it routes to the right place — a person. Prompt rules alone are
 policy, not enforcement, so the gate independently backstops them: an honest
 insufficiency can never be auto-finalized into a decision.
 
-**Counter-argument.** A prompt cannot guarantee a cited reference is real —
-`resolve_citations()` now closes that gap mechanically: every citation on a
-met claim is checked against a `(ResourceType, id)` index built from the
-submitted bundle, and any that don't resolve are stripped. Two honest
-subtleties remain even so. First, resolution proves *existence*, not
-*clinical relevance*: a citation to a real resource in the bundle satisfies
-the check even if that resource has nothing to do with the criterion it's
-attached to (e.g. citing `Patient/patient-1` to support a BMI criterion).
-Second, a criterion can now pass `met` on its surviving citations alone — if
-a model originally supplied three citations and two are stripped as
-unresolvable, the criterion still stands as met on the one real citation
-left, which may or may not be sufficient evidence on its own. Strictness
-also pends cases where a clinician would trivially infer the fact.
+**Counter-argument.** A prompt cannot guarantee a cited reference is real.
+D10 enforces that a met claim *carries* both a policy quote and a chart
+citation; a deterministic post-check in the evidence extractor now resolves
+each citation per-citation against the bundle, strips any that fail to
+resolve, and downgrades the criterion to `insufficient` when none survive.
+Two subtleties remain honest: first, resolution proves existence, not clinical
+relevance — a citation can resolve to a real resource in the bundle that does
+not actually support the criterion (the human gate backstops this); second, a
+criterion can now pass `met` with fewer citations than the model originally
+offered, on the surviving ones only, so a partially-fabricated claim may still
+reach determination if at least one citation holds. Strictness also pends
+cases where a clinician would trivially infer the fact.
 
 ---
 
@@ -263,7 +262,8 @@ most of the same information without the framing.
 > **Extends [D2](#d2-every-clinical-claim-carries-a-fhir-citation-or-the-criterion-is-insufficient).**
 > D2 established that claims must be citation-backed or fall to `insufficient`
 > and route to a human. D10 hardens that into a hard gate for one specific
-> failure: a claim asserted `met` without its citations.
+> failure: a claim asserted `met` without its citations. The existence gap
+> named in this entry's counter-argument is now closed — see D2.
 
 **Context.** D2 routes honest gaps (`insufficient`) to a human. It does not
 stop the opposite failure: the model marking a criterion `met` while omitting
@@ -288,10 +288,10 @@ handling: uncertainty (D2's `insufficient`) is a judgment call for a person;
 an unsupported assertion is invalid and is rejected. Keeping enforcement in a
 validator that raises makes it deterministic and testable without an LLM call.
 
-**Counter-argument.** Rejecting a met claim outright when even one required
-piece is missing (rather than pending it) discards a case a human might have
-salvaged by supplying the missing quote. Whether a *present* citation's
-`ResourceType/id` actually *resolves* against the bundle is a separate
-question, addressed by resolution rather than presence — see D2's
-counter-argument for what that resolution now closes and the subtleties
-that remain.
+**Counter-argument.** The gate checks that citations are *present*, not that
+they *resolve*. That existence gap is now closed: a deterministic post-check
+in the evidence extractor resolves each citation per-citation against the
+bundle, strips any that fail, and downgrades to `insufficient` when none
+survive (see [D2](#d2-every-clinical-claim-carries-a-fhir-citation-or-the-criterion-is-insufficient)).
+What remains: rejecting outright (rather than pending) discards a case a
+human might have salvaged by supplying the missing quote.
