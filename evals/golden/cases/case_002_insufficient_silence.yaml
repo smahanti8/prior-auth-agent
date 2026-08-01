@@ -1,0 +1,70 @@
+id: case_002
+title: "Bariatric sleeve — insufficient, chart silent on diet program"
+cpt: "43644"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-002
+    age: 45
+    sex: M
+  observations:
+    - id: bmi-002
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 41.3
+      unit: "kg/m2"
+      date: "2024-04-01"
+  conditions:
+    - id: t2dm-002
+      display: "Type 2 diabetes mellitus, uncontrolled"
+      clinical_status: active
+      icd10: "E11.65"
+  diagnostic_reports:
+    - id: psych-eval-002
+      display: "Psychiatric pre-surgical evaluation"
+      conclusion: "Patient cleared for bariatric surgery. No active psychiatric contraindications."
+      date: "2024-03-20"
+
+  # The bundle intentionally contains NO Procedure or Condition documenting
+  # a supervised diet program. This tests D2's "chart is silent" path.
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "BMI >= 40, OR BMI >= 35 with an obesity-related comorbidity"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/bmi-002"
+        - "Condition/t2dm-002"
+      rationale: >
+        BMI 41.3 satisfies the >=40 threshold independently. T2DM also satisfies
+        the >=35 + comorbidity path. Either citation alone would be sufficient.
+    - id: c2
+      text: "Documented completion of a >= 6-month physician-supervised diet program"
+      required: true
+      expected_status: insufficient
+      expected_citations: []
+      rationale: >
+        No diet program resources exist in the bundle. Chart is entirely silent
+        on this criterion. Per D2, silence is 'insufficient' with empty citations
+        — never an inference. This is the correct clinical answer: documentation
+        doesn't say.
+    - id: c3
+      text: "Psychiatric evaluation clearance for bariatric surgery"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "DiagnosticReport/psych-eval-002"
+      rationale: >
+        Psych eval explicitly clears the patient for surgery, dated 2024-03-20.
+  outcome:
+    stage: determination
+    decision: insufficient_evidence
+    route: hitl
+    rationale: >
+      c2 is a required criterion and the chart is entirely silent on it. Per D3,
+      any required 'insufficient' criterion forces HITL regardless of confidence.
+      The model should correctly mark c2 insufficient because there is no
+      documentation to cite.

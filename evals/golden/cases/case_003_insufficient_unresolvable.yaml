@@ -1,0 +1,92 @@
+id: case_003
+title: "Bariatric sleeve — insufficient via unresolvable citation"
+cpt: "43644"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-003
+    age: 45
+    sex: M
+  observations:
+    - id: bmi-003
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 41.3
+      unit: "kg/m2"
+      date: "2024-04-01"
+    - id: weight-history-003
+      display: "12-month body weight trend"
+      note: "Weight trending down from 287 lb to 271 lb over 12 months per patient self-report."
+      date: "2024-04-01"
+  conditions:
+    - id: t2dm-003
+      display: "Type 2 diabetes mellitus, uncontrolled"
+      clinical_status: active
+      icd10: "E11.65"
+  diagnostic_reports:
+    - id: psych-eval-003
+      display: "Psychiatric pre-surgical evaluation"
+      conclusion: "Patient cleared for bariatric surgery. No active psychiatric contraindications."
+      date: "2024-03-20"
+  procedures:
+    - id: bariatric-consult-003
+      display: "Bariatric surgery consultation"
+      status: completed
+      note: >
+        Initial surgical consultation for laparoscopic sleeve gastrectomy.
+        Patient meets basic surgical candidacy criteria. Awaiting program
+        completion documentation.
+      start_date: "2024-02-15"
+      end_date: "2024-02-15"
+
+  # The bundle has Procedure and Observation resources to create plausible
+  # red-herring targets. None represent a supervised diet program:
+  #   bariatric-consult-003 = surgical consult, not a diet program
+  #   weight-history-003    = self-reported weight trend, not a structured program
+  # If the model fabricates a diet-program resource ID, resolve_citations()
+  # strips it and downgrades c2 to insufficient.
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "BMI >= 40, OR BMI >= 35 with an obesity-related comorbidity"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/bmi-003"
+        - "Condition/t2dm-003"
+      rationale: >
+        BMI 41.3 satisfies >=40 independently. T2DM satisfies >=35 + comorbidity.
+    - id: c2
+      text: "Documented completion of a >= 6-month physician-supervised diet program"
+      required: true
+      expected_status: insufficient
+      expected_citations: []
+      rationale: >
+        No resource in the bundle documents a supervised diet program.
+        Procedure/bariatric-consult-003 is a surgical consult — not a diet program.
+        Observation/weight-history-003 is self-reported weight trend — does not
+        constitute a structured physician-supervised program.
+        If the model marks c2 as 'met' and fabricates a resource ID (e.g.
+        Procedure/supervised-diet-6mo), resolve_citations() strips that citation
+        and downgrades c2 to insufficient. If the model correctly identifies the
+        gap, c2 comes back insufficient directly. Either path ends at insufficient.
+    - id: c3
+      text: "Psychiatric evaluation clearance for bariatric surgery"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "DiagnosticReport/psych-eval-003"
+      rationale: >
+        Psych eval explicitly clears the patient for surgery, dated 2024-03-20.
+  outcome:
+    stage: determination
+    decision: insufficient_evidence
+    route: hitl
+    rationale: >
+      c2 is required and insufficient via either the LLM-correct path (model sees
+      no supporting evidence) or the resolve_citations() path (model fabricates
+      an ID that is stripped). The bundle's plausible red-herring resources
+      stress-test both code paths in a single golden case. Either way, c2 cannot
+      be met and the case routes to HITL.

@@ -1,0 +1,29 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_005",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "bmi-005",
+        "status": "final",
+        "code": {
+          "text": "Body mass index",
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 34.2,
+          "unit": "kg/m2"
+        },
+        "effectiveDateTime": "2024-03-15"
+      }
+    }
+  ]
+}

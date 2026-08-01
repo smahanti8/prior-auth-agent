@@ -1,0 +1,76 @@
+id: case_004
+title: "Lumbar MRI — all criteria technically met, low confidence HITL"
+cpt: "72148"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-004
+    age: 52
+    sex: M
+  conditions:
+    - id: lbp-004
+      display: "Low back pain, non-specific"
+      clinical_status: active
+      onset_date: "2024-05-10"
+      note: "Documented at office visit 2024-07-07. 8-week duration at time of MRI request."
+  procedures:
+    - id: pt-course-004
+      display: "Physical therapy course for low back pain"
+      status: completed
+      note: "6 sessions over 6 weeks. Minimal improvement documented by physical therapist."
+      start_date: "2024-05-20"
+      end_date: "2024-07-01"
+  observations:
+    - id: neuro-exam-004
+      display: "Neurological examination"
+      note: >
+        Lower extremity sensation and strength intact bilaterally.
+        No bowel or bladder dysfunction. No saddle anesthesia.
+        No fever of unknown origin. No unexplained weight loss.
+      date: "2024-07-07"
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Low back pain symptoms present for >= 6 weeks"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Condition/lbp-004"
+      rationale: >
+        8 weeks documented from onset (2024-05-10) to MRI request date (2024-07-07).
+        Exceeds the 6-week minimum.
+    - id: c2
+      text: "Failure of conservative management including physician-supervised PT for >= 6 weeks"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Procedure/pt-course-004"
+      rationale: >
+        Completed PT course (6 sessions over 6 weeks, 2024-05-20 to 2024-07-01)
+        with documented minimal improvement. Satisfies the conservative management
+        criterion. Documentation is thin — a single procedure record with a brief
+        note, no detailed session-level documentation or objective functional
+        measures. This sparse record is expected to lower model confidence.
+    - id: c3
+      text: "Absence of red-flag findings (neurological deficit, bowel/bladder, fever, weight loss)"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/neuro-exam-004"
+      rationale: >
+        Neurological exam explicitly documents absence of all five red-flag
+        categories listed in the policy criterion text.
+  outcome:
+    stage: determination
+    decision: approve
+    route: hitl
+    rationale: >
+      All three criteria are technically met but documentation quality is thin:
+      a single PT procedure record with a brief note, LBP documented at one
+      office visit. This sparse evidence is expected to produce model confidence
+      below 0.85, routing to HITL via the confidence branch of D3 rather than
+      the criterion-insufficiency branch. The runner asserts route == hitl.
+      If the pipeline routes auto, that is a test failure — the case is
+      intentionally designed to sit below the confidence threshold.

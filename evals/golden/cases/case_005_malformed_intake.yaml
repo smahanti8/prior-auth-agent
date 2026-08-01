@@ -1,0 +1,31 @@
+id: case_005
+title: "Malformed bundle — missing Patient resource, rejected at intake"
+cpt: "27447"
+date: "2026-07-28"
+
+bundle_resources:
+  omit_patient: true
+  observations:
+    - id: bmi-005
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 34.2
+      unit: "kg/m2"
+      date: "2024-03-15"
+
+  # The generator will omit the Patient resource because omit_patient == true.
+  # The bundle will contain only the Observation — valid JSON, valid Bundle
+  # structure, but missing the Patient entry that intake() requires.
+  # CPT code is valid (27447) so only the Patient absence triggers rejection.
+
+ground_truth:
+  outcome:
+    stage: intake
+    valid: false
+    validation_error_contains: "Patient"
+    rationale: >
+      intake() checks that at least one entry has resourceType == 'Patient'.
+      This bundle contains only an Observation. The pipeline rejects before any
+      LLM call or token spend, per D4 (everything deterministic runs before
+      anything probabilistic). The rejection message must contain 'Patient'
+      — exact text from intake.py: "Bundle is missing a Patient resource".

@@ -1,0 +1,67 @@
+id: case_001
+title: "Total knee arthroplasty — clean approve"
+cpt: "27447"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-001
+    age: 68
+    sex: F
+  imaging_studies:
+    - id: xray-right-knee-001
+      modality: DX
+      body_site: "Right knee"
+      description: "Standing AP weight-bearing X-ray, right knee"
+      finding: "Grade IV osteoarthritis, bone-on-bone medial compartment (Kellgren-Lawrence scale)"
+      date: "2024-02-10"
+  conditions:
+    - id: conservative-failure-001
+      display: "Failed conservative management — 8 months PT and NSAID therapy"
+      clinical_status: resolved
+      onset_date: "2023-07-01"
+      abatement_date: "2024-03-01"
+  observations:
+    - id: bmi-001
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 34.2
+      unit: "kg/m2"
+      date: "2024-03-15"
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Diagnosis of severe knee osteoarthritis (Kellgren-Lawrence Grade III-IV)"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "ImagingStudy/xray-right-knee-001"
+      rationale: >
+        X-ray explicitly documents Grade IV OA with bone-on-bone medial compartment
+        contact. Satisfies the Kellgren-Lawrence Grade III-IV policy requirement.
+    - id: c2
+      text: "Failure of conservative management for >= 6 months"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Condition/conservative-failure-001"
+      rationale: >
+        Chart documents 8 months of failed PT and NSAID therapy (onset 2023-07-01,
+        abatement 2024-03-01). Exceeds the 6-month minimum.
+    - id: c3
+      text: "BMI < 40 at time of surgical evaluation"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/bmi-001"
+      rationale: >
+        BMI 34.2 kg/m2 documented March 2024. Within the <40 policy threshold.
+  outcome:
+    stage: determination
+    decision: approve
+    route: auto
+    rationale: >
+      All three required criteria are met with specific, resolvable citations.
+      No documentation gaps. High-confidence case — should clear the 0.85
+      confidence threshold and auto-route without HITL.
