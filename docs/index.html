@@ -179,6 +179,23 @@ hr.div{border:none;border-top:1px solid var(--border);margin:28px 0}
 .route-val{font-size:14px;font-weight:700;margin-top:1px}
 .route-val.auto{color:var(--green)}
 .route-val.hitl{color:var(--orange)}
+.route-reason{font-size:11.5px;color:var(--text3);margin-top:3px;line-height:1.4}
+
+/* EVAL BADGES */
+.eval-badges{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.badge-provenance{font-size:10.5px;font-weight:600;color:var(--purple);background:var(--purple-dim);padding:3px 9px;border-radius:999px;text-decoration:none;border:1px solid transparent;display:inline-block}
+.badge-provenance:hover{border-color:var(--purple)}
+.badge-verify{font-size:10.5px;font-weight:700;color:var(--green);background:var(--green-dim);padding:3px 9px;border-radius:999px;display:inline-block}
+
+/* STRIPPED CITATIONS */
+.cite-tag.stripped{color:var(--red);background:var(--red-dim);text-decoration:line-through;margin-right:4px;cursor:help}
+.orig-note{font-size:10px;color:var(--text3);font-style:italic;margin-left:6px;font-weight:400;text-transform:none;letter-spacing:0}
+
+/* INTAKE REJECTION */
+.intake-box{border-radius:10px;padding:16px 18px;margin:14px 0;background:var(--red-dim);border:1px solid var(--red)}
+.intake-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:var(--red)}
+.intake-dec{font-size:15px;font-weight:800;margin-bottom:8px;color:var(--red);font-family:ui-monospace,monospace}
+.intake-rat{font-size:12px;color:var(--text2);line-height:1.6}
 
 /* REVIEWER */
 .rev-intro{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:22px;border-left:3px solid var(--accent);padding-left:14px}
@@ -474,20 +491,28 @@ footer a:hover{text-decoration:underline}
 <!-- ═══ SIMULATOR ═══ -->
 <div id="tab-simulator" class="section">
   <div class="sec-title">See it in action</div>
-  <p class="sec-sub">Three synthetic cases. Select one, run it through the pipeline, and see exactly how the agent analyzes criteria, cites evidence, and routes the case. All patient data is fictional.</p>
+  <p class="sec-sub">Five synthetic cases, each backed by a golden regression fixture in <code>evals/golden/</code>. Select one, run it through the pipeline, and see exactly how the agent analyzes criteria, cites evidence, resolves citations against the chart, and routes the case — including when it's rejected before any LLM call runs. All patient data is fictional.</p>
 
   <div class="sim-cases">
-    <div class="sim-btn active" onclick="selectCase('knee',this)">
+    <div class="sim-btn active" onclick="selectCase('case_001',this)">
       <div class="sim-cpt">CPT 27447</div>
       <div class="sim-name">Total Knee Replacement</div>
     </div>
-    <div class="sim-btn" onclick="selectCase('bariatric',this)">
+    <div class="sim-btn" onclick="selectCase('case_002',this)">
       <div class="sim-cpt">CPT 43644</div>
-      <div class="sim-name">Bariatric Surgery</div>
+      <div class="sim-name">Bariatric — Silent Chart</div>
     </div>
-    <div class="sim-btn" onclick="selectCase('mri',this)">
+    <div class="sim-btn" onclick="selectCase('case_003',this)">
+      <div class="sim-cpt">CPT 43644</div>
+      <div class="sim-name">Bariatric — Stripped Citation</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('case_004',this)">
       <div class="sim-cpt">CPT 72148</div>
-      <div class="sim-name">Lumbar Spine MRI</div>
+      <div class="sim-name">Lumbar MRI — Low Confidence</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('case_005',this)">
+      <div class="sim-cpt">CPT 27447</div>
+      <div class="sim-name">Malformed — Rejected at Intake</div>
     </div>
   </div>
 
@@ -555,73 +580,121 @@ footer a:hover{text-decoration:underline}
 </footer>
 
 <script>
-var selectedCase = 'knee';
+var selectedCase = 'case_001';
 
 var CASES = {
-  knee: {
+  case_001: {
+    goldenFile: 'case_001_clean_approve.yaml',
     title: 'Total Knee Replacement', cpt: 'CPT 27447',
-    patient: '68F · Severe osteoarthritis · BMI 34 · Failed 8 months conservative treatment',
+    patient: '68F · Severe osteoarthritis · BMI 34.2 · 8 months failed conservative therapy',
+    stage: 'determination',
     criteria: [
       { id:'c1', text:'Diagnosis of severe knee osteoarthritis (Kellgren-Lawrence Grade III–IV)', required:true, status:'met',
         summary:'X-ray confirms Grade IV OA with bone-on-bone contact in the medial compartment, documented 2024-02-10.',
-        policy_quote:'Severe osteoarthritis defined as Grade III or IV on the Kellgren-Lawrence scale, confirmed on standing weight-bearing radiograph.',
-        citation:'ImagingStudy/xray-knee-20240210' },
+        policy_quote:'Patient must have a documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee.',
+        citations:['ImagingStudy/xray-right-knee-001'] },
       { id:'c2', text:'Failure of conservative management for ≥ 6 months', required:true, status:'met',
-        summary:'Chart documents 8 months of physical therapy and NSAID therapy with documented lack of improvement across two treating providers.',
-        policy_quote:'Conservative management including physical therapy and analgesic medications for a minimum of 6 consecutive months without adequate pain relief or functional improvement.',
-        citation:'Condition/conservative-treatment-failure-2024' },
+        summary:'Chart documents 8 months of failed physical therapy and NSAID therapy (2023-07-01 to 2024-03-01) across two treating providers.',
+        policy_quote:'Patient must have documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication.',
+        citations:['Condition/conservative-failure-001'] },
       { id:'c3', text:'BMI < 40 at time of surgical evaluation', required:true, status:'met',
-        summary:'BMI documented at 34.2 on 2024-03-15, within the acceptable policy range.',
-        policy_quote:'Body mass index less than 40 kg/m² at the time of surgical evaluation, as documented in the medical record.',
-        citation:'Observation/bmi-20240315' }
+        summary:'BMI documented at 34.2 kg/m² on 2024-03-15, within the acceptable policy range.',
+        policy_quote:'Patient body mass index (BMI) must be documented as less than 40 kg/m2 at the time of the pre-surgical evaluation.',
+        citations:['Observation/bmi-001'] }
     ],
-    determination:{ decision:'approve', confidence:0.91,
-      rationale:'All three required criteria are met with full bilateral citations. Conservative treatment failure is documented over 8 months. Imaging confirms Grade IV disease. BMI is within the policy-specified range.',
+    determination:{ decision:'approve', confidence:0.93,
+      rationale:'All three required criteria are met with specific, resolvable citations. Conservative treatment failure is documented over 8 months, imaging confirms Grade IV disease, and BMI is within the policy-specified range. No documentation gaps.',
       gaps:[] },
-    route:'auto', time:'1m 52s'
+    route:'auto', routeReason:'Approve decision at 93% confidence clears the 85% auto-approval threshold — no human review required.',
+    time:'1m 52s'
   },
-  bariatric: {
-    title: 'Bariatric Surgery (Sleeve Gastrectomy)', cpt: 'CPT 43644',
-    patient: '45M · BMI 41.3 · Type 2 diabetes · Hypertension',
+  case_002: {
+    goldenFile: 'case_002_insufficient_silence.yaml',
+    title: 'Bariatric Surgery — Silent Chart', cpt: 'CPT 43644',
+    patient: '45M · BMI 41.3 · Type 2 diabetes (uncontrolled)',
+    stage: 'determination',
     criteria: [
-      { id:'c1', text:'BMI ≥ 40 (or ≥ 35 with qualifying comorbidity)', required:true, status:'met',
-        summary:'BMI of 41.3 documented on 2024-04-01. Type 2 diabetes present as a qualifying comorbidity.',
-        policy_quote:'BMI ≥ 40 kg/m², or BMI ≥ 35 kg/m² with at least one obesity-related comorbidity such as type 2 diabetes, hypertension, or sleep apnea.',
-        citation:'Observation/bmi-20240401' },
-      { id:'c2', text:'Completion of 6-month physician-supervised dietary program', required:true, status:'insufficient',
-        summary:'No documentation of a supervised dietary program found in the patient FHIR chart. This criterion cannot be confirmed from available records.',
-        policy_quote:'Documented completion of a physician-supervised dietary and lifestyle modification program for a minimum of 6 consecutive months prior to surgical evaluation.',
-        citation:null },
+      { id:'c1', text:'BMI ≥ 40 (or ≥ 35 with a qualifying comorbidity)', required:true, status:'met',
+        summary:'BMI of 41.3 kg/m² documented 2024-04-01, independently satisfying the ≥40 threshold. Type 2 diabetes also satisfies the ≥35 + comorbidity path.',
+        policy_quote:'Patient must have a documented body mass index (BMI) of 40 kg/m2 or greater, OR a documented BMI of 35 kg/m2 or greater with at least one obesity-related comorbidity. Qualifying comorbidities include: Type 2 diabetes mellitus, hypertension, obstructive sleep apnea, or clinically significant cardiovascular disease.',
+        citations:['Observation/bmi-002','Condition/t2dm-002'] },
+      { id:'c2', text:'Documented completion of a ≥ 6-month physician-supervised diet program', required:true, status:'insufficient',
+        summary:'The chart is entirely silent on this criterion — no diet-program resource of any kind exists in the bundle. Per D2, silence is insufficient with empty citations, never an inference.',
+        policy_quote:'Patient must have documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months. Self-directed weight loss attempts do not satisfy this requirement.',
+        citations:[] },
       { id:'c3', text:'Pre-surgical psychological evaluation clearance', required:true, status:'met',
-        summary:'Psychological evaluation completed 2024-02-10 by a licensed psychologist. Patient cleared for surgical candidacy.',
-        policy_quote:'Pre-surgical psychological evaluation conducted by a licensed mental health professional, with documented clearance for bariatric surgery candidacy.',
-        citation:'DiagnosticReport/psych-eval-20240210' }
+        summary:'Psychiatric evaluation completed 2024-03-20 explicitly clears the patient for bariatric surgery candidacy.',
+        policy_quote:'Patient must have completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, confirming the absence of active psychiatric contraindications.',
+        citations:['DiagnosticReport/psych-eval-002'] }
     ],
     determination:{ decision:'insufficient_evidence', confidence:0.54,
-      rationale:'Criteria c1 and c3 are met with valid clinical citations. Criterion c2 — the 6-month supervised dietary program — has no supporting documentation in the chart. A determination of approval cannot be made without this documentation.',
+      rationale:'Criteria c1 and c3 are met with valid clinical citations. Criterion c2 — the 6-month supervised dietary program — has no supporting documentation anywhere in the chart. A determination of approval cannot be made without it.',
       gaps:['6-month physician-supervised dietary program documentation is not present in the patient chart. Records from a structured weight-management program or referring provider would satisfy this criterion.'] },
-    route:'hitl', time:'2m 08s'
+    route:'hitl', routeReason:'c2 is a required criterion marked insufficient. Per D3, any required insufficient criterion forces human review regardless of confidence.',
+    time:'2m 08s'
   },
-  mri: {
-    title: 'Lumbar Spine MRI (Non-contrast)', cpt: 'CPT 72148',
-    patient: '52M · Low back pain · 3-week duration · No neurological symptoms',
+  case_003: {
+    goldenFile: 'case_003_insufficient_unresolvable.yaml',
+    title: 'Bariatric Surgery — Stripped Citation', cpt: 'CPT 43644',
+    patient: '45M · BMI 41.3 · Type 2 diabetes (uncontrolled) · Surgical consult on file',
+    stage: 'determination',
     criteria: [
-      { id:'c1', text:'Persistent low back pain ≥ 6 weeks with conservative management', required:true, status:'not_met',
-        summary:'Chart documents symptom onset 3 weeks prior to this request. Policy requires a minimum of 6 weeks. This criterion is not met at this time.',
-        policy_quote:'Persistent low back or radicular pain for a minimum of 6 weeks despite conservative management, including physical therapy or pharmacologic treatment.',
-        citation:'Condition/lbp-onset-20240618' },
-      { id:'c2', text:'Neurological deficit or red-flag symptom present', required:false, status:'not_met',
-        summary:'Neurological examination documented as normal. No motor deficit, bowel or bladder dysfunction, or saddle anesthesia reported.',
-        policy_quote:'New or progressive neurological deficit (motor weakness, sensory loss), bowel or bladder dysfunction, or saddle anesthesia.',
-        citation:'Observation/neuro-exam-20240618' }
+      { id:'c1', text:'BMI ≥ 40 (or ≥ 35 with a qualifying comorbidity)', required:true, status:'met',
+        summary:'BMI of 41.3 kg/m² documented 2024-04-01. Type 2 diabetes also satisfies the ≥35 + comorbidity path.',
+        policy_quote:'Patient must have a documented body mass index (BMI) of 40 kg/m2 or greater, OR a documented BMI of 35 kg/m2 or greater with at least one obesity-related comorbidity.',
+        citations:['Observation/bmi-003','Condition/t2dm-003'] },
+      { id:'c2', text:'Documented completion of a ≥ 6-month physician-supervised diet program', required:true, status:'insufficient', originalStatus:'met',
+        summary:'The bundle contains two plausible-looking but non-qualifying resources — a surgical consultation note and a self-reported 12-month weight trend — neither of which documents a structured, physician-supervised diet program. The model initially cited a diet-program resource that does not exist in the bundle; <code>resolve_citations()</code> could not resolve it against the submitted FHIR bundle, stripped it, and downgraded this criterion from met to insufficient.',
+        policy_quote:'Patient must have documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months. Self-directed weight loss attempts do not satisfy this requirement.',
+        citations:[],
+        strippedCitations:['Procedure/supervised-diet-6mo'],
+        stripReason:'not found in submitted bundle' },
+      { id:'c3', text:'Pre-surgical psychological evaluation clearance', required:true, status:'met',
+        summary:'Psychiatric evaluation completed 2024-03-20 explicitly clears the patient for bariatric surgery candidacy.',
+        policy_quote:'Patient must have completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, confirming the absence of active psychiatric contraindications.',
+        citations:['DiagnosticReport/psych-eval-003'] }
     ],
-    determination:{ decision:'insufficient_evidence', confidence:0.28,
-      rationale:'Required criterion c1 is not met — documented symptom duration of 3 weeks falls below the 6-week policy threshold. The optional red-flag pathway (c2) is also not met. There is no clinical pathway in the current policy under which this case meets medical necessity criteria at this time.',
-      gaps:[
-        'Symptom duration is 3 weeks. Policy requires 6 weeks minimum. This request may be resubmitted after the 6-week threshold is reached if symptoms persist despite conservative management.',
-        'No neurological deficit is documented that would qualify under the red-flag pathway.'
-      ] },
-    route:'hitl', time:'1m 34s'
+    determination:{ decision:'insufficient_evidence', confidence:0.71,
+      rationale:'Criteria c1 and c3 are met with valid clinical citations. Criterion c2 initially appeared met, but its sole citation does not resolve against the submitted FHIR bundle. The citation existence check (D2/D10) stripped it and downgraded c2 to insufficient — the layer that catches a fabricated reference a prompt alone cannot prevent.',
+      gaps:['No resource in the bundle documents a ≥6-month physician-supervised diet program. The surgical consultation and self-reported weight trend on file do not satisfy this criterion.'] },
+    route:'hitl', routeReason:'c2 is a required criterion downgraded to insufficient by citation resolution. Per D3, this forces human review regardless of confidence.',
+    time:'2m 15s'
+  },
+  case_004: {
+    goldenFile: 'case_004_low_confidence_hitl.yaml',
+    title: 'Lumbar Spine MRI — Low Confidence', cpt: 'CPT 72148',
+    patient: '52M · Low back pain, 8-week duration · Completed PT course',
+    stage: 'determination',
+    criteria: [
+      { id:'c1', text:'Low back pain symptoms present for ≥ 6 weeks', required:true, status:'met',
+        summary:'8 weeks documented from onset (2024-05-10) to MRI request date (2024-07-07), exceeding the 6-week minimum.',
+        policy_quote:'Patient must have documented low back pain symptoms for a minimum of 6 consecutive weeks. Documentation must include symptom onset date or a clinical note confirming symptom duration of at least 6 weeks.',
+        citations:['Condition/lbp-004'] },
+      { id:'c2', text:'Failure of conservative management, including physician-supervised PT, for ≥ 6 weeks', required:true, status:'met',
+        summary:'A completed PT course (6 sessions over 6 weeks, 2024-05-20 to 2024-07-01) is documented with minimal improvement noted — but as a single procedure record with a brief note, not detailed session-level documentation or objective functional measures. Thin documentation is expected to lower confidence.',
+        policy_quote:'Patient must have documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks.',
+        citations:['Procedure/pt-course-004'] },
+      { id:'c3', text:'Absence of red-flag findings (neurological deficit, bowel/bladder dysfunction, fever, unexplained weight loss)', required:true, status:'met',
+        summary:'Neurological exam explicitly documents intact sensation and strength, no bowel/bladder dysfunction, no saddle anesthesia, no fever, no unexplained weight loss.',
+        policy_quote:'The ordering clinician must document the absence of all red-flag findings: new or progressive neurological deficit, bowel or bladder dysfunction, saddle anesthesia, fever of unknown origin, unexplained significant weight loss.',
+        citations:['Observation/neuro-exam-004'] }
+    ],
+    determination:{ decision:'approve', confidence:0.71,
+      rationale:'All three criteria are technically met, but the supporting documentation is sparse: a single PT procedure record with a brief note, and low back pain documented at one office visit. The model correctly reaches an approve decision, but confidence falls below the 85% auto-approval threshold.',
+      gaps:[] },
+    route:'hitl', routeReason:'Approve decision at 71% confidence — below the 85% auto-approval threshold. Per D1, the machine may finalize approvals only above threshold; this one routes to a human despite every criterion being met.',
+    time:'1m 47s'
+  },
+  case_005: {
+    goldenFile: 'case_005_malformed_intake.yaml',
+    title: 'Malformed Bundle — Rejected at Intake', cpt: 'CPT 27447',
+    patient: 'Bundle contains an Observation only — no Patient resource',
+    stage: 'intake',
+    intake: {
+      error: 'Bundle is missing a Patient resource',
+      rationale: 'The submitted bundle is valid JSON with a valid Bundle structure — it contains an Observation resource — but intake() requires at least one entry with resourceType == "Patient". Per D4 (everything deterministic runs before anything probabilistic), the case is rejected here, before any LLM call, RAG retrieval, or token spend.'
+    },
+    time:'< 1s (no LLM call)'
   }
 };
 
@@ -657,27 +730,72 @@ function sLabel(s) {
   return '<span class="c-status '+s+'">'+map[s]+'</span>';
 }
 
+function citeTagsHtml(cr) {
+  var parts = [];
+  (cr.citations||[]).forEach(function(id){
+    parts.push('<span class="cite-tag">'+id+'</span>');
+  });
+  (cr.strippedCitations||[]).forEach(function(id){
+    parts.push('<span class="cite-tag stripped" title="Stripped by resolve_citations() — '+(cr.stripReason||'not found in bundle')+'">'+id+'</span>');
+  });
+  if (!parts.length) {
+    return '<span style="color:var(--orange);font-size:12px">⚠ No citation — documentation not found in chart</span>';
+  }
+  return parts.join(' ');
+}
+
+function evalBadgeHtml(c) {
+  var n = (c.criteria||[]).length;
+  var matchBadge = c.stage === 'intake'
+    ? '<span class="badge-verify">✓ Correctly rejected — 0 LLM calls</span>'
+    : '<span class="badge-verify">✓ '+n+'/'+n+' criteria matched</span>';
+  var fileUrl = 'https://github.com/smahanti8/prior-auth-agent/blob/main/evals/golden/cases/'+c.goldenFile;
+  var provBadge = '<a class="badge-provenance" href="'+fileUrl+'" target="_blank" rel="noopener">🧪 golden '+c.goldenFile.replace('.yaml','')+'</a>';
+  return '<div class="eval-badges">'+provBadge+matchBadge+'</div>';
+}
+
 function renderResult(c) {
+  var badges = evalBadgeHtml(c);
+  var headerHtml = '<div class="sim-row">'
+    +'<div><div class="sim-case-h">'+c.title+' · '+c.cpt+'</div><div class="sim-patient">'+c.patient+'</div>'+badges+'</div>'
+    +'<div class="sim-timing"><div class="sim-timing-l">Pipeline completed in</div><div class="sim-timing-v">'+c.time+'</div></div>'
+    +'</div>';
+
+  if (c.stage === 'intake') {
+    var html = headerHtml
+      +'<div class="intake-box">'
+      +'<div class="intake-lbl">⛔ Rejected at Intake</div>'
+      +'<div class="intake-dec">"'+c.intake.error+'"</div>'
+      +'<div class="intake-rat">'+c.intake.rationale+'</div>'
+      +'</div>';
+    var r0 = document.getElementById('simResult');
+    r0.innerHTML = html;
+    r0.classList.add('show');
+    r0.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+
   var isApprove = c.determination.decision === 'approve';
   var pct = Math.round(c.determination.confidence * 100);
   var confCls = pct>=80?'high':pct>=55?'mid':'low';
 
   var crits = c.criteria.map(function(cr,i){
-    var citeHtml = cr.citation
-      ? '<div class="cd"><div class="cd-l">FHIR Citation</div><span class="cite-tag">'+cr.citation+'</span></div>'
-      : '<div class="cd"><div class="cd-l">FHIR Citation</div><span style="color:var(--orange);font-size:12px">⚠ No citation — documentation not found in chart</span></div>';
+    var origNote = (cr.originalStatus && cr.originalStatus !== cr.status)
+      ? '<span class="orig-note">model initially said '+cr.originalStatus.toUpperCase()+' → downgraded</span>'
+      : '';
     return '<div class="crit-card">'
       +'<div class="crit-head" onclick="toggleCrit('+i+')">'
       +sIcon(cr.status)
       +'<span class="c-text">'+cr.text+'</span>'
       +'<span class="c-req '+(cr.required?'r':'o')+'">'+(cr.required?'Required':'Optional')+'</span>'
       +sLabel(cr.status)
+      +origNote
       +'<span class="c-chevron" id="chev-'+i+'">▾</span>'
       +'</div>'
       +'<div class="crit-body" id="cbody-'+i+'">'
       +'<div class="cd"><div class="cd-l">Evidence summary</div><div class="cd-v">'+cr.summary+'</div></div>'
       +'<div class="cd"><div class="cd-l">Policy quote</div><div class="cd-v italic">"'+cr.policy_quote+'"</div></div>'
-      +citeHtml
+      +'<div class="cd"><div class="cd-l">FHIR Citation</div><div class="cd-v">'+citeTagsHtml(cr)+'</div></div>'
       +'</div></div>';
   }).join('');
 
@@ -688,10 +806,7 @@ function renderResult(c) {
   var decColor = isApprove ? 'var(--green)' : 'var(--orange)';
   var decText = isApprove ? '✓ Approved' : '⚠ Insufficient Evidence';
 
-  var html = '<div class="sim-row">'
-    +'<div><div class="sim-case-h">'+c.title+' · '+c.cpt+'</div><div class="sim-patient">'+c.patient+'</div></div>'
-    +'<div class="sim-timing"><div class="sim-timing-l">Pipeline completed in</div><div class="sim-timing-v">'+c.time+'</div></div>'
-    +'</div>'
+  var html = headerHtml
     +'<div class="crit-section-l">Criteria assessment</div>'
     +crits
     +'<div class="det-box '+(isApprove?'approve':'insufficient')+'">'
@@ -709,7 +824,9 @@ function renderResult(c) {
     +'<div><div class="route-lbl">Routed to</div>'
     +'<div class="route-val '+(c.route==='auto'?'auto':'hitl')+'">'
     +(c.route==='auto'?'Auto-approved — no human review required':'Human review queue — awaiting utilization management decision')
-    +'</div></div></div>';
+    +'</div>'
+    +'<div class="route-reason">'+(c.routeReason||'')+'</div>'
+    +'</div></div>';
 
   var r = document.getElementById('simResult');
   r.innerHTML = html;
