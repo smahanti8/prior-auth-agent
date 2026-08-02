@@ -3,5 +3,6 @@
 __pycache__/
 *.egg-info/
 data/review_queue/*.jsonl
+evals/results/*.json
 .claude/
 .DS_Store
