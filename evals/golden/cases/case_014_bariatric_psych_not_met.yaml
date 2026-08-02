@@ -1,0 +1,103 @@
+id: case_014
+title: "Bariatric sleeve — psych eval explicitly denies clearance (required not_met)"
+cpt: "43644"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-014
+    age: 39
+    sex: M
+  coverage:
+    id: coverage-014
+    status: active
+    payer_display: "Acme Health Plan"
+  observations:
+    - id: bmi-014
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 42.8
+      unit: "kg/m2"
+      date: "2026-06-10"
+  procedures:
+    - id: diet-program-014
+      display: "Physician-supervised structured diet and lifestyle modification program"
+      status: completed
+      note: >
+        6-month physician-supervised structured diet and lifestyle modification
+        program. Supervising provider: licensed registered dietitian operating
+        under physician oversight. Patient attended 24 of 24 scheduled sessions
+        (100% attendance). Dietary education completed. 8 lb weight loss
+        achieved over program duration. Clinical summary on file. Program
+        meets documentation requirements.
+      start_date: "2026-01-01"
+      end_date: "2026-06-30"
+  diagnostic_reports:
+    - id: psych-eval-014
+      display: "Psychiatric evaluation for bariatric surgery"
+      conclusion: >
+        RECOMMENDATION: DEFERRAL. Patient does not currently meet psychological
+        criteria for bariatric surgery. Findings: significant unresolved major
+        depressive disorder (PHQ-9 score 18, indicating moderately severe
+        depression) and active binge eating disorder (confirmed by structured
+        clinical interview). Both conditions represent active psychiatric
+        contraindications to bariatric surgery at this time. Recommend minimum
+        6 months of psychiatric treatment and stabilization prior to
+        reconsideration. Clearance for bariatric surgery is NOT granted at
+        this time.
+      date: "2026-07-01"
+
+  # The psych evaluation EXISTS — unlike case_002 where the chart is silent.
+  # The distinction is between insufficient (silent) and not_met (contradicted).
+  # The report's conclusion explicitly denies clearance and documents active
+  # psychiatric contraindications. The model must read the conclusion and
+  # recognize the explicit denial, not just the existence of a psych eval resource.
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "BMI >= 40, OR BMI >= 35 with an obesity-related comorbidity"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/bmi-014"
+      rationale: >
+        BMI 42.8 satisfies the >= 40 threshold with comfortable margin.
+    - id: c2
+      text: "Documented completion of a >= 6-month physician-supervised diet program"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Procedure/diet-program-014"
+      rationale: >
+        6-month program completed with 100% attendance, supervising provider,
+        program dates, and clinical summary. All policy documentation
+        requirements satisfied. This is the cleanest possible C2 documentation —
+        deliberately strong to isolate C3 as the only failure.
+    - id: c3
+      text: "Psychiatric evaluation clearance for bariatric surgery"
+      required: true
+      expected_status: not_met
+      expected_citations:
+        - "DiagnosticReport/psych-eval-014"
+      rationale: >
+        The evaluation is completed — unlike case_002's silence. Its conclusion
+        explicitly states "clearance is NOT granted" and documents active
+        contraindications (MDD PHQ-9=18, active binge eating disorder). The
+        policy requires "documented clearance for bariatric surgery, confirming
+        the absence of active psychiatric contraindications" — the report states
+        the opposite. This is not_met (contradicted by evidence), not
+        insufficient (silent). The model must read the conclusion and mark c3
+        not_met based on the explicit denial statement.
+  outcome:
+    stage: determination
+    decision: insufficient_evidence
+    route: hitl
+    rationale: >
+      C3 is required and not_met — the psych evaluation exists but its
+      conclusion is an explicit contraindication. The model must distinguish
+      between the existence of a resource (c3 would appear met if only the
+      resource type was checked) and the content of its conclusion. If the
+      model marks c3 as met just because a DiagnosticReport exists, S3
+      criterion-evidence scoring will catch it: expected not_met, actual met
+      = "right answer for the wrong reason" failure mode.

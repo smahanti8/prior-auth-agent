@@ -1,17 +1,17 @@
 {
   "resourceType": "Bundle",
-  "id": "case_002",
+  "id": "case_009",
   "type": "collection",
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "patient-002",
-        "gender": "male",
+        "id": "patient-009",
+        "gender": "female",
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
-            "valueInteger": 45
+            "valueInteger": 67
           }
         ]
       }
@@ -19,8 +19,8 @@
     {
       "resource": {
         "resourceType": "Coverage",
-        "id": "coverage-002",
-        "status": "active",
+        "id": "coverage-009",
+        "status": "cancelled",
         "payor": [
           {
             "display": "Acme Health Plan"
@@ -31,31 +31,26 @@
     {
       "resource": {
         "resourceType": "Condition",
-        "id": "t2dm-002",
+        "id": "conservative-failure-009",
         "clinicalStatus": {
           "coding": [
             {
               "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
-              "code": "active"
+              "code": "resolved"
             }
           ]
         },
         "code": {
-          "text": "Type 2 diabetes mellitus, uncontrolled",
-          "coding": [
-            {
-              "system": "http://hl7.org/fhir/sid/icd-10-cm",
-              "code": "E11.65",
-              "display": "Type 2 diabetes mellitus, uncontrolled"
-            }
-          ]
-        }
+          "text": "Failed conservative management \u2014 8 months PT and NSAID therapy"
+        },
+        "onsetDateTime": "2025-09-01",
+        "abatementDateTime": "2026-05-01"
       }
     },
     {
       "resource": {
         "resourceType": "Observation",
-        "id": "bmi-002",
+        "id": "bmi-009",
         "status": "final",
         "code": {
           "text": "Body mass index",
@@ -68,22 +63,37 @@
           ]
         },
         "valueQuantity": {
-          "value": 41.3,
+          "value": 34.1,
           "unit": "kg/m2"
         },
-        "effectiveDateTime": "2024-04-01"
+        "effectiveDateTime": "2026-05-15"
       }
     },
     {
       "resource": {
-        "resourceType": "DiagnosticReport",
-        "id": "psych-eval-002",
-        "status": "final",
-        "code": {
-          "text": "Psychiatric pre-surgical evaluation"
-        },
-        "conclusion": "Patient cleared for bariatric surgery. No active psychiatric contraindications.",
-        "effectiveDateTime": "2024-03-20"
+        "resourceType": "ImagingStudy",
+        "id": "xray-knee-009",
+        "status": "available",
+        "description": "Standing AP weight-bearing X-ray, right knee",
+        "modality": [
+          {
+            "code": "DX"
+          }
+        ],
+        "series": [
+          {
+            "uid": "urn:oid:xray-knee-009",
+            "bodySite": {
+              "display": "Right knee"
+            }
+          }
+        ],
+        "note": [
+          {
+            "text": "Grade IV osteoarthritis, bone-on-bone medial compartment (Kellgren-Lawrence scale)"
+          }
+        ],
+        "started": "2026-05-01"
       }
     }
   ]

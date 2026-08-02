@@ -1,0 +1,121 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_006",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-006",
+        "gender": "male",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
+            "valueInteger": 42
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-006",
+        "status": "active",
+        "payor": [
+          {
+            "display": "Acme Health Plan"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "mechanical-symptoms-006",
+        "status": "final",
+        "code": {
+          "text": "Knee mechanical symptoms assessment"
+        },
+        "effectiveDateTime": "2026-05-20",
+        "note": [
+          {
+            "text": "Patient reports right knee locking 2-3 times per week with associated pain. Giving-way episodes documented 4 times in past month. Physical examination: McMurray test positive medial compartment with audible click and pain. Joint-line tenderness medial aspect.\n"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ImagingStudy",
+        "id": "mri-knee-006",
+        "status": "available",
+        "description": "MRI right knee without contrast",
+        "modality": [
+          {
+            "code": "MR"
+          }
+        ],
+        "series": [
+          {
+            "uid": "urn:oid:mri-knee-006",
+            "bodySite": {
+              "display": "Right knee"
+            }
+          }
+        ],
+        "note": [
+          {
+            "text": "Full-thickness horizontal tear of the medial meniscus posterior horn. Kellgren-Lawrence Grade 2 osteoarthritis. No evidence of Grade 4 advanced OA."
+          }
+        ],
+        "started": "2026-05-15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ImagingStudy",
+        "id": "xray-knee-006",
+        "status": "available",
+        "description": "Standing AP weight-bearing X-ray, right knee",
+        "modality": [
+          {
+            "code": "DX"
+          }
+        ],
+        "series": [
+          {
+            "uid": "urn:oid:xray-knee-006",
+            "bodySite": {
+              "display": "Right knee"
+            }
+          }
+        ],
+        "note": [
+          {
+            "text": "KL Grade 2 osteoarthritis. Mild medial joint-space narrowing. No bone-on-bone narrowing. Grade 4 OA absent."
+          }
+        ],
+        "started": "2026-05-10"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "pt-knee-006",
+        "status": "completed",
+        "code": {
+          "text": "Physical therapy course \u2014 right knee"
+        },
+        "performedPeriod": {
+          "start": "2026-03-01",
+          "end": "2026-04-26"
+        },
+        "note": [
+          {
+            "text": "8-week PT course including quad strengthening, range of motion, and activity modification. NSAIDs (ibuprofen 600mg TID) prescribed concurrently. Functional outcome at 8 weeks: persistent mechanical symptoms unchanged, pain not improved. Conservative management deemed unsuccessful by treating orthopedist.\n"
+          }
+        ]
+      }
+    }
+  ]
+}

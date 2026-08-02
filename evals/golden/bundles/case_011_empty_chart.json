@@ -1,0 +1,32 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_011",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-011",
+        "gender": "male",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
+            "valueInteger": 65
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-011",
+        "status": "active",
+        "payor": [
+          {
+            "display": "Acme Health Plan"
+          }
+        ]
+      }
+    }
+  ]
+}

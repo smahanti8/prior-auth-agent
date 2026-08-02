@@ -1,17 +1,17 @@
 {
   "resourceType": "Bundle",
-  "id": "case_001",
+  "id": "case_013",
   "type": "collection",
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "patient-001",
+        "id": "patient-013",
         "gender": "female",
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
-            "valueInteger": 68
+            "valueInteger": 61
           }
         ]
       }
@@ -19,7 +19,7 @@
     {
       "resource": {
         "resourceType": "Coverage",
-        "id": "coverage-001",
+        "id": "coverage-013",
         "status": "active",
         "payor": [
           {
@@ -31,7 +31,7 @@
     {
       "resource": {
         "resourceType": "Condition",
-        "id": "conservative-failure-001",
+        "id": "conservative-failure-013",
         "clinicalStatus": {
           "coding": [
             {
@@ -41,16 +41,21 @@
           ]
         },
         "code": {
-          "text": "Failed conservative management \u2014 8 months PT and NSAID therapy"
+          "text": "Failed conservative management \u2014 7-month PT and NSAID course"
         },
-        "onsetDateTime": "2023-07-01",
-        "abatementDateTime": "2024-03-01"
+        "onsetDateTime": "2025-08-01",
+        "abatementDateTime": "2026-03-01",
+        "note": [
+          {
+            "text": "7-month course of physical therapy (2 sessions per week) and naproxen 500mg daily. Monthly functional pain assessments recorded throughout: VAS 7/10 pain at baseline, VAS 6.5/10 at 4 months, VAS 7/10 at 7 months \u2014 no clinically meaningful improvement. Orthopedic surgeon written assessment dated 2026-03-15: conservative management deemed unsuccessful; patient meets surgical candidacy criteria. Patient functional status: limited to 0.3-mile ambulation before pain forces rest.\n"
+          }
+        ]
       }
     },
     {
       "resource": {
         "resourceType": "Observation",
-        "id": "bmi-001",
+        "id": "bmi-013",
         "status": "final",
         "code": {
           "text": "Body mass index",
@@ -63,16 +68,16 @@
           ]
         },
         "valueQuantity": {
-          "value": 34.2,
+          "value": 35.1,
           "unit": "kg/m2"
         },
-        "effectiveDateTime": "2024-03-15"
+        "effectiveDateTime": "2026-03-10"
       }
     },
     {
       "resource": {
         "resourceType": "ImagingStudy",
-        "id": "xray-right-knee-001",
+        "id": "xray-knee-013",
         "status": "available",
         "description": "Standing AP weight-bearing X-ray, right knee",
         "modality": [
@@ -82,7 +87,7 @@
         ],
         "series": [
           {
-            "uid": "urn:oid:xray-right-knee-001",
+            "uid": "urn:oid:xray-knee-013",
             "bodySite": {
               "display": "Right knee"
             }
@@ -90,10 +95,10 @@
         ],
         "note": [
           {
-            "text": "Grade IV osteoarthritis, bone-on-bone medial compartment (Kellgren-Lawrence scale)"
+            "text": "Kellgren-Lawrence Grade III osteoarthritis, medial compartment predominant. Medial joint-space narrowing to 1.5 mm. Subchondral sclerosis and marginal osteophyte formation. No bone-on-bone narrowing. Grade IV changes not present."
           }
         ],
-        "started": "2024-02-10"
+        "started": "2025-12-01"
       }
     }
   ]

@@ -1,0 +1,98 @@
+id: case_006
+title: "Knee arthroscopy — gold-card clean approve"
+cpt: "29881"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-006
+    age: 42
+    sex: M
+  coverage:
+    id: coverage-006
+    status: active
+    payer_display: "Acme Health Plan"
+  imaging_studies:
+    - id: mri-knee-006
+      modality: MR
+      body_site: "Right knee"
+      description: "MRI right knee without contrast"
+      finding: "Full-thickness horizontal tear of the medial meniscus posterior horn. Kellgren-Lawrence Grade 2 osteoarthritis. No evidence of Grade 4 advanced OA."
+      date: "2026-05-15"
+    - id: xray-knee-006
+      modality: DX
+      body_site: "Right knee"
+      description: "Standing AP weight-bearing X-ray, right knee"
+      finding: "KL Grade 2 osteoarthritis. Mild medial joint-space narrowing. No bone-on-bone narrowing. Grade 4 OA absent."
+      date: "2026-05-10"
+  observations:
+    - id: mechanical-symptoms-006
+      display: "Knee mechanical symptoms assessment"
+      note: >
+        Patient reports right knee locking 2-3 times per week with associated
+        pain. Giving-way episodes documented 4 times in past month. Physical
+        examination: McMurray test positive medial compartment with audible
+        click and pain. Joint-line tenderness medial aspect.
+      date: "2026-05-20"
+  procedures:
+    - id: pt-knee-006
+      display: "Physical therapy course — right knee"
+      status: completed
+      note: >
+        8-week PT course including quad strengthening, range of motion, and
+        activity modification. NSAIDs (ibuprofen 600mg TID) prescribed
+        concurrently. Functional outcome at 8 weeks: persistent mechanical
+        symptoms unchanged, pain not improved. Conservative management
+        deemed unsuccessful by treating orthopedist.
+      start_date: "2026-03-01"
+      end_date: "2026-04-26"
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Documented meniscal tear confirmed by MRI or prior arthroscopy"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "ImagingStudy/mri-knee-006"
+      rationale: >
+        MRI explicitly confirms full-thickness medial meniscal tear, posterior
+        horn. Satisfies the imaging confirmation requirement directly.
+    - id: c2
+      text: "Presence of mechanical symptoms or joint-line pain with positive McMurray test"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/mechanical-symptoms-006"
+      rationale: >
+        Locking, giving-way, and positive McMurray test with audible click all
+        documented. Satisfies both the mechanical symptoms and physical exam
+        branches of this criterion.
+    - id: c3
+      text: "Failure of at least 6 weeks of conservative therapy"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Procedure/pt-knee-006"
+      rationale: >
+        8-week PT course with NSAIDs documented; orthopedist explicitly
+        documented failure. Exceeds the 6-week minimum.
+    - id: c4
+      text: "Absence of advanced osteoarthritis (Kellgren-Lawrence grade 4)"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "ImagingStudy/xray-knee-006"
+      rationale: >
+        X-ray explicitly states KL Grade 2 OA with no bone-on-bone narrowing
+        and "Grade 4 OA absent." The absence-criterion is satisfied by positive
+        documentation of the absence, not by silence.
+  outcome:
+    stage: determination
+    decision: approve
+    route: auto
+    rationale: >
+      All 4 policy criteria met with specific, resolvable citations. Absence-
+      criterion c4 is documented explicitly on the X-ray report. High-confidence
+      gold-card profile — no documentation gaps, no ambiguity in any criterion.
+      Expected confidence >= 0.90, auto-route without HITL.

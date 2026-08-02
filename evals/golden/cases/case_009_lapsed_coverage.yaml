@@ -1,0 +1,52 @@
+id: case_009
+title: "TKA — lapsed coverage, rejected at eligibility"
+cpt: "27447"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-009
+    age: 67
+    sex: F
+  coverage:
+    id: coverage-009
+    status: cancelled
+    payer_display: "Acme Health Plan"
+  imaging_studies:
+    - id: xray-knee-009
+      modality: DX
+      body_site: "Right knee"
+      description: "Standing AP weight-bearing X-ray, right knee"
+      finding: "Grade IV osteoarthritis, bone-on-bone medial compartment (Kellgren-Lawrence scale)"
+      date: "2026-05-01"
+  conditions:
+    - id: conservative-failure-009
+      display: "Failed conservative management — 8 months PT and NSAID therapy"
+      clinical_status: resolved
+      onset_date: "2025-09-01"
+      abatement_date: "2026-05-01"
+  observations:
+    - id: bmi-009
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 34.1
+      unit: "kg/m2"
+      date: "2026-05-15"
+
+  # The clinical picture is identical to case_001 (Grade IV OA, 8-month
+  # conservative failure, BMI 34.1). The only difference is Coverage.status
+  # = "cancelled". The pipeline must reject at eligibility before any LLM call.
+
+ground_truth:
+  criteria: []
+  outcome:
+    stage: eligibility
+    eligible: false
+    validation_error_contains: "cancelled"
+    rationale: >
+      eligibility() reads Coverage.status = "cancelled" and returns eligible=False.
+      The pipeline routes to _reject() which writes final_decision =
+      "rejected_at_intake: Coverage status='cancelled', payer=Acme Health Plan".
+      No LLM calls. No determination in state. The runner asserts eligible==False,
+      final_decision contains "cancelled", and no "determination" key in state.
+      This is the eligibility analog of the intake rejection in case_005.

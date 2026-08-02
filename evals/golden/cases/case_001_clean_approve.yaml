@@ -8,6 +8,10 @@ bundle_resources:
     id: patient-001
     age: 68
     sex: F
+  coverage:
+    id: coverage-001
+    status: active
+    payer_display: "Acme Health Plan"
   imaging_studies:
     - id: xray-right-knee-001
       modality: DX

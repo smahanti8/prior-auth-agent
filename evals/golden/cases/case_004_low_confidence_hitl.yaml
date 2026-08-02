@@ -8,6 +8,10 @@ bundle_resources:
     id: patient-004
     age: 52
     sex: M
+  coverage:
+    id: coverage-004
+    status: active
+    payer_display: "Acme Health Plan"
   conditions:
     - id: lbp-004
       display: "Low back pain, non-specific"

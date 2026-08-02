@@ -1,0 +1,98 @@
+id: case_007
+title: "Rotator cuff repair — strip-and-log stays met on surviving citations"
+cpt: "29827"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-007
+    age: 55
+    sex: M
+  coverage:
+    id: coverage-007
+    status: active
+    payer_display: "Acme Health Plan"
+  imaging_studies:
+    - id: mri-shoulder-007
+      modality: MR
+      body_site: "Right shoulder"
+      description: "MRI right shoulder without contrast"
+      finding: "Full-thickness supraspinatus tear with medial retraction 1.5 cm. Moderate tendon degeneration. No evidence of rotator cuff atrophy."
+      date: "2026-04-10"
+  procedures:
+    - id: pt-shoulder-007
+      display: "Physical therapy course — right shoulder"
+      status: completed
+      note: >
+        Patient completed a 14-week physical therapy course for right shoulder
+        pain and weakness (January through April 2026). Treatment included
+        rotator cuff strengthening, scapular stabilization, and manual therapy.
+        Outcome at 14 weeks: persistent weakness and pain, no functional
+        improvement. Conservative management deemed unsuccessful.
+        Note: patient also received 2 corticosteroid injections during this
+        period; see Observation/steroid-injection-007 for injection records.
+      start_date: "2026-01-06"
+      end_date: "2026-04-11"
+  observations:
+    - id: functional-assessment-007
+      display: "Shoulder functional impairment assessment"
+      note: >
+        DASH (Disabilities of the Arm, Shoulder and Hand) score: 68/100
+        indicating severe disability. Patient unable to perform overhead work
+        or lift objects greater than 2 lbs. Activities of daily living
+        significantly limited: unable to dress independently, difficulty with
+        personal hygiene. Occupational function severely compromised.
+      date: "2026-04-15"
+
+  # Observation/steroid-injection-007 is referenced in the procedure note text
+  # but does NOT exist as a bundle entry. The LLM, reading the procedure note,
+  # is likely to cite it as additional supporting evidence for c2. resolve_citations()
+  # strips it (absent from bundle), but c2 stays met on Procedure/pt-shoulder-007.
+  # This directly tests the "strip-and-log stays met on survivors" path.
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Full-thickness rotator cuff tear confirmed by MRI"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "ImagingStudy/mri-shoulder-007"
+      rationale: >
+        MRI explicitly confirms full-thickness supraspinatus tear with 1.5 cm
+        medial retraction. Satisfies the imaging confirmation requirement.
+    - id: c2
+      text: "Failure of >= 3 months conservative management including PT"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Procedure/pt-shoulder-007"
+      rationale: >
+        14-week PT course documented (Jan–Apr 2026) with explicit failure
+        assessment. Exceeds the 3-month minimum. The procedure note references
+        Observation/steroid-injection-007, which does not exist as a bundle
+        entry. If the LLM cites it, resolve_citations() strips it but c2 stays
+        met on the surviving Procedure citation. expected_citations lists only
+        the real resource; the runner asserts c2.status == met regardless of
+        how many citations the LLM originally attempted.
+    - id: c3
+      text: "Documented functional impairment affecting activities of daily living"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/functional-assessment-007"
+      rationale: >
+        DASH score 68/100 (severe). Specific ADL limitations documented:
+        unable to dress independently, unable to lift >2 lbs, occupational
+        function compromised. Satisfies the functional impairment criterion.
+  outcome:
+    stage: determination
+    decision: approve
+    route: auto
+    rationale: >
+      All 3 required criteria met with specific citations. The strip-and-log
+      behavior is the behavioral assertion: if Observation/steroid-injection-007
+      appears in any evidence summary as CITATION STRIPPED, c2.status must
+      remain met — the criterion stays met on the surviving Procedure resource.
+      14-week PT course and formal DASH score give high documentation quality;
+      expected confidence >= 0.85, auto-route.

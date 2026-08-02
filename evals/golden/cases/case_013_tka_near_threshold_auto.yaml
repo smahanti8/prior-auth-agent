@@ -1,0 +1,88 @@
+id: case_013
+title: "TKA — near-threshold auto, solid documentation"
+cpt: "27447"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-013
+    age: 61
+    sex: F
+  coverage:
+    id: coverage-013
+    status: active
+    payer_display: "Acme Health Plan"
+  imaging_studies:
+    - id: xray-knee-013
+      modality: DX
+      body_site: "Right knee"
+      description: "Standing AP weight-bearing X-ray, right knee"
+      finding: "Kellgren-Lawrence Grade III osteoarthritis, medial compartment predominant. Medial joint-space narrowing to 1.5 mm. Subchondral sclerosis and marginal osteophyte formation. No bone-on-bone narrowing. Grade IV changes not present."
+      date: "2025-12-01"
+  conditions:
+    - id: conservative-failure-013
+      display: "Failed conservative management — 7-month PT and NSAID course"
+      clinical_status: resolved
+      onset_date: "2025-08-01"
+      abatement_date: "2026-03-01"
+      note: >
+        7-month course of physical therapy (2 sessions per week) and naproxen
+        500mg daily. Monthly functional pain assessments recorded throughout:
+        VAS 7/10 pain at baseline, VAS 6.5/10 at 4 months, VAS 7/10 at 7
+        months — no clinically meaningful improvement. Orthopedic surgeon
+        written assessment dated 2026-03-15: conservative management deemed
+        unsuccessful; patient meets surgical candidacy criteria. Patient
+        functional status: limited to 0.3-mile ambulation before pain forces
+        rest.
+  observations:
+    - id: bmi-013
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 35.1
+      unit: "kg/m2"
+      date: "2026-03-10"
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Diagnosis of severe knee osteoarthritis (Kellgren-Lawrence Grade III-IV)"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "ImagingStudy/xray-knee-013"
+      rationale: >
+        KL Grade III with 1.5mm medial joint-space narrowing and subchondral
+        sclerosis. Grade IV explicitly noted as absent. Solid OA documentation
+        satisfying "Grade III-IV" criterion.
+    - id: c2
+      text: "Failure of conservative management for >= 6 months"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Condition/conservative-failure-013"
+      rationale: >
+        7-month course with treatment frequency (2×/week), serial VAS scores
+        demonstrating no improvement, and an explicit orthopedist failure
+        assessment. Documentation quality is above the floor — serial objective
+        measures and a physician's written declaration of failure. Expected to
+        produce confidence >= 0.85 unlike the thin documentation in case_004
+        and the missing records in case_012.
+    - id: c3
+      text: "BMI < 40 at time of surgical evaluation"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/bmi-013"
+      rationale: >
+        BMI 35.1 kg/m2 documented March 2026. Well within the <40 threshold.
+  outcome:
+    stage: determination
+    decision: approve
+    route: auto
+    rationale: >
+      All 3 criteria met with complete, specific documentation. C2 includes
+      treatment frequency, serial VAS measurements, and a physician's written
+      failure assessment — above the documentation quality floor. Expected
+      confidence >= 0.85, auto-route. Paired with case_012 (same CPT family,
+      similar clinical picture, different documentation quality) to bracket
+      the confidence threshold from above.

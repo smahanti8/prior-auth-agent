@@ -1,0 +1,94 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_007",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-007",
+        "gender": "male",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
+            "valueInteger": 55
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-007",
+        "status": "active",
+        "payor": [
+          {
+            "display": "Acme Health Plan"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "functional-assessment-007",
+        "status": "final",
+        "code": {
+          "text": "Shoulder functional impairment assessment"
+        },
+        "effectiveDateTime": "2026-04-15",
+        "note": [
+          {
+            "text": "DASH (Disabilities of the Arm, Shoulder and Hand) score: 68/100 indicating severe disability. Patient unable to perform overhead work or lift objects greater than 2 lbs. Activities of daily living significantly limited: unable to dress independently, difficulty with personal hygiene. Occupational function severely compromised.\n"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ImagingStudy",
+        "id": "mri-shoulder-007",
+        "status": "available",
+        "description": "MRI right shoulder without contrast",
+        "modality": [
+          {
+            "code": "MR"
+          }
+        ],
+        "series": [
+          {
+            "uid": "urn:oid:mri-shoulder-007",
+            "bodySite": {
+              "display": "Right shoulder"
+            }
+          }
+        ],
+        "note": [
+          {
+            "text": "Full-thickness supraspinatus tear with medial retraction 1.5 cm. Moderate tendon degeneration. No evidence of rotator cuff atrophy."
+          }
+        ],
+        "started": "2026-04-10"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "pt-shoulder-007",
+        "status": "completed",
+        "code": {
+          "text": "Physical therapy course \u2014 right shoulder"
+        },
+        "performedPeriod": {
+          "start": "2026-01-06",
+          "end": "2026-04-11"
+        },
+        "note": [
+          {
+            "text": "Patient completed a 14-week physical therapy course for right shoulder pain and weakness (January through April 2026). Treatment included rotator cuff strengthening, scapular stabilization, and manual therapy. Outcome at 14 weeks: persistent weakness and pain, no functional improvement. Conservative management deemed unsuccessful. Note: patient also received 2 corticosteroid injections during this period; see Observation/steroid-injection-007 for injection records.\n"
+          }
+        ]
+      }
+    }
+  ]
+}

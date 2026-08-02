@@ -74,9 +74,16 @@ class DiagnosticReportSpec(BaseModel):
     date: Optional[str] = None
 
 
+class CoverageSpec(BaseModel):
+    id: str
+    status: str = "active"
+    payer_display: str = "Acme Health Plan"
+
+
 class BundleResourcesSpec(BaseModel):
     patient: Optional[PatientSpec] = None
     omit_patient: bool = False  # set True to intentionally produce a bundle without Patient
+    coverage: Optional[CoverageSpec] = None
     conditions: list[ConditionSpec] = Field(default_factory=list)
     observations: list[ObservationSpec] = Field(default_factory=list)
     imaging_studies: list[ImagingStudySpec] = Field(default_factory=list)
@@ -97,10 +104,11 @@ class CriterionGroundTruth(BaseModel):
 
 
 class OutcomeSpec(BaseModel):
-    stage: Literal["determination", "intake"]
+    stage: Literal["determination", "intake", "eligibility"]
     decision: Optional[Literal["approve", "insufficient_evidence"]] = None
     route: Optional[Literal["auto", "hitl"]] = None
     valid: Optional[bool] = None
+    eligible: Optional[bool] = None
     validation_error_contains: Optional[str] = None
     rationale: str
 

@@ -1,0 +1,82 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_012",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-012",
+        "gender": "female",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
+            "valueInteger": 44
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-012",
+        "status": "active",
+        "payor": [
+          {
+            "display": "Acme Health Plan"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "bmi-012",
+        "status": "final",
+        "code": {
+          "text": "Body mass index",
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 40.1,
+          "unit": "kg/m2"
+        },
+        "effectiveDateTime": "2026-07-01"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "diet-attempt-012",
+        "status": "final",
+        "code": {
+          "text": "Weight management program \u2014 patient report"
+        },
+        "effectiveDateTime": "2026-07-10",
+        "note": [
+          {
+            "text": "Patient reports completing a 6-month weight management program through primary care physician approximately 6 months ago. No formal program records available at this visit. Program provider and dates not documented. Patient denies participation in any commercial weight loss program. No visit records, attendance documentation, or clinical summary from supervising provider available.\n"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "psych-eval-012",
+        "status": "final",
+        "code": {
+          "text": "Psychological evaluation for bariatric surgery"
+        },
+        "conclusion": "CLEARANCE GRANTED. Patient meets psychological criteria for bariatric surgery. No active psychiatric contraindications identified. Patient demonstrates adequate understanding of the procedure and realistic expectations.",
+        "effectiveDateTime": "2026-06-15"
+      }
+    }
+  ]
+}

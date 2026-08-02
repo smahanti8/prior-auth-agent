@@ -1,0 +1,59 @@
+id: case_011
+title: "TKA — empty clinical chart, all criteria insufficient"
+cpt: "27447"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-011
+    age: 65
+    sex: M
+  coverage:
+    id: coverage-011
+    status: active
+    payer_display: "Acme Health Plan"
+
+  # Intentionally contains ONLY administrative data: Patient and Coverage.
+  # No imaging, no conditions documenting OA, no treatment records, no BMI.
+  # Eligibility passes (active coverage). Pipeline reaches determination.
+  # All three required TKA criteria have zero evidence in the bundle.
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Diagnosis of severe knee osteoarthritis (Kellgren-Lawrence Grade III-IV)"
+      required: true
+      expected_status: insufficient
+      expected_citations: []
+      rationale: >
+        No imaging study in the bundle. The model cannot assert OA severity
+        without evidence. Per D2, silence is insufficient — not a denial,
+        not an assumption. Chart is completely silent on this criterion.
+    - id: c2
+      text: "Failure of conservative management for >= 6 months"
+      required: true
+      expected_status: insufficient
+      expected_citations: []
+      rationale: >
+        No treatment records (procedures, conditions, or observations documenting
+        a PT course or conservative management attempt) in the bundle. Chart is
+        entirely silent. Per D2, insufficient — not a denial.
+    - id: c3
+      text: "BMI < 40 at time of surgical evaluation"
+      required: true
+      expected_status: insufficient
+      expected_citations: []
+      rationale: >
+        No BMI observation in the bundle. Cannot confirm the patient meets or
+        fails the < 40 threshold. Chart is silent. Per D2, insufficient.
+  outcome:
+    stage: determination
+    decision: insufficient_evidence
+    route: hitl
+    rationale: >
+      All 3 required criteria are insufficient — the bundle contains only
+      administrative data. Confidence_gate routes to HITL because required
+      criteria are insufficient (D3). This is the "administrative shell"
+      scenario: coverage and demographics present but no clinical documentation.
+      Distinguishes from cases 002/003 (some criteria met, one insufficient)
+      — here the chart is completely empty of clinical content.

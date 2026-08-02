@@ -1,0 +1,94 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_015",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-015",
+        "gender": "male",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
+            "valueInteger": 48
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-015",
+        "status": "active",
+        "payor": [
+          {
+            "display": "Acme Health Plan"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "lbp-015",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Low back pain with right lower extremity radiation",
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "M54.42",
+              "display": "Low back pain with right lower extremity radiation"
+            }
+          ]
+        },
+        "onsetDateTime": "2026-05-10",
+        "note": [
+          {
+            "text": "Low back pain with right leg radiation (L4-L5 distribution) of 10-week duration. Pain rated 6/10 at rest, 9/10 with ambulation. Requesting lumbar MRI for further evaluation.\n"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "pt-refusal-015",
+        "status": "final",
+        "code": {
+          "text": "Patient counseling \u2014 physical therapy referral declined"
+        },
+        "effectiveDateTime": "2026-07-20",
+        "note": [
+          {
+            "text": "Counseling note dated 2026-07-20: Patient was offered referral for physician-supervised physical therapy as required by prior authorization policy for lumbar MRI. Patient declined physical therapy, stating preference for imaging-first workup to identify the structural cause before committing to a rehabilitation program. No structured exercise program, physician-supervised physical therapy, or any documented physician-supervised conservative management trial has been initiated or completed. Ordering clinician documented the refusal and discussed implications for prior authorization.\n"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "neuro-exam-015",
+        "status": "final",
+        "code": {
+          "text": "Neurological examination"
+        },
+        "effectiveDateTime": "2026-07-20",
+        "note": [
+          {
+            "text": "Neurological examination dated 2026-07-20: Intact reflexes at L3, L4, and S1 bilaterally. No focal motor deficits. Sensation intact in bilateral lower extremities. No bowel or bladder dysfunction reported by patient. No saddle anesthesia on examination. No fever documented. No unexplained significant weight loss (weight stable). All five red-flag categories documented as absent.\n"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+id: case_008
+title: "Brain MRI — no matching policy, wrong policy retrieved via RAG"
+cpt: "70553"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-008
+    age: 38
+    sex: F
+  coverage:
+    id: coverage-008
+    status: active
+    payer_display: "Acme Health Plan"
+  conditions:
+    - id: chronic-migraine-008
+      display: "Chronic migraine with aura, progressive"
+      clinical_status: active
+      icd10: "G43.109"
+      onset_date: "2024-01-01"
+      note: >
+        Established diagnosis of chronic migraine with aura. Patient presents
+        with 3-week history of increased frequency and severity of migraines,
+        new right-sided visual aura lasting > 60 minutes, and one episode of
+        transient left arm paresthesia. Clinician concerns: new prolonged aura
+        and atypical features warrant exclusion of structural intracranial
+        pathology.
+  observations:
+    - id: neuro-exam-008
+      display: "Neurological examination"
+      note: >
+        Cranial nerves II-XII intact bilaterally. No focal motor or sensory
+        deficits. Fundoscopy: disc margins sharp bilaterally, no papilledema.
+        Coordination: finger-nose test normal. No meningismus. No signs of
+        raised intracranial pressure. Mental status intact.
+      date: "2026-07-15"
+
+  # CPT 70553 (Brain MRI without and with contrast) has no policy document in
+  # data/policies/. RAG will retrieve the closest available policy — most likely
+  # lumbar_mri_72148.md (both are MRI procedures). The criteria mapped will be
+  # lumbar-specific (6 weeks LBP, PT failure, no red flags). None of those
+  # criteria are satisfiable by brain MRI clinical evidence.
+  # Runner secondary assertion: policy_chunks[0]["source"] does not contain "70553".
+
+ground_truth:
+  criteria: []
+  outcome:
+    stage: determination
+    decision: insufficient_evidence
+    route: hitl
+    rationale: >
+      No CPT 70553 policy exists in the corpus. RAG retrieves an adjacent
+      policy (expected: lumbar_mri_72148.md). The criteria mapped will be
+      lumbar-specific and the brain MRI clinical evidence satisfies none of
+      them. Model expected to produce insufficient_evidence with low confidence
+      and route to HITL. This tests the pipeline's behavior under policy
+      mismatch — the runner additionally checks that policy_chunks[0]["source"]
+      does not contain "70553", proving wrong-policy retrieval was the mechanism.

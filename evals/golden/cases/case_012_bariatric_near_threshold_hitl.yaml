@@ -1,0 +1,89 @@
+id: case_012
+title: "Bariatric sleeve — near-threshold HITL, thin C2 documentation"
+cpt: "43644"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-012
+    age: 44
+    sex: F
+  coverage:
+    id: coverage-012
+    status: active
+    payer_display: "Acme Health Plan"
+  observations:
+    - id: bmi-012
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 40.1
+      unit: "kg/m2"
+      date: "2026-07-01"
+    - id: diet-attempt-012
+      display: "Weight management program — patient report"
+      note: >
+        Patient reports completing a 6-month weight management program through
+        primary care physician approximately 6 months ago. No formal program
+        records available at this visit. Program provider and dates not
+        documented. Patient denies participation in any commercial weight loss
+        program. No visit records, attendance documentation, or clinical
+        summary from supervising provider available.
+      date: "2026-07-10"
+  diagnostic_reports:
+    - id: psych-eval-012
+      display: "Psychological evaluation for bariatric surgery"
+      conclusion: "CLEARANCE GRANTED. Patient meets psychological criteria for bariatric surgery. No active psychiatric contraindications identified. Patient demonstrates adequate understanding of the procedure and realistic expectations."
+      date: "2026-06-15"
+
+  # C2 documentation fails the policy's explicit documentation requirements:
+  # the policy mandates "program start and end dates, attendance or visit
+  # records, and a clinical summary from the supervising provider." None of
+  # these are present — only a patient self-report. This is technically "met"
+  # based on the patient's account, but documentation quality is below the
+  # policy's explicit evidentiary threshold. Expected: model marks c2 as met
+  # but assigns low confidence, driving overall confidence below 0.85.
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "BMI >= 40, OR BMI >= 35 with an obesity-related comorbidity"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/bmi-012"
+      rationale: >
+        BMI 40.1 meets the >= 40 threshold. Value is at the margin (0.1 above)
+        which may add minor uncertainty but does not change the determination.
+    - id: c2
+      text: "Documented completion of a >= 6-month physician-supervised diet program"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/diet-attempt-012"
+      rationale: >
+        Patient report of program completion is documented in the chart. The
+        criterion itself is technically met by the patient's account. However,
+        the policy explicitly requires program dates, attendance records, and
+        a supervising provider summary — none of which are present. The model
+        should mark this met but with low confidence due to the documentation
+        gap. This drives overall confidence below 0.85, not an insufficiency.
+    - id: c3
+      text: "Psychiatric evaluation clearance for bariatric surgery"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "DiagnosticReport/psych-eval-012"
+      rationale: >
+        Formal evaluation with explicit clearance statement. Documentation
+        is solid and complete.
+  outcome:
+    stage: determination
+    decision: approve
+    route: hitl
+    rationale: >
+      All 3 criteria are technically met. The expected route is hitl because
+      C2 documentation fails the policy's explicit evidentiary requirements,
+      and BMI is borderline — expected to produce confidence below 0.85.
+      The confidence_gate fires on the confidence branch, not the criterion-
+      insufficiency branch. If the pipeline routes auto, that is a test
+      failure: the borderline documentation is designed to sit below threshold.

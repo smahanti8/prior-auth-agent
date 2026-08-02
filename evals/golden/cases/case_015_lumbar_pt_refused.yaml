@@ -1,0 +1,103 @@
+id: case_015
+title: "Lumbar MRI — C2 not_met, conservative treatment explicitly refused"
+cpt: "72148"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-015
+    age: 48
+    sex: M
+  coverage:
+    id: coverage-015
+    status: active
+    payer_display: "Acme Health Plan"
+  conditions:
+    - id: lbp-015
+      display: "Low back pain with right lower extremity radiation"
+      clinical_status: active
+      icd10: "M54.42"
+      onset_date: "2026-05-10"
+      note: >
+        Low back pain with right leg radiation (L4-L5 distribution) of
+        10-week duration. Pain rated 6/10 at rest, 9/10 with ambulation.
+        Requesting lumbar MRI for further evaluation.
+  observations:
+    - id: pt-refusal-015
+      display: "Patient counseling — physical therapy referral declined"
+      note: >
+        Counseling note dated 2026-07-20: Patient was offered referral for
+        physician-supervised physical therapy as required by prior authorization
+        policy for lumbar MRI. Patient declined physical therapy, stating
+        preference for imaging-first workup to identify the structural cause
+        before committing to a rehabilitation program. No structured exercise
+        program, physician-supervised physical therapy, or any documented
+        physician-supervised conservative management trial has been initiated
+        or completed. Ordering clinician documented the refusal and discussed
+        implications for prior authorization.
+      date: "2026-07-20"
+    - id: neuro-exam-015
+      display: "Neurological examination"
+      note: >
+        Neurological examination dated 2026-07-20: Intact reflexes at L3, L4,
+        and S1 bilaterally. No focal motor deficits. Sensation intact in
+        bilateral lower extremities. No bowel or bladder dysfunction reported
+        by patient. No saddle anesthesia on examination. No fever documented.
+        No unexplained significant weight loss (weight stable). All five
+        red-flag categories documented as absent.
+      date: "2026-07-20"
+
+  # C2 distinction: not_met (contradicted) vs insufficient (silent).
+  # The PT refusal is explicitly documented — this is not chart silence,
+  # it is documented non-compliance with the policy requirement.
+  # The policy requires "physician-supervised physical therapy for a minimum
+  # of 6 weeks" — refusing the referral means the criterion is not_met.
+  # C1 (10-week LBP) and C3 (no red flags) are both well-documented and met.
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Low back pain symptoms present for >= 6 weeks"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Condition/lbp-015"
+      rationale: >
+        10-week duration explicitly documented (onset 2026-05-10, counseling
+        note 2026-07-20). Exceeds the 6-week minimum by 4 weeks.
+    - id: c2
+      text: "Failure of conservative management including physician-supervised PT for >= 6 weeks"
+      required: true
+      expected_status: not_met
+      expected_citations:
+        - "Observation/pt-refusal-015"
+      rationale: >
+        PT was offered and explicitly refused. The refusal is documented in a
+        counseling note with detail: the ordering clinician offered the referral
+        and the patient declined. No PT has been initiated or completed.
+        This is not_met (criterion contradicted by documented refusal) rather
+        than insufficient (chart silent on the topic). The model must recognize
+        the documented refusal as active non-satisfaction of the criterion, not
+        just absent documentation. expected_citations includes the refusal note
+        because that resource is the evidence that C2 is not_met.
+    - id: c3
+      text: "Absence of red-flag findings (neurological deficit, bowel/bladder, fever, weight loss)"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/neuro-exam-015"
+      rationale: >
+        All five red-flag categories explicitly documented as absent in the
+        neurological examination note. Satisfies the red-flag criterion.
+  outcome:
+    stage: determination
+    decision: insufficient_evidence
+    route: hitl
+    rationale: >
+      C2 is required and not_met — the criterion is explicitly contradicted
+      by documented patient refusal of the PT referral. Two criteria met
+      (c1, c3) but one required criterion (c2) is not_met. Tests the
+      distinction between not_met (contradicted, with a specific citation
+      documenting the non-compliance) and insufficient (no data). Paired with
+      cases 002/003 (silent C2) to cover both sides of the evidence-absence
+      spectrum.

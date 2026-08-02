@@ -18,6 +18,18 @@
     },
     {
       "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-004",
+        "status": "active",
+        "payor": [
+          {
+            "display": "Acme Health Plan"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
         "resourceType": "Condition",
         "id": "lbp-004",
         "clinicalStatus": {

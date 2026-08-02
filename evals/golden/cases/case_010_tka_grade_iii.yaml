@@ -1,0 +1,84 @@
+id: case_010
+title: "TKA — Grade III OA lower-bound criterion check"
+cpt: "27447"
+date: "2026-07-28"
+
+bundle_resources:
+  patient:
+    id: patient-010
+    age: 58
+    sex: M
+  coverage:
+    id: coverage-010
+    status: active
+    payer_display: "Acme Health Plan"
+  imaging_studies:
+    - id: xray-knee-010
+      modality: DX
+      body_site: "Left knee"
+      description: "Standing AP weight-bearing X-ray, left knee"
+      finding: "Kellgren-Lawrence Grade III osteoarthritis. Medial joint-space narrowing to 2 mm. Subchondral sclerosis and marginal osteophyte formation. No bone-on-bone narrowing present."
+      date: "2026-04-20"
+  conditions:
+    - id: conservative-failure-010
+      display: "Failed 7-month conservative management — PT and NSAID therapy"
+      clinical_status: resolved
+      onset_date: "2023-09-01"
+      abatement_date: "2024-04-01"
+      note: >
+        7-month course of physical therapy (3 sessions/week) and naproxen
+        500mg BID. Monthly functional assessments throughout. Orthopedist
+        assessment 2024-04-01: conservative management exhausted; surgical
+        candidacy established. Patient continues to experience pain limiting
+        ambulation to < 0.5 miles.
+  observations:
+    - id: bmi-010
+      loinc: "39156-5"
+      display: "Body mass index"
+      value: 38.9
+      unit: "kg/m2"
+      date: "2026-04-25"
+
+ground_truth:
+  criteria:
+    - id: c1
+      text: "Diagnosis of severe knee osteoarthritis (Kellgren-Lawrence Grade III-IV)"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "ImagingStudy/xray-knee-010"
+      rationale: >
+        KL Grade III explicitly documented on X-ray. The policy criterion is
+        "Grade III-IV" — Grade III satisfies this. If the pipeline only
+        recognizes Grade IV and misses Grade III, c1 will fail, which is the
+        intended test signal. Grade III with 2mm joint-space narrowing and
+        documented subchondral changes is unambiguous KL3.
+    - id: c2
+      text: "Failure of conservative management for >= 6 months"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Condition/conservative-failure-010"
+      rationale: >
+        7-month course documented (onset 2023-09-01, abatement 2024-04-01)
+        with treatment frequency, outcome measures, and orthopedist assessment.
+        Exceeds the 6-month minimum.
+    - id: c3
+      text: "BMI < 40 at time of surgical evaluation"
+      required: true
+      expected_status: met
+      expected_citations:
+        - "Observation/bmi-010"
+      rationale: >
+        BMI 38.9 kg/m2 documented April 2026. Within the <40 threshold
+        with comfortable margin.
+  outcome:
+    stage: determination
+    decision: approve
+    route: auto
+    rationale: >
+      All 3 required criteria met. The test signal for this case is c1:
+      Grade III must satisfy the "Grade III-IV" criterion. Documentation
+      quality is solid — 7-month PT course with frequency and provider
+      assessment, specific X-ray findings, BMI within range. Expected
+      confidence >= 0.85, auto-route.

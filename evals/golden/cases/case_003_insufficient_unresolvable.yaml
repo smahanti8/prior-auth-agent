@@ -8,6 +8,10 @@ bundle_resources:
     id: patient-003
     age: 45
     sex: M
+  coverage:
+    id: coverage-003
+    status: active
+    payer_display: "Acme Health Plan"
   observations:
     - id: bmi-003
       loinc: "39156-5"

@@ -1,0 +1,85 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_014",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-014",
+        "gender": "male",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-age",
+            "valueInteger": 39
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-014",
+        "status": "active",
+        "payor": [
+          {
+            "display": "Acme Health Plan"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "bmi-014",
+        "status": "final",
+        "code": {
+          "text": "Body mass index",
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 42.8,
+          "unit": "kg/m2"
+        },
+        "effectiveDateTime": "2026-06-10"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "diet-program-014",
+        "status": "completed",
+        "code": {
+          "text": "Physician-supervised structured diet and lifestyle modification program"
+        },
+        "performedPeriod": {
+          "start": "2026-01-01",
+          "end": "2026-06-30"
+        },
+        "note": [
+          {
+            "text": "6-month physician-supervised structured diet and lifestyle modification program. Supervising provider: licensed registered dietitian operating under physician oversight. Patient attended 24 of 24 scheduled sessions (100% attendance). Dietary education completed. 8 lb weight loss achieved over program duration. Clinical summary on file. Program meets documentation requirements.\n"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "psych-eval-014",
+        "status": "final",
+        "code": {
+          "text": "Psychiatric evaluation for bariatric surgery"
+        },
+        "conclusion": "RECOMMENDATION: DEFERRAL. Patient does not currently meet psychological criteria for bariatric surgery. Findings: significant unresolved major depressive disorder (PHQ-9 score 18, indicating moderately severe depression) and active binge eating disorder (confirmed by structured clinical interview). Both conditions represent active psychiatric contraindications to bariatric surgery at this time. Recommend minimum 6 months of psychiatric treatment and stabilization prior to reconsideration. Clearance for bariatric surgery is NOT granted at this time.\n",
+        "effectiveDateTime": "2026-07-01"
+      }
+    }
+  ]
+}

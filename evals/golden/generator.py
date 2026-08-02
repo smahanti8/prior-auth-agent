@@ -20,6 +20,7 @@ from .schema import (
     BundleResourcesSpec,
     CaseSpec,
     ConditionSpec,
+    CoverageSpec,
     DiagnosticReportSpec,
     ImagingStudySpec,
     ObservationSpec,
@@ -124,6 +125,15 @@ def _make_procedure(spec: ProcedureSpec) -> dict:
     return r
 
 
+def _make_coverage(spec: CoverageSpec) -> dict:
+    return {
+        "resourceType": "Coverage",
+        "id": spec.id,
+        "status": spec.status,
+        "payor": [{"display": spec.payer_display}],
+    }
+
+
 def _make_diagnostic_report(spec: DiagnosticReportSpec) -> dict:
     r: dict = {
         "resourceType": "DiagnosticReport",
@@ -152,6 +162,8 @@ def generate_bundle(spec: CaseSpec) -> dict:
 
     if not res.omit_patient and res.patient is not None:
         entries.append({"resource": _make_patient(res.patient)})
+    if res.coverage is not None:
+        entries.append({"resource": _make_coverage(res.coverage)})
 
     for c in res.conditions:
         entries.append({"resource": _make_condition(c)})

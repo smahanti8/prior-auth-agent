@@ -197,6 +197,11 @@ hr.div{border:none;border-top:1px solid var(--border);margin:28px 0}
 .intake-dec{font-size:15px;font-weight:800;margin-bottom:8px;color:var(--red);font-family:ui-monospace,monospace}
 .intake-rat{font-size:12px;color:var(--text2);line-height:1.6}
 
+/* POLICY MISMATCH */
+.mismatch-box{border-radius:10px;padding:14px 16px;margin:0 0 18px;background:var(--purple-dim);border:1px solid var(--purple)}
+.mismatch-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:var(--purple)}
+.mismatch-body{font-size:12px;color:var(--text2);line-height:1.6}
+
 /* REVIEWER */
 .rev-intro{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:22px;border-left:3px solid var(--accent);padding-left:14px}
 .rev-preview{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
@@ -491,7 +496,7 @@ footer a:hover{text-decoration:underline}
 <!-- ═══ SIMULATOR ═══ -->
 <div id="tab-simulator" class="section">
   <div class="sec-title">See it in action</div>
-  <p class="sec-sub">Five synthetic cases, each backed by a golden regression fixture in <code>evals/golden/</code>. Select one, run it through the pipeline, and see exactly how the agent analyzes criteria, cites evidence, resolves citations against the chart, and routes the case — including when it's rejected before any LLM call runs. All patient data is fictional.</p>
+  <p class="sec-sub">Nine synthetic cases, drawn from a 15-case golden regression suite in <code>evals/golden/</code>. Select one, run it through the pipeline, and see exactly how the agent analyzes criteria, cites evidence, resolves citations against the chart, and routes the case — including when it's rejected before any LLM call runs. All patient data is fictional.</p>
 
   <div class="sim-cases">
     <div class="sim-btn active" onclick="selectCase('case_001',this)">
@@ -513,6 +518,22 @@ footer a:hover{text-decoration:underline}
     <div class="sim-btn" onclick="selectCase('case_005',this)">
       <div class="sim-cpt">CPT 27447</div>
       <div class="sim-name">Malformed — Rejected at Intake</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('case_007',this)">
+      <div class="sim-cpt">CPT 29827</div>
+      <div class="sim-name">Rotator Cuff — Strip, Stays Met</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('case_008',this)">
+      <div class="sim-cpt">CPT 70553</div>
+      <div class="sim-name">Brain MRI — Wrong Policy Retrieved</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('case_009',this)">
+      <div class="sim-cpt">CPT 27447</div>
+      <div class="sim-name">TKA — Lapsed Coverage</div>
+    </div>
+    <div class="sim-btn" onclick="selectCase('case_014',this)">
+      <div class="sim-cpt">CPT 43644</div>
+      <div class="sim-name">Bariatric — Explicit Denial</div>
     </div>
   </div>
 
@@ -695,6 +716,98 @@ var CASES = {
       rationale: 'The submitted bundle is valid JSON with a valid Bundle structure — it contains an Observation resource — but intake() requires at least one entry with resourceType == "Patient". Per D4 (everything deterministic runs before anything probabilistic), the case is rejected here, before any LLM call, RAG retrieval, or token spend.'
     },
     time:'< 1s (no LLM call)'
+  },
+  case_007: {
+    goldenFile: 'case_007_rotator_cuff_strip_log.yaml',
+    title: 'Rotator Cuff Repair — Strip, Stays Met', cpt: 'CPT 29827',
+    patient: '55M · Full-thickness supraspinatus tear · 14-week PT course · DASH 68/100 (severe disability)',
+    stage: 'determination',
+    criteria: [
+      { id:'c1', text:'Full-thickness rotator cuff tear confirmed by MRI', required:true, status:'met',
+        summary:'MRI documents a full-thickness supraspinatus tear with 1.5 cm medial retraction and moderate tendon degeneration.',
+        policy_quote:'Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram of the affected shoulder.',
+        citations:['ImagingStudy/mri-shoulder-007'] },
+      { id:'c2', text:'Failure of ≥ 3 months conservative management, including physician-supervised PT', required:true, status:'met',
+        summary:'A 14-week PT course (Jan–Apr 2026) is documented with persistent weakness and no functional improvement — exceeding the 3-month minimum. The procedure note also mentions two corticosteroid injections and references Observation/steroid-injection-007 — but no such resource exists in the submitted bundle. resolve_citations() strips that citation as unresolvable. Unlike case_003, this criterion does not downgrade: the surviving Procedure/pt-shoulder-007 citation is sufficient on its own, so c2 correctly stays met.',
+        policy_quote:'Failure of at least 3 months of conservative management, which must include physician-supervised physical therapy. Documentation must include treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement.',
+        citations:['Procedure/pt-shoulder-007'],
+        strippedCitations:['Observation/steroid-injection-007'],
+        stripReason:'referenced in the procedure note, but no such resource exists in the bundle' },
+      { id:'c3', text:'Documented functional impairment affecting activities of daily living', required:true, status:'met',
+        summary:'DASH score 68/100 (severe disability). Patient cannot perform overhead work, lift objects over 2 lbs, or dress independently.',
+        policy_quote:'Documented functional impairment affecting activities of daily living, as evidenced by a formal functional assessment, shoulder disability questionnaire, or equivalent standardized instrument with scoring.',
+        citations:['Observation/functional-assessment-007'] }
+    ],
+    determination:{ decision:'approve', confidence:0.89,
+      rationale:'All three required criteria are met with specific citations. One fabricated citation on c2 was stripped by the existence check, but the criterion correctly stays met because a real, sufficient citation survives — contrast with case_003, where stripping left zero survivors and forced a downgrade. Documentation quality (14-week PT course, formal DASH score) supports high confidence.',
+      gaps:[] },
+    route:'auto', routeReason:'Approve decision at 89% confidence clears the 85% auto-approval threshold — no human review required, despite one citation being stripped along the way.',
+    time:'1m 58s'
+  },
+  case_008: {
+    goldenFile: 'case_008_brain_mri_wrong_policy.yaml',
+    title: 'Brain MRI — Wrong Policy Retrieved', cpt: 'CPT 70553',
+    patient: '38F · Chronic migraine with new prolonged aura · Neurological exam normal',
+    stage: 'determination',
+    badgeText: '✓ Wrong-policy retrieval correctly caught',
+    policyMismatch: {
+      note: 'CPT 70553 (brain MRI) has no policy document in this deployment\'s corpus. RAG retrieves the closest match by semantic similarity — the lumbar-spine MRI policy — because both are "MRI" procedures. The criteria mapped below are lumbar-specific and illustrate what the pipeline actually produces under this mismatch: none of them are answerable from brain MRI evidence, because they are the wrong criteria for this request.'
+    },
+    criteria: [
+      { id:'c1', text:'Low back pain symptoms present for ≥ 6 weeks (lumbar criterion — mismatched to a brain MRI request)', required:true, status:'insufficient',
+        summary:'This criterion comes from the mismatched lumbar-spine policy. The chart documents chronic migraine with aura, not low back pain — the bundle contains no evidence relevant to this criterion at all.',
+        policy_quote:'Patient must have documented low back pain symptoms for a minimum of 6 consecutive weeks.',
+        citations:[] },
+      { id:'c2', text:'Failure of conservative management, including physician-supervised PT (lumbar criterion — mismatched)', required:true, status:'insufficient',
+        summary:'Also mismatched from the lumbar policy. No physical therapy or low-back conservative-management record exists in this migraine-focused chart.',
+        policy_quote:'Patient must have documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks.',
+        citations:[] },
+      { id:'c3', text:'Absence of red-flag findings (lumbar criterion — mismatched)', required:true, status:'insufficient',
+        summary:'The neurological exam is normal, but it was performed to evaluate migraine, not lumbar red-flag findings — it does not map onto this criterion\'s intent.',
+        policy_quote:'The ordering clinician must document the absence of all red-flag findings: new or progressive neurological deficit, bowel or bladder dysfunction, saddle anesthesia, fever of unknown origin, unexplained significant weight loss.',
+        citations:[] }
+    ],
+    determination:{ decision:'insufficient_evidence', confidence:0.19,
+      rationale:'Every mapped criterion is insufficient — not because the chart is thin, but because the criteria themselves are wrong for this request. Retrieval grabbed a superficially similar policy (both are "MRI"), and no clinical evidence in a migraine chart can satisfy lumbar-spine criteria. Very low confidence reflects the pipeline correctly detecting that nothing here fits.',
+      gaps:['No CPT 70553 (brain MRI) policy exists in the corpus. This case cannot be correctly evaluated until the correct policy document is ingested — resubmitting more chart data will not fix a wrong-policy retrieval.'] },
+    route:'hitl', routeReason:'Every required criterion is insufficient and confidence is far below threshold. Per D3, this forces human review — a person can recognize the mismatch immediately, which the current pipeline has no explicit check for.',
+    time:'1m 41s'
+  },
+  case_009: {
+    goldenFile: 'case_009_lapsed_coverage.yaml',
+    title: 'TKA — Lapsed Coverage', cpt: 'CPT 27447',
+    patient: '67F · Same clinical picture as the clean-approve case (Grade IV OA, 8 months failed conservative therapy) — coverage cancelled',
+    stage: 'eligibility',
+    eligibility: {
+      error: 'Coverage status = \'cancelled\' (payer: Acme Health Plan)',
+      rationale: 'eligibility() reads the bundle\'s Coverage resource and finds status "cancelled" rather than "active." The clinical picture here is identical to the clean-approve case — same diagnosis, same conservative-therapy history — but it never reaches criteria mapping, evidence extraction, or determination. Per D4, everything deterministic runs before anything probabilistic: a lapsed policy is a deterministic fact that makes the clinical question moot, so the case is rejected before any LLM call or token spend.'
+    },
+    time:'< 1s (no LLM call)'
+  },
+  case_014: {
+    goldenFile: 'case_014_bariatric_psych_not_met.yaml',
+    title: 'Bariatric Surgery — Explicit Denial', cpt: 'CPT 43644',
+    patient: '39M · BMI 42.8 · 6-month diet program, 100% attendance · Psych eval: clearance NOT granted',
+    stage: 'determination',
+    criteria: [
+      { id:'c1', text:'BMI ≥ 40 (or ≥ 35 with a qualifying comorbidity)', required:true, status:'met',
+        summary:'BMI of 42.8 kg/m² documented 2026-06-10, comfortably above the ≥40 threshold.',
+        policy_quote:'Patient must have a documented body mass index (BMI) of 40 kg/m2 or greater, OR a documented BMI of 35 kg/m2 or greater with at least one obesity-related comorbidity.',
+        citations:['Observation/bmi-014'] },
+      { id:'c2', text:'Documented completion of a ≥ 6-month physician-supervised diet program', required:true, status:'met',
+        summary:'6-month program completed with 100% attendance (24/24 sessions), a supervising registered dietitian under physician oversight, program dates, and a clinical summary on file — the cleanest possible documentation for this criterion.',
+        policy_quote:'Patient must have documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months.',
+        citations:['Procedure/diet-program-014'] },
+      { id:'c3', text:'Pre-surgical psychological evaluation clearance', required:true, status:'not_met',
+        summary:'The evaluation exists and is cited — unlike a silent chart, this is not a documentation gap. Its conclusion explicitly states "clearance is NOT granted" and documents active contraindications: major depressive disorder (PHQ-9 score 18) and active binge eating disorder. The model must read the conclusion text itself, not just note that a psych-eval resource is present — marking this "met" merely because a DiagnosticReport exists would be the right resource but the wrong reading of it.',
+        policy_quote:'Patient must have completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, confirming the absence of active psychiatric contraindications.',
+        citations:['DiagnosticReport/psych-eval-014'] }
+    ],
+    determination:{ decision:'insufficient_evidence', confidence:0.9,
+      rationale:'c1 and c2 are cleanly met with strong documentation. c3 is not_met — not insufficient — because the evaluation\'s own conclusion contradicts clearance rather than being silent on it. High confidence reflects that this determination itself is unambiguous, even though the outcome is not an approval.',
+      gaps:['Psychiatric re-evaluation and clearance for bariatric surgery, following the evaluator\'s recommended minimum 6-month period of psychiatric treatment and stabilization.'] },
+    route:'hitl', routeReason:'c3 is a required criterion marked not_met. Per D3, this forces human review regardless of confidence — and a denial, if one is ultimately warranted, is framed by the human reviewer, never by the model.',
+    time:'2m 02s'
   }
 };
 
@@ -746,9 +859,14 @@ function citeTagsHtml(cr) {
 
 function evalBadgeHtml(c) {
   var n = (c.criteria||[]).length;
-  var matchBadge = c.stage === 'intake'
-    ? '<span class="badge-verify">✓ Correctly rejected — 0 LLM calls</span>'
-    : '<span class="badge-verify">✓ '+n+'/'+n+' criteria matched</span>';
+  var matchBadge;
+  if (c.badgeText) {
+    matchBadge = '<span class="badge-verify">'+c.badgeText+'</span>';
+  } else if (c.stage === 'intake' || c.stage === 'eligibility') {
+    matchBadge = '<span class="badge-verify">✓ Correctly rejected — 0 LLM calls</span>';
+  } else {
+    matchBadge = '<span class="badge-verify">✓ '+n+'/'+n+' criteria matched</span>';
+  }
   var fileUrl = 'https://github.com/smahanti8/prior-auth-agent/blob/main/evals/golden/cases/'+c.goldenFile;
   var provBadge = '<a class="badge-provenance" href="'+fileUrl+'" target="_blank" rel="noopener">🧪 golden '+c.goldenFile.replace('.yaml','')+'</a>';
   return '<div class="eval-badges">'+provBadge+matchBadge+'</div>';
@@ -761,12 +879,14 @@ function renderResult(c) {
     +'<div class="sim-timing"><div class="sim-timing-l">Pipeline completed in</div><div class="sim-timing-v">'+c.time+'</div></div>'
     +'</div>';
 
-  if (c.stage === 'intake') {
+  if (c.stage === 'intake' || c.stage === 'eligibility') {
+    var stageData = c.stage === 'intake' ? c.intake : c.eligibility;
+    var stageLbl = c.stage === 'intake' ? '⛔ Rejected at Intake' : '⛔ Rejected at Eligibility';
     var html = headerHtml
       +'<div class="intake-box">'
-      +'<div class="intake-lbl">⛔ Rejected at Intake</div>'
-      +'<div class="intake-dec">"'+c.intake.error+'"</div>'
-      +'<div class="intake-rat">'+c.intake.rationale+'</div>'
+      +'<div class="intake-lbl">'+stageLbl+'</div>'
+      +'<div class="intake-dec">"'+stageData.error+'"</div>'
+      +'<div class="intake-rat">'+stageData.rationale+'</div>'
       +'</div>';
     var r0 = document.getElementById('simResult');
     r0.innerHTML = html;
@@ -774,6 +894,10 @@ function renderResult(c) {
     r0.scrollIntoView({behavior:'smooth',block:'nearest'});
     return;
   }
+
+  var mismatchHtml = c.policyMismatch
+    ? '<div class="mismatch-box"><div class="mismatch-lbl">⚠ Policy Mismatch Detected</div><div class="mismatch-body">'+c.policyMismatch.note+'</div></div>'
+    : '';
 
   var isApprove = c.determination.decision === 'approve';
   var pct = Math.round(c.determination.confidence * 100);
@@ -807,6 +931,7 @@ function renderResult(c) {
   var decText = isApprove ? '✓ Approved' : '⚠ Insufficient Evidence';
 
   var html = headerHtml
+    +mismatchHtml
     +'<div class="crit-section-l">Criteria assessment</div>'
     +crits
     +'<div class="det-box '+(isApprove?'approve':'insufficient')+'">'
