@@ -21,7 +21,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 from unittest.mock import MagicMock
 
 RECORDED_DIR = Path(__file__).resolve().parent / "recorded"
