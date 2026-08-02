@@ -1,5 +1,7 @@
 # Healthcare Prior Auth Agent
 
+[![Golden Eval Suite](https://github.com/smahanti8/prior-auth-agent/actions/workflows/golden_eval.yml/badge.svg)](https://github.com/smahanti8/prior-auth-agent/actions/workflows/golden_eval.yml)
+
 An agentic prior-authorization pipeline: it takes a FHIR bundle and a CPT code, validates and checks eligibility, retrieves the applicable payer policy via RAG (ChromaDB), maps policy criteria, and extracts per-criterion clinical evidence with citations. It drafts either an approval or an `insufficient_evidence` result — it never drafts a denial, because a drafted denial anchors the reviewer; a human makes any adverse decision. A hard citation gate rejects any criterion marked *met* that lacks both a policy-side quote and a chart-side FHIR citation ("no citation → no claim"), and non-approved or low-confidence cases route to a human review queue (Streamlit). Every decision is written to a tamper-evident, hash-chained audit log.
 
 **[▶ Live Interactive Demo](https://smahanti8.github.io/prior-auth-agent/)** &nbsp;·&nbsp; [Architecture decisions](DECISIONS.md)
@@ -78,6 +80,24 @@ The deterministic parts (intake, eligibility, the citation gate, the audit log) 
 - **Design decisions**: the never-deny rule is [DECISIONS.md](DECISIONS.md) D9; the bilateral-citation gate is D10, which extends D2 (citations must be present; existence-against-the-bundle is still unverified).
 - **Confidence gate**: non-approvals, cases below `CONFIDENCE_THRESHOLD` (default 0.85), or any required criterion lacking evidence go to `data/review_queue/pending.jsonl` for human review.
 - **PHI**: this scaffold does no de-identification; do not point it at real patient data without your compliance controls in place.
+
+## Eval Suite
+
+A 15-case golden eval suite scores four dimensions per case: determination
+accuracy, routing accuracy, criterion-level evidence accuracy (catches
+"right answer, wrong reason"), and citation validity. Cassette-based replay
+means CI runs at zero API cost.
+
+See [EVALS.md](EVALS.md) for methodology, metric definitions, case index,
+scoreboard, and an explicit limitations section.
+
+```bash
+# Record cassettes once (requires ANTHROPIC_API_KEY)
+python -m evals.run --live
+
+# Replay in CI (no API key)
+python -m evals.run --baseline-check
+```
 
 ## Known Limitations
 
