@@ -1,0 +1,204 @@
+{
+  "case_id": "case_006",
+  "recorded_at": "2026-08-02T17:22:25.496833+00:00",
+  "model": "claude-opus-4-8",
+  "nodes": {
+    "policy_rag": {
+      "chunks": [
+        {
+          "text": "# Prior Authorization Policy: Total Knee Arthroplasty (CPT 27447)\n\n## Policy Overview\n\nPrior authorization is required for total knee arthroplasty (CPT 27447).\nAll three criteria below must be met for approval.\n\n## Required Criteria\n\n### C1: Diagnosis of severe knee osteoarthritis\n\nPatient must have a documented diagnosis of severe knee osteoarthritis,\nKellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing\nradiographs of the affected knee.\n\n### C2: Failure of conservative management for at least 6 months\n\nPatient must have documented failure of conservative management for a minimum\nof 6 consecutive months, including physician-supervised physical therapy and\nanti-inflammatory medication. Documentation must specify treatment duration\nand clinical outcome.\n\n### C3: BMI less than 40 at time of surgical evaluation\n\nPatient body mass index (BMI) must be documented as less than 40 kg/m2 at\nthe time of the pre-surgical evaluation. Morbid obesity (BMI >= 40) is a\nrelative contraindication and requires case-by-case review.\n\n## Documentation Requirements",
+          "source": "total_knee_arthroplasty_27447.md",
+          "distance": 0.5117974877357483
+        },
+        {
+          "text": "# Medical Policy: Rotator Cuff Repair (CPT 29827)\n\nEffective: 2026-01-01 \u00b7 Payer: Acme Health Plan \u00b7 Policy ID: SURG-041\n\n## Prior Authorization Criteria\n\nArthroscopic rotator cuff repair (CPT 29827) is considered medically necessary\nwhen ALL of the following criteria are met:\n\n1. Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram of the\n   affected shoulder.\n\n2. Failure of at least 3 months of conservative management, which must include\n   physician-supervised physical therapy. Documentation must include treating\n   provider, treatment dates, and clinical outcome demonstrating lack of adequate\n   improvement.\n\n3. Documented functional impairment affecting activities of daily living, as\n   evidenced by a formal functional assessment, shoulder disability questionnaire,\n   or equivalent standardized instrument with scoring.\n\n## Exclusions\n\n- Partial-thickness tears not meeting full-thickness criteria on imaging.\n- Conservative management period of less than 3 months unless the tear is\n  acute traumatic in nature.\n\n## Documentation Requirements",
+          "source": "rotator_cuff_repair_29827.md",
+          "distance": 0.5212823152542114
+        },
+        {
+          "text": "# Prior Authorization Policy: Laparoscopic Sleeve Gastrectomy (CPT 43644)\n\n## Policy Overview\n\nPrior authorization is required for laparoscopic sleeve gastrectomy\n(CPT 43644). All three criteria below must be met for approval.\n\n## Required Criteria\n\n### C1: BMI threshold\n\nPatient must have a documented body mass index (BMI) of 40 kg/m2 or greater,\nOR a documented BMI of 35 kg/m2 or greater with at least one obesity-related\ncomorbidity. Qualifying comorbidities include: Type 2 diabetes mellitus,\nhypertension, obstructive sleep apnea, or clinically significant\ncardiovascular disease.\n\n### C2: Physician-supervised diet program\n\nPatient must have documented completion of a physician-supervised, structured\ndiet and lifestyle modification program for a minimum of 6 consecutive months.\nThe program must be supervised by a licensed physician or registered dietitian\noperating under physician oversight. Self-directed weight loss attempts do not\nsatisfy this requirement. Documentation must include program start and end\ndates, attendance or visit records, and a clinical summary from the supervising\nprovider.\n\n### C3: Psychiatric or psychological evaluation",
+          "source": "bariatric_sleeve_43644.md",
+          "distance": 0.544265866279602
+        },
+        {
+          "text": "# Prior Authorization Policy: MRI Lumbar Spine without Contrast (CPT 72148)\n\n## Policy Overview\n\nPrior authorization is required for MRI of the lumbar spine without contrast\n(CPT 72148) for non-emergent indications. All three criteria below must be\nmet for approval. Red-flag findings (see C3) permit immediate imaging without\nprior authorization.\n\n## Required Criteria\n\n### C1: Duration of low back pain symptoms\n\nPatient must have documented low back pain symptoms for a minimum of 6\nconsecutive weeks. Documentation must include symptom onset date or a\nclinical note confirming symptom duration of at least 6 weeks.\n\n### C2: Failure of conservative management\n\nPatient must have documented failure of a course of conservative management,\nincluding physician-supervised physical therapy administered for a minimum\nof 6 weeks. Documentation must include the treating provider, treatment dates,\nand clinical outcome demonstrating lack of adequate improvement.\n\n### C3: Absence of red-flag findings",
+          "source": "lumbar_mri_72148.md",
+          "distance": 0.557045578956604
+        },
+        {
+          "text": "requirement. Documentation must include program start and end\ndates, attendance or visit records, and a clinical summary from the supervising\nprovider.\n\n### C3: Psychiatric or psychological evaluation\n\nPatient must have completed a formal psychiatric or psychological evaluation\nwithin 12 months prior to the authorization request. The evaluation must\ninclude documented clearance for bariatric surgery, confirming the absence\nof active psychiatric contraindications.\n\n## Documentation Requirements",
+          "source": "bariatric_sleeve_43644.md",
+          "distance": 0.580059289932251
+        },
+        {
+          "text": "# Medical Policy: Knee Arthroscopy with Meniscectomy (CPT 29881)\n\nEffective: 2026-01-01 \u00b7 Payer: Acme Health Plan \u00b7 Policy ID: SURG-029\n\n## Prior Authorization Criteria\n\nKnee arthroscopy with medial OR lateral meniscectomy (CPT 29881) is considered\nmedically necessary when ALL of the following criteria are met:\n\n1. Documented meniscal tear confirmed by MRI or prior arthroscopy.\n2. Presence of mechanical symptoms (locking, catching, giving way) OR joint-line\n   pain with a positive McMurray test.\n3. Failure of at least 6 weeks of conservative therapy, including at least one of:\n   physical therapy, NSAIDs, activity modification, or intra-articular injection.\n4. Absence of advanced osteoarthritis in the affected compartment\n   (Kellgren-Lawrence grade 4).\n\n## Exclusions\n\n- Asymptomatic incidental meniscal tears found on imaging.\n- Primary treatment of osteoarthritis pain without discrete tear.\n\n## Documentation Requirements",
+          "source": "knee_arthroscopy_29881.md",
+          "distance": 0.6334058046340942
+        }
+      ]
+    },
+    "criteria_mapper": {
+      "node_name": "criteria_mapper",
+      "schema_fingerprint": "b708e4c6b596",
+      "system_hash": "700f2dd524ca1549",
+      "response": {
+        "criteria": [
+          {
+            "id": "c1",
+            "text": "Documented meniscal tear confirmed by MRI or prior arthroscopy.",
+            "required": true
+          },
+          {
+            "id": "c2",
+            "text": "Presence of mechanical symptoms (locking, catching, giving way).",
+            "required": false
+          },
+          {
+            "id": "c3",
+            "text": "Joint-line pain with a positive McMurray test.",
+            "required": false
+          },
+          {
+            "id": "c4",
+            "text": "Failure of at least 6 weeks of conservative therapy.",
+            "required": true
+          },
+          {
+            "id": "c5",
+            "text": "Conservative therapy included physical therapy.",
+            "required": false
+          },
+          {
+            "id": "c6",
+            "text": "Conservative therapy included NSAIDs.",
+            "required": false
+          },
+          {
+            "id": "c7",
+            "text": "Conservative therapy included activity modification.",
+            "required": false
+          },
+          {
+            "id": "c8",
+            "text": "Conservative therapy included intra-articular injection.",
+            "required": false
+          },
+          {
+            "id": "c9",
+            "text": "Absence of advanced osteoarthritis (Kellgren-Lawrence grade 4) in the affected compartment.",
+            "required": true
+          }
+        ]
+      },
+      "input_tokens": 2643,
+      "output_tokens": 966,
+      "model": "claude-opus-4-8"
+    },
+    "evidence_extractor": {
+      "node_name": "evidence_extractor",
+      "schema_fingerprint": "858f975183e5",
+      "system_hash": "479d79ee670e7b3f",
+      "response": {
+        "evidence": [
+          {
+            "criterion_id": "c1",
+            "status": "met",
+            "summary": "MRI of the right knee documents a full-thickness horizontal tear of the medial meniscus posterior horn.",
+            "citations": [
+              "ImagingStudy/mri-knee-006"
+            ],
+            "policy_quote": "Documented meniscal tear confirmed by MRI or prior arthroscopy."
+          },
+          {
+            "criterion_id": "c2",
+            "status": "met",
+            "summary": "Patient reports right knee locking 2-3 times per week and documented giving-way episodes 4 times in the past month.",
+            "citations": [
+              "Observation/mechanical-symptoms-006"
+            ],
+            "policy_quote": "Presence of mechanical symptoms (locking, catching, giving way)."
+          },
+          {
+            "criterion_id": "c3",
+            "status": "met",
+            "summary": "Exam shows positive McMurray test with medial joint-line tenderness and pain.",
+            "citations": [
+              "Observation/mechanical-symptoms-006"
+            ],
+            "policy_quote": "Joint-line pain with a positive McMurray test."
+          },
+          {
+            "criterion_id": "c4",
+            "status": "met",
+            "summary": "An 8-week physical therapy course with concurrent NSAIDs was completed and deemed unsuccessful with persistent symptoms.",
+            "citations": [
+              "Procedure/pt-knee-006"
+            ],
+            "policy_quote": "Failure of at least 6 weeks of conservative therapy."
+          },
+          {
+            "criterion_id": "c5",
+            "status": "met",
+            "summary": "Conservative therapy included an 8-week physical therapy course with quad strengthening and range of motion.",
+            "citations": [
+              "Procedure/pt-knee-006"
+            ],
+            "policy_quote": "Conservative therapy included physical therapy."
+          },
+          {
+            "criterion_id": "c6",
+            "status": "met",
+            "summary": "NSAIDs (ibuprofen 600mg TID) were prescribed concurrently with PT.",
+            "citations": [
+              "Procedure/pt-knee-006"
+            ],
+            "policy_quote": "Conservative therapy included NSAIDs."
+          },
+          {
+            "criterion_id": "c7",
+            "status": "met",
+            "summary": "Conservative therapy included activity modification as part of the PT course.",
+            "citations": [
+              "Procedure/pt-knee-006"
+            ],
+            "policy_quote": "Conservative therapy included activity modification."
+          },
+          {
+            "criterion_id": "c8",
+            "status": "insufficient",
+            "summary": "No documentation of intra-articular injection in the bundle.",
+            "citations": [],
+            "policy_quote": "Conservative therapy included intra-articular injection."
+          },
+          {
+            "criterion_id": "c9",
+            "status": "met",
+            "summary": "Both MRI and weight-bearing X-ray show Kellgren-Lawrence Grade 2 osteoarthritis with Grade 4 advanced OA absent.",
+            "citations": [
+              "ImagingStudy/mri-knee-006",
+              "ImagingStudy/xray-knee-006"
+            ],
+            "policy_quote": "Absence of advanced osteoarthritis (Kellgren-Lawrence grade 4) in the affected compartment."
+          }
+        ]
+      },
+      "input_tokens": 2376,
+      "output_tokens": 1250,
+      "model": "claude-opus-4-8"
+    },
+    "determination": {
+      "node_name": "determination",
+      "schema_fingerprint": "df1465ba9d6d",
+      "system_hash": "40990d39c2435f5c",
+      "response": {
+        "decision": "approve",
+        "rationale": "All required criteria are met. c1 (meniscal tear confirmed by MRI) is met per ImagingStudy/mri-knee-006 showing a full-thickness horizontal tear of the medial meniscus posterior horn. c4 (failure of at least 6 weeks of conservative therapy) is met per Procedure/pt-knee-006 documenting a completed 8-week PT course with concurrent NSAIDs deemed unsuccessful. c9 (absence of Kellgren-Lawrence grade 4 OA) is met per ImagingStudy/mri-knee-006 and ImagingStudy/xray-knee-006 showing Grade 2 OA with advanced Grade 4 OA absent. The optional criteria c2, c3, c5, c6, and c7 are also met, and c8 (intra-articular injection) is insufficient but not required and does not affect the determination.",
+        "confidence": 0.95,
+        "gaps": []
+      },
+      "input_tokens": 2415,
+      "output_tokens": 366,
+      "model": "claude-opus-4-8"
+    }
+  }
+}
