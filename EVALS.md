@@ -176,9 +176,9 @@ Specific limitations:
    wrote the policy. Real charts have noise, ambiguity, conflicting evidence,
    and edge cases that synthetic data systematically under-represents.
 
-3. **Single policy**: All 15 cases use `rotator_cuff_repair_29827.md`. The
-   RAG retrieval, criteria-mapping, and evidence-extraction behaviour for
-   other CPT codes is entirely untested.
+3. **Multi-policy retrieval is now exercised, and it found a real bug**: the
+   15 cases span 5 CPT codes/policies. A live eval run surfaced a genuine
+   RAG retrieval issue — see README's Known Limitations. Not yet fixed.
 
 4. **S3 matching is heuristic**: Criterion evidence is matched by citation
    overlap, not semantic equivalence. A pipeline could pass S3 while
