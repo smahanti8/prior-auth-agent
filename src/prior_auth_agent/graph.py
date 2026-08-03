@@ -5,8 +5,11 @@ Intake -> Eligibility -> Policy RAG -> Criteria Mapper -> Evidence Extractor
                                     --(high)-> Auto decision
 """
 
+
 from langgraph.graph import END, StateGraph
 
+from .audit_log import append_chained
+from .config import AUDIT_LOG_PATH
 from .nodes import (
     auto_decision,
     citation_gate,
@@ -21,6 +24,11 @@ from .nodes import (
     policy_rag,
 )
 from .state import PriorAuthState
+from . import telemetry
+from .telemetry import _timed
+
+
+# ── Routing predicates ─────────────────────────────────────────────────────────
 
 
 def _after_intake(state: PriorAuthState) -> str:
@@ -44,21 +52,24 @@ def _reject(state: PriorAuthState) -> PriorAuthState:
     return {"final_decision": f"rejected_at_intake: {'; '.join(reasons)}"}
 
 
+# ── Graph construction ────────────────────────────────────────────────────────
+
+
 def build_graph():
     g = StateGraph(PriorAuthState)
 
-    g.add_node("intake", intake)
-    g.add_node("eligibility", eligibility)
-    g.add_node("policy_rag", policy_rag)
-    g.add_node("criteria_mapper", criteria_mapper)
-    g.add_node("evidence_extractor", evidence_extractor)
-    g.add_node("citation_gate", citation_gate)
-    g.add_node("citation_reject", citation_reject)
-    g.add_node("determination", determination_drafter)
-    g.add_node("confidence_gate", confidence_gate)
-    g.add_node("auto_decision", auto_decision)
-    g.add_node("hitl_enqueue", hitl_enqueue)
-    g.add_node("reject", _reject)
+    g.add_node("intake",             _timed("intake",             intake))
+    g.add_node("eligibility",        _timed("eligibility",        eligibility))
+    g.add_node("policy_rag",         _timed("policy_rag",         policy_rag))
+    g.add_node("criteria_mapper",    _timed("criteria_mapper",    criteria_mapper))
+    g.add_node("evidence_extractor", _timed("evidence_extractor", evidence_extractor))
+    g.add_node("citation_gate",      _timed("citation_gate",      citation_gate))
+    g.add_node("citation_reject",    _timed("citation_reject",    citation_reject))
+    g.add_node("determination",      _timed("determination",      determination_drafter))
+    g.add_node("confidence_gate",    _timed("confidence_gate",    confidence_gate))
+    g.add_node("auto_decision",      _timed("auto_decision",      auto_decision))
+    g.add_node("hitl_enqueue",       _timed("hitl_enqueue",       hitl_enqueue))
+    g.add_node("reject",             _timed("reject",             _reject))
 
     g.set_entry_point("intake")
     g.add_conditional_edges("intake", _after_intake, ["eligibility", "reject"])
@@ -79,14 +90,31 @@ def build_graph():
     return g.compile()
 
 
+# ── Entry point ───────────────────────────────────────────────────────────────
+
+
 def run(bundle_path: str, cpt_code: str) -> PriorAuthState:
     import json
 
     with open(bundle_path) as f:
         bundle = json.load(f)
 
+    telemetry.reset()
     graph = build_graph()
-    return graph.invoke({"fhir_bundle": bundle, "cpt_code": cpt_code})
+    state = graph.invoke({"fhir_bundle": bundle, "cpt_code": cpt_code})
+
+    node_tel = telemetry.drain()
+    cost_total = sum(t.cost_usd for t in node_tel)
+    append_chained(AUDIT_LOG_PATH, {
+        "case_id":        state.get("case_id"),
+        "cpt_code":       cpt_code,
+        "final_decision": state.get("final_decision"),
+        "determination":  state.get("determination"),
+        "node_telemetry": [t.to_dict() for t in node_tel],
+        "cost_usd_total": cost_total,
+    })
+
+    return state
 
 
 if __name__ == "__main__":
