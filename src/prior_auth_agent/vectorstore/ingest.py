@@ -20,7 +20,7 @@ def chunk_text(text: str) -> list[str]:
         end = start + CHUNK_SIZE
         # try to break at a paragraph boundary
         cut = text.rfind("\n\n", start, end)
-        if cut <= start:
+        if cut <= start or cut - CHUNK_OVERLAP <= start:
             cut = end
         chunks.append(text[start:cut].strip())
         start = max(cut - CHUNK_OVERLAP, start + 1)
