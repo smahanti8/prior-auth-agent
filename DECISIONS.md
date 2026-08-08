@@ -295,3 +295,32 @@ bundle, strips any that fail, and downgrades to `insufficient` when none
 survive (see [D2](#d2-every-clinical-claim-carries-a-fhir-citation-or-the-criterion-is-insufficient)).
 What remains: rejecting outright (rather than pending) discards a case a
 human might have salvaged by supplying the missing quote.
+
+---
+
+## D11. The evidence-tier pattern stays local; not extracted into a shared package
+
+**Context.** The three-tier evidence pattern — hard-reject on no evidence,
+soft-downgrade-with-flag on partial, clean-pass on full — is genuinely
+present in both this repo and `surgical-fhir-pipeline`. A shared
+`evidence-gate` package was scoped to extract it.
+
+**Decision.** Not extracted. The primitive stays local to this repo.
+
+**Rationale.** Only this repo computes tier assignment — `validation.py`
+resolves citations at request time, strips non-resolving ones, and
+downgrades `met` to `insufficient`. `surgical-fhir-pipeline` asserts status
+as static data in a hardcoded table, with a test guarding against silent
+promotion; its promotion path is explicitly deferred roadmap work there.
+Extracting now would either ship dead code to `surgical-fhir-pipeline` or
+smuggle new feature work in as a refactor, violating behavior preservation.
+Applying the "both consumers must genuinely use it" rule strictly leaves
+~10 lines — a tier enum and a boolean reduction — not enough to justify a
+separately versioned package with coordinated CI across two repos that
+share no runtime interop.
+
+**Counter-argument.** The pattern is real, and a future Snowstorm
+terminology-server validation loop would make `surgical-fhir-pipeline` a
+genuine second consumer with executable promotion. Revisit then. There is
+also a modest cost to deferring: the shape is currently documented in prose
+rather than enforced by a shared type.
