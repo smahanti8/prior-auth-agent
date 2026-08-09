@@ -4,5 +4,7 @@ __pycache__/
 *.egg-info/
 data/review_queue/*.jsonl
 evals/results/*.json
+docs/audit_packet_[0-9]*.md
+docs/audit_packet.html
 .claude/
 .DS_Store
