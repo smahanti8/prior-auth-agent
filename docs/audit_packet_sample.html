@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prior-Auth Compliance Audit Packet</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       max-width: 980px; margin: 40px auto; padding: 0 24px;
+       color: #24292e; line-height: 1.6; }
+h1 { font-size: 1.8em; border-bottom: 2px solid #e1e4e8; padding-bottom: .3em; }
+h2 { font-size: 1.35em; border-bottom: 1px solid #e1e4e8; padding-bottom: .2em;
+     margin-top: 2em; }
+h3 { font-size: 1.1em; margin-top: 1.5em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: .9em; }
+th { background: #f6f8fa; text-align: left; padding: 8px 12px;
+     border: 1px solid #d0d7de; }
+td { padding: 6px 12px; border: 1px solid #d0d7de; vertical-align: top; }
+tr:nth-child(even) td { background: #f6f8fa; }
+code { background: #f0f2f5; padding: 2px 5px; border-radius: 3px;
+       font-family: 'SFMono-Regular', Consolas, monospace; font-size: .88em; }
+pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 4px;
+      padding: 12px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid #d0d7de; margin: 0; padding: 8px 16px;
+             color: #57606a; background: #f6f8fa; }
+hr { border: none; border-top: 1px solid #e1e4e8; margin: 24px 0; }
+strong { font-weight: 600; }
+em { font-style: italic; }
+.provenance { background: #fff8c5; border: 1px solid #d4a72c;
+              border-radius: 4px; padding: 10px 16px; margin-bottom: 1.5em; }
+</style>
+</head>
+<body>
+<h1>AI Prior-Authorization System — Compliance Audit Packet</h1>
+<p><strong>Generated:</strong> 2026-08-08T11:39:00+00:00 <strong>Git commit:</strong> <code>7f577f7</code> <strong>Model:</strong> <code>claude-opus-4-8</code> <strong>Eval run:</strong> <code>evals/results/run_20260802_172528.json</code> (2026-08-02T17:25:28.270472+00:00) <strong>Cost report:</strong> not available</p>
+<p>This packet is machine-generated from live system data. It does not require manual maintenance. To regenerate after any system change:</p>
+<pre><code>python -m prior_auth_agent.audit_packet</code></pre>
+<p>The packet describes the system at the Git SHA above. A different commit, a different model, or a new eval run produces a different packet. Do not use a packet whose SHA does not match the deployed system.</p>
+<hr>
+<h2>1. System Identity</h2>
+<table>
+<tr><th>Component</th><th>Value</th></tr>
+<tr><td>LLM model</td><td><code>claude-opus-4-8</code></td></tr>
+<tr><td>Confidence threshold</td><td>0.85</td></tr>
+<tr><td>Criteria Mapper prompt</td><td><code>700f2dd524ca1549</code><br>(SHA-256[:16] of SYSTEM string, commit <code>7f577f7</code>)</td></tr>
+<tr><td>Evidence Extractor prompt</td><td><code>479d79ee670e7b3f</code><br>(SHA-256[:16] of SYSTEM string, commit <code>7f577f7</code>)</td></tr>
+<tr><td>Determination prompt</td><td><code>40990d39c2435f5c</code><br>(SHA-256[:16] of SYSTEM string, commit <code>7f577f7</code>)</td></tr>
+</table>
+<p><em>Prompt hashes are computed from each node's <code>SYSTEM</code> constant at generation time. A changed prompt produces a different hash and this table changes on next regeneration.</em></p>
+<hr>
+<h2>2. Governance Invariants</h2>
+<table>
+<tr><th>Rule</th><th>Description</th><th>Decision(s)</th><th>Enforcing test</th><th>Status</th></tr>
+<tr><td>No AI denial</td><td>The AI cannot frame, recommend, or auto-finalize a denial. Permitted outputs are <code>approve</code> and <code>insufficient_evidence</code> only. A human makes any denial.</td><td>D9</td><td><code>tests/test_no_denial.py</code></td><td><strong>PASS</strong> (4/4)</td></tr>
+<tr><td>Deterministic autonomy gate</td><td>Auto-finalization is pure Python: confidence ≥ 0.85 AND decision = approve AND no required criterion is insufficient. No LLM call in the gate.</td><td>D3</td><td><code>tests/test_no_denial.py</code></td><td><strong>PASS</strong> (4/4)</td></tr>
+<tr><td>Bilateral citation gate (hard reject)</td><td>A criterion marked <code>met</code> must carry both a policy-side quote and a chart-side FHIR citation. Missing either triggers hard rejection before determination — not a soft HITL route, a hard discard.</td><td>D2 / D10</td><td><code>tests/test_citation_gate.py</code></td><td><strong>PASS</strong> (8/8)</td></tr>
+<tr><td>Citation existence check</td><td>FHIR citations are resolved against the submitted bundle post-LLM. Unresolvable citations are stripped; a criterion with no surviving citations is downgraded to <code>insufficient</code>.</td><td>D2 / D10</td><td><code>tests/test_citation_resolution.py</code></td><td><strong>PASS</strong> (6/6)</td></tr>
+<tr><td>Tamper-evident audit log</td><td>Every audit record carries SHA-256 <code>prev_hash</code> and <code>entry_hash</code>. Editing, deleting, or reordering any record breaks chain verification. Limitation documented: whole-file rewrite can rebuild the chain.</td><td>D7</td><td><code>tests/test_audit_log.py</code></td><td><strong>PASS</strong> (7/7)</td></tr>
+<tr><td>Append-only pending queue</td><td>Reviewer resolutions are appended as events; the queue is never rewritten in place. Chain is verified on every read — a tampered queue fails loudly rather than serving doctored cases.</td><td>D8</td><td><code>tests/test_audit_log.py</code></td><td><strong>PASS</strong> (7/7)</td></tr>
+</table>
+<p><em>A rule without a passing test is not a rule — it is a comment. Status is computed by running each test file at generation time.</em></p>
+<hr>
+<h2>3. Golden-Set Evaluation Scoreboard</h2>
+<p><strong>Eval run:</strong> <code>evals/results/run_20260802_172528.json</code><br> <strong>Run timestamp:</strong> 2026-08-02T17:25:28.270472+00:00<br> <strong>Eval git SHA:</strong> <code>5f71d70</code><br> <strong>Cases:</strong> 15 ran of 15 total<br> <strong>Ground truth:</strong> human-authored from policy documents — LLM never used to generate expected outcomes.</p>
+<table>
+<tr><th>Dimension</th><th>What it measures</th><th>Scoreable</th><th>Result</th></tr>
+<tr><td>S1 Determination accuracy</td><td>Pipeline decision matches expected (approve / insufficient_evidence / reject)</td><td>15</td><td>11/15</td></tr>
+<tr><td>S2 Routing accuracy</td><td>auto vs HITL routing matches expected for determination-stage cases</td><td>13</td><td>9/13</td></tr>
+<tr><td>S3 Criterion-level evidence accuracy</td><td>Each criterion matched to correct pipeline evidence with correct status and citations</td><td>12</td><td>11/12</td></tr>
+<tr><td>S4 Citation validity</td><td>Surviving citations in <code>met</code> evidence resolve against the submitted bundle</td><td>13</td><td><strong>13/13</strong></td></tr>
+</table>
+<p><strong>S2 HITL routing — precision and recall:</strong></p>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Cases expected HITL</td><td>8</td></tr>
+<tr><td>True positives (correctly sent to HITL)</td><td>7</td></tr>
+<tr><td>False positives (sent to HITL unnecessarily)</td><td>3</td></tr>
+<tr><td>False negatives (missed — sent to auto)</td><td>1</td></tr>
+<tr><td>Precision</td><td>70%</td></tr>
+<tr><td>Recall</td><td>88%</td></tr>
+</table>
+<p><strong>Key behavioral cases:</strong></p>
+<table>
+<tr><th>Case</th><th>Behavior</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th></tr>
+<tr><td><code>case_007</code></td><td>Strip-and-log: ghost citation absent from bundle stripped by existence check; criterion stays <code>met</code> on surviving citations</td><td><strong>FAIL</strong></td><td><strong>FAIL</strong></td><td>PASS</td><td>PASS</td></tr>
+<tr><td><code>case_009</code></td><td>Eligibility gate: <code>Coverage.status=cancelled</code> halts pipeline before any LLM call</td><td>PASS</td><td>skip</td><td>skip</td><td>skip</td></tr>
+<tr><td><code>case_011</code></td><td>All criteria insufficient: bundle has only Patient+Coverage, zero clinical resources</td><td>PASS</td><td>PASS</td><td>PASS</td><td>PASS</td></tr>
+<tr><td><code>case_014</code></td><td><code>not_met</code>: DiagnosticReport explicitly denies psychiatric clearance for surgery</td><td>PASS</td><td>PASS</td><td>PASS</td><td>PASS</td></tr>
+<tr><td><code>case_015</code></td><td><code>not_met</code>: Observation documents patient refused PT — C2 not satisfied</td><td>PASS</td><td>PASS</td><td>PASS</td><td>PASS</td></tr>
+</table>
+<hr>
+<h2>4. Citation-Gate Coverage</h2>
+<table>
+<tr><th>Metric</th><th>Count</th></tr>
+<tr><td>Total criteria evaluated across determination-stage cases</td><td>37</td></tr>
+<tr><td>Met criteria with bilateral citations (passed gate)</td><td>29</td></tr>
+<tr><td>Citations stripped by existence check</td><td>0</td></tr>
+<tr><td>Criteria downgraded to <code>insufficient</code> (no citations survived)</td><td>0</td></tr>
+<tr><td>Cases hard-rejected at citation gate (never reached determination)</td><td>0</td></tr>
+</table>
+<p><em>Derived from <code>scores.criterion_evidence.details[].strip_log_fired</code> and <code>scores.citation_validity.stripped_count</code> in the eval results JSON. <code>case_007</code> is the designed strip-and-log case; any other stripped citations represent unintended pipeline behavior.</em></p>
+<hr>
+<h2>5. Traceability: Policy Criteria → Tests</h2>
+<p><strong>Policy document:</strong> <code>data/policies/rotator_cuff_repair_29827.md</code><br> <strong>CPT code:</strong> 29827</p>
+<table>
+<tr><th>ID</th><th>Criterion</th><th>Required</th><th>Met in</th><th>Insufficient in</th><th>Not-met in</th><th>Covering test patterns</th><th>Status</th></tr>
+<tr><td>C1</td><td>MRI-confirmed full-thickness rotator cuff tear</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code></td><td><strong>PASS</strong> (288/288)</td></tr>
+<tr><td>C2</td><td>Failure of ≥3 months conservative management including PT</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code><br><code>test_case_007_ghost_citation_absent_from_bundle</code></td><td><strong>PASS</strong> (288/288)</td></tr>
+<tr><td>C3</td><td>Documented functional impairment affecting ADLs</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code></td><td><strong>PASS</strong> (288/288)</td></tr>
+</table>
+<p><em>The criterion→test mapping in this table is declared in the generator config (~10 lines). It is the only section requiring human update when criteria or test names change. CPT 29827 currently has exactly one golden case (<code>case_007</code>), which exercises <code>met</code> for all three criteria — there is no <code>insufficient</code> or <code>not_met</code> example for this policy in the golden set yet, hence the empty columns above.</em></p>
+<hr>
+<h2>6. Cost per Determination</h2>
+<blockquote>
+<p><strong>[LIVE RUN REQUIRED]</strong> No cost report found.<br></p>
+<p>Run: <code>python -m evals.run --live &amp;&amp; python -m evals.cost_report</code></p>
+</blockquote>
+<hr>
+<h2>7. Limitations</h2>
+<h3>From the evaluation methodology (EVALS.md)</h3>
+<p><strong>15 synthetic cases is a demonstration of method, not statistical validation.</strong></p>
+<p>This suite shows that the evaluation <em>harness</em> works: that it can catch regressions, that it scores the right dimensions, and that CI can run it without an API key. It does not validate the pipeline's clinical correctness, and no one should cite a pass rate on 15 hand-authored cases as evidence of production readiness.</p>
+<p>Specific limitations:</p>
+<ol>
+<li><strong>Sample size</strong>: 15 cases cannot characterise the distribution of real</li>
+</ul>
+<p><br> prior-auth requests. A pipeline that passes all 15 can still fail on the <br> first real case.</p>
+<ol>
+<li><strong>Synthetic data only</strong>: Every bundle was authored by the same person who</li>
+</ul>
+<p><br> wrote the policy. Real charts have noise, ambiguity, conflicting evidence, <br> and edge cases that synthetic data systematically under-represents.</p>
+<ol>
+<li><strong>Multi-policy retrieval is now exercised, and it found a real bug</strong>: the</li>
+</ul>
+<p><br> 15 cases span 5 CPT codes/policies. A live eval run surfaced a genuine <br> RAG retrieval issue — see README's Known Limitations. Not yet fixed.</p>
+<ol>
+<li><strong>S3 matching is heuristic</strong>: Criterion evidence is matched by citation</li>
+</ul>
+<p><br> overlap, not semantic equivalence. A pipeline could pass S3 while <br> extracting evidence from the wrong clinical context, as long as the right <br> resource ID appears in the citations.</p>
+<ol>
+<li><strong>S4 is a post-hoc check</strong>: Citation validity is verified against the</li>
+</ul>
+<p><br> bundle after the fact. It does not test whether the model's reasoning <br> was sound — only that the citations it produced correspond to real <br> resources.</p>
+<ol>
+<li><strong>No adversarial cases</strong>: There are no cases designed to elicit prompt</li>
+</ul>
+<p><br> injection, policy bypass, or reasoning shortcuts. The suite tests the <br> happy path and a few error paths; it does not test the security surface.</p>
+<p>What this suite is good for: <strong>catching regressions</strong>. If a system prompt change causes a previously-passing case to fail, the harness will detect it in CI. That is its intended purpose. It is not a substitute for clinical validation, red-teaming, or production monitoring.</p>
+<h3>Operational limitations (from README)</h3>
+<ul>
+<li><strong>LLM node coverage comes from a 15case golden eval suite, not exhaustive unit tests.</strong> Cassettebased replay (<code>evals/run.py</code>) lets criteria mapping, evidence extraction, and determination run in CI without an API key — see [EVALS.md](EVALS.md) for what that suite does and doesn't validate.</li>
+<li><strong>Eligibility is a stub.</strong> It reads <code>Coverage.status</code> from the bundle and nothing more; it does not perform a real 270/271 eligibility transaction or call a payer coverage API.</li>
+<li><strong>The audit log is tamperevident, not tamperproof.</strong> The hash chain detects edits, deletions, and reordering, but an attacker who can rewrite the whole file can rebuild the chain. Anchoring the head hash externally is not yet implemented.</li>
+<li><strong>RAG retrieval can select the wrong policy document.</strong> The query's only reliably distinguishing feature between similar policies is the numeric CPT code; the local embedding model (allMiniLML6v2) doesn't always weight that distinctly enough against nearidentical boilerplate shared across policy documents. Confirmed via a live eval run: 3 of 5 test CPTs retrieved a different policy's chunks as the top match. Not yet fixed.</li>
+<li><strong>Empty criteria can vacuously autoapprove.</strong> When retrieval returns zero applicable policy chunks (e.g., no policy exists for the requested CPT), the determination step can reason "no required criteria to evaluate" as trivially satisfied and approve, rather than treating the absence of any policy knowledge as insufficient. Confirmed via <code>case_008</code>'s live eval run. Not yet fixed. <strong>Fixed 2026-08-02:</strong> the policy chunker in <code>ingest.py</code> previously crawled forward one character at a time whenever a paragraph break fell within the overlap window — up to ~200 near-duplicate chunks from a ~1KB document. Not just wasteful: once more than one policy existed in the same ChromaDB collection, the resulting dense cluster could dominate retrieval for every query, regardless of the actual CPT. See <code>tests/test_ingest.py</code>.</li>
+</ul>
+<hr>
+<h2>8. Generation Provenance</h2>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Generated at</td><td>2026-08-08T11:39:00+00:00</td></tr>
+<tr><td>Git SHA</td><td><code>7f577f7</code></td></tr>
+<tr><td>Generator</td><td><code>python -m prior_auth_agent.audit_packet</code></td></tr>
+<tr><td>Eval results</td><td><code>evals/results/run_20260802_172528.json</code></td></tr>
+<tr><td>Cost report</td><td>not available</td></tr>
+<tr><td>Test run at generation</td><td><strong>PASS</strong> (288/288)</td></tr>
+</table>
+<p><em>Regenerate after any model change, prompt change, or new eval run. Do not use a packet whose SHA does not match the deployed system.</em></p>
+</body>
+</html>
