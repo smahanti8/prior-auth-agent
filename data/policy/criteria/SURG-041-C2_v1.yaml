@@ -1,0 +1,40 @@
+criterion_id: SURG-041-C2
+version: "1.0"
+policy_effective_date: "2026-01-01"
+criterion_text: >-
+  Failure of at least 3 months of conservative management, which must include
+  physician-supervised physical therapy. Documentation must include treating
+  provider, treatment dates, and clinical outcome demonstrating lack of
+  adequate improvement.
+policy_ref:
+  file: rotator_cuff_repair_29827.md
+  section: "Prior Authorization Criteria"
+  text_fragment: "Failure of at least 3 months of conservative management, which must include"
+required: true
+predicate:
+  all_of:
+    - resource_exists:
+        resource_type: Procedure
+    - finding_present:
+        resource_type: Procedure
+        affirmative_terms:
+          - "physical therapy"
+          - "physiotherapy"
+        case_insensitive: true
+    - minimum_duration_months:
+        resource_type: Procedure
+        start_path: performedPeriod.start
+        end_path: performedPeriod.end
+        min_months: 3
+    - field_documented:
+        resource_type: Procedure
+        field_path: outcome
+notes: >-
+  Duration is evaluated as calendar months (Oct 1 + 3 months = Jan 1), not
+  a fixed 90-day count. The acute-traumatic exception from the policy
+  Exclusions section ("less than 3 months unless the tear is acute traumatic
+  in nature") is not evaluated by this predicate — sub-threshold duration
+  evaluates as not_met regardless of injury mechanism, deferring the
+  exception judgment to the human reviewer. This is deliberate: the
+  exception requires clinical interpretation the predicate cannot provide.
+  See DECISIONS.md D12.

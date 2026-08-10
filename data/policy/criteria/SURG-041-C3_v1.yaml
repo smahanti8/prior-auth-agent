@@ -1,0 +1,35 @@
+criterion_id: SURG-041-C3
+version: "1.0"
+policy_effective_date: "2026-01-01"
+criterion_text: >-
+  Documented functional impairment affecting activities of daily living, as
+  evidenced by a formal functional assessment, shoulder disability
+  questionnaire, or equivalent standardized instrument with scoring.
+policy_ref:
+  file: rotator_cuff_repair_29827.md
+  section: "Prior Authorization Criteria"
+  text_fragment: "equivalent standardized instrument with scoring"
+required: true
+predicate:
+  any_of:
+    - all_of:
+        - resource_exists:
+            resource_type: QuestionnaireResponse
+        - field_documented:
+            resource_type: QuestionnaireResponse
+            field_path: item
+    - all_of:
+        - resource_exists:
+            resource_type: Observation
+        - field_documented:
+            resource_type: Observation
+            field_path: valueQuantity
+notes: >-
+  The predicate verifies that a formal assessment with scoring exists — it
+  does not interpret the score value or apply a clinical threshold. A DASH
+  score of 5 (minimal disability) and 80 (severe) both evaluate as met.
+  Score interpretation is left to the evidence extractor and human reviewer.
+  There is no not_met predicate path: clinical evidence of normal function
+  evaluates as insufficient at the predicate level, not not_met, following
+  the rule that not_met requires an affirmative contradiction in the data
+  (DECISIONS.md D12).

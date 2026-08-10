@@ -1,0 +1,33 @@
+criterion_id: SURG-041-C1
+version: "1.0"
+policy_effective_date: "2026-01-01"
+criterion_text: >-
+  Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram of the
+  affected shoulder.
+policy_ref:
+  file: rotator_cuff_repair_29827.md
+  section: "Prior Authorization Criteria"
+  text_fragment: "Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram"
+required: true
+predicate:
+  all_of:
+    - resource_exists:
+        resource_type: DiagnosticReport
+    - finding_present:
+        resource_type: DiagnosticReport
+        affirmative_terms:
+          - "full-thickness"
+          - "full thickness"
+          - "complete tear"
+        contradicting_terms:
+          - "partial-thickness"
+          - "partial thickness"
+          - "partial tear"
+        case_insensitive: true
+notes: >-
+  The predicate checks display text for full-thickness vs partial-thickness
+  terms. It cannot distinguish MRI from MR arthrogram by modality — both
+  satisfy C1 if the full-thickness finding appears in the display text.
+  The partial-thickness contradicting_terms are sourced from the policy
+  Exclusions section ("Partial-thickness tears not meeting full-thickness
+  criteria on imaging"), not the criterion text itself.
