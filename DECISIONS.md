@@ -324,3 +324,47 @@ terminology-server validation loop would make `surgical-fhir-pipeline` a
 genuine second consumer with executable promotion. Revisit then. There is
 also a modest cost to deferring: the shape is currently documented in prose
 rather than enforced by a shared type.
+
+---
+
+## D12. Policy-as-code sits beside RAG-extracted criteria, not instead of it
+
+**Context.** `policy_rag.py` retrieves policy text and an LLM maps it to
+criteria at request time — flexible, covers any ingested policy, but not
+deterministic or auditable without reading the model's reasoning. The
+`policy/` package (`schema.py`, `evaluator.py`, `registry.py`) encodes 3
+criteria for CPT 29827 as versioned, declarative predicates evaluated by
+ordinary code — fully deterministic and auditable, but requires
+hand-encoding each criterion and cannot cover a policy that hasn't been
+encoded.
+
+**Decision.** Both stay. RAG-extracted criteria remain the default path for
+any policy without a hand-encoded predicate. The predicate layer is
+additive — a small number of high-value criteria get versioned, testable,
+auditable encodings; everything else still goes through RAG. Neither
+replaces the other.
+
+**Rationale.** The two approaches trade off exactly the dimensions that
+matter differently: coverage vs. auditability. Forcing a choice between them
+would either (a) require hand-encoding every policy this pipeline might ever
+see — not viable, or (b) give up deterministic auditability entirely — the
+thing the predicate layer exists to demonstrate. Depth on a few real
+criteria proves the method works; it doesn't need to replace the
+general-purpose path to be valuable.
+
+A criterion is `not_met` only when data affirmatively contradicts what's
+required (e.g. an explicit "partial-thickness" finding contradicting a
+full-thickness requirement); it's `insufficient` when the chart is silent,
+a value can't be interpreted at the predicate level, or a documented
+exception (like C2's acute-traumatic carve-out) requires clinical judgment
+the predicate doesn't attempt. This mirrors [D2](#d2-every-clinical-claim-carries-a-fhir-citation-or-the-criterion-is-insufficient)'s
+citation-or-insufficient rule for the RAG path — the same epistemic
+discipline, applied to a different evaluation mechanism.
+
+**Counter-argument.** Two parallel mechanisms for the same job is real
+complexity — a reviewer now has to know which criteria are predicate-backed
+and which are LLM-extracted, and the two could theoretically disagree on the
+same case. Only 3 criteria (one policy) are encoded today; whether this is
+worth maintaining long-term depends on whether more policies get
+hand-encoded, or this stays a demonstration of method rather than a growing
+subsystem.
