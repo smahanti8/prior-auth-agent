@@ -1,0 +1,44 @@
+criterion_id: SURG-041-C1
+version: "1.0"
+cases:
+  - id: tc_001
+    description: "DiagnosticReport with full-thickness finding in display"
+    bundle_fragments:
+      DiagnosticReport:
+        - id: "imaging-1"
+          status: "final"
+          code:
+            coding:
+              - display: "Full-thickness rotator cuff tear"
+    expected: met
+
+  - id: tc_002
+    description: >-
+      DiagnosticReport with partial-thickness finding — policy Exclusions
+      section affirmatively excludes partial-thickness tears
+    bundle_fragments:
+      DiagnosticReport:
+        - id: "imaging-2"
+          status: "final"
+          code:
+            coding:
+              - display: "Partial-thickness rotator cuff tear"
+    expected: not_met
+
+  - id: tc_003
+    description: "No DiagnosticReport in bundle — chart silent on imaging"
+    bundle_fragments: {}
+    expected: insufficient
+
+  - id: tc_004
+    description: >-
+      DiagnosticReport present but finding unqualified — neither full nor
+      partial thickness specified; evaluator cannot determine grade
+    bundle_fragments:
+      DiagnosticReport:
+        - id: "imaging-3"
+          status: "final"
+          code:
+            coding:
+              - display: "Rotator cuff tear"
+    expected: insufficient

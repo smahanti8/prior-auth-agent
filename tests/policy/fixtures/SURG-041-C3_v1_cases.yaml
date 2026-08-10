@@ -1,0 +1,43 @@
+criterion_id: SURG-041-C3
+version: "1.0"
+cases:
+  - id: tc_001
+    description: "QuestionnaireResponse with scored items (DASH questionnaire)"
+    bundle_fragments:
+      QuestionnaireResponse:
+        - id: "qr-1"
+          questionnaire: "http://example.org/DASH"
+          item:
+            - linkId: "1"
+              text: "Rate difficulty with usual work"
+              answer:
+                - valueInteger: 4
+    expected: met
+
+  - id: tc_002
+    description: >-
+      Observation with numeric score — policy allows "equivalent standardized
+      instrument with scoring" (verbatim from source)
+    bundle_fragments:
+      Observation:
+        - id: "obs-1"
+          code:
+            coding:
+              - display: "DASH questionnaire score"
+          valueQuantity:
+            value: 65.0
+            unit: "score"
+    expected: met
+
+  - id: tc_003
+    description: "No formal assessment resource in bundle — chart silent"
+    bundle_fragments: {}
+    expected: insufficient
+
+  - id: tc_004
+    description: "QuestionnaireResponse present but no item values — scoring not documented"
+    bundle_fragments:
+      QuestionnaireResponse:
+        - id: "qr-2"
+          questionnaire: "http://example.org/DASH"
+    expected: insufficient

@@ -1,0 +1,123 @@
+criterion_id: SURG-041-C2
+version: "1.0"
+cases:
+  - id: tc_001
+    description: "PT >3 months with outcome note — clearly met"
+    bundle_fragments:
+      Procedure:
+        - id: "proc-1"
+          code:
+            coding:
+              - display: "Physical therapy"
+          performedPeriod:
+            start: "2025-10-01"
+            end: "2026-01-15"
+          outcome:
+            coding:
+              - display: "Lack of adequate improvement after physical therapy"
+    expected: met
+
+  - id: tc_002
+    description: "PT ~6 weeks with outcome note — sub-threshold duration"
+    bundle_fragments:
+      Procedure:
+        - id: "proc-2"
+          code:
+            coding:
+              - display: "Physical therapy"
+          performedPeriod:
+            start: "2025-11-01"
+            end: "2025-12-15"
+          outcome:
+            coding:
+              - display: "Patient reports minimal improvement"
+    expected: not_met
+
+  - id: tc_003
+    description: "PT >3 months but no outcome note — documentation incomplete"
+    bundle_fragments:
+      Procedure:
+        - id: "proc-3"
+          code:
+            coding:
+              - display: "Physical therapy"
+          performedPeriod:
+            start: "2025-10-01"
+            end: "2026-01-15"
+    expected: insufficient
+
+  - id: tc_004
+    description: "No Procedure resource in bundle — chart silent on PT"
+    bundle_fragments: {}
+    expected: insufficient
+
+  - id: tc_005
+    description: "PT Procedure with start date only — end date missing"
+    bundle_fragments:
+      Procedure:
+        - id: "proc-4"
+          code:
+            coding:
+              - display: "Physical therapy"
+          performedPeriod:
+            start: "2025-10-01"
+    expected: insufficient
+
+  - id: tc_006
+    description: "PT exactly at 3-month boundary: Oct 1 to Jan 1"
+    bundle_fragments:
+      Procedure:
+        - id: "proc-6"
+          code:
+            coding:
+              - display: "Physical therapy"
+          performedPeriod:
+            start: "2025-10-01"
+            end: "2026-01-01"
+          outcome:
+            coding:
+              - display: "No significant improvement"
+    expected: met
+
+  - id: tc_007
+    description: "PT one day before 3-month boundary: Oct 1 to Dec 31"
+    bundle_fragments:
+      Procedure:
+        - id: "proc-7"
+          code:
+            coding:
+              - display: "Physical therapy"
+          performedPeriod:
+            start: "2025-10-01"
+            end: "2025-12-31"
+          outcome:
+            coding:
+              - display: "No significant improvement"
+    expected: not_met
+
+  - id: tc_008
+    description: >-
+      Acute traumatic context with sub-threshold PT duration — evaluator
+      returns not_met, deliberately deferring the acute-traumatic exception
+      (policy Exclusions: "less than 3 months unless the tear is acute
+      traumatic in nature") to the human reviewer
+    bundle_fragments:
+      Procedure:
+        - id: "proc-8"
+          code:
+            coding:
+              - display: "Physical therapy"
+          performedPeriod:
+            start: "2025-11-01"
+            end: "2025-12-01"
+          outcome:
+            coding:
+              - display: "Post-traumatic rehab, PT initiated after acute injury"
+      Condition:
+        - id: "cond-1"
+          code:
+            coding:
+              - display: "Acute traumatic rotator cuff tear"
+          note:
+            - text: "Acute traumatic mechanism, fell from ladder"
+    expected: not_met
