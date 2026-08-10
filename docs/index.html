@@ -202,6 +202,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:28px 0}
 .mismatch-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:var(--purple)}
 .mismatch-body{font-size:12px;color:var(--text2);line-height:1.6}
 
+/* VACUOUS-TRUTH WARNING (known limitation) */
+.vacuous-box{border-radius:10px;padding:14px 16px;margin:0 0 18px;background:var(--orange-dim);border:1px solid var(--orange)}
+.vacuous-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:var(--orange)}
+.vacuous-body{font-size:12px;color:var(--text2);line-height:1.6}
+.vacuous-body strong{color:var(--text)}
+.badge-warn{font-size:10.5px;font-weight:700;color:var(--orange);background:var(--orange-dim);padding:3px 9px;border-radius:999px;display:inline-block}
+.empty-crit-note{font-size:12px;color:var(--text3);font-style:italic;padding:8px 0 14px}
+
 /* REVIEWER */
 .rev-intro{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:22px;border-left:3px solid var(--accent);padding-left:14px}
 .rev-preview{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
@@ -525,7 +533,7 @@ footer a:hover{text-decoration:underline}
     </div>
     <div class="sim-btn" onclick="selectCase('case_008',this)">
       <div class="sim-cpt">CPT 70553</div>
-      <div class="sim-name">Brain MRI — Wrong Policy Retrieved</div>
+      <div class="sim-name">Brain MRI — Vacuous Approval</div>
     </div>
     <div class="sim-btn" onclick="selectCase('case_009',this)">
       <div class="sim-cpt">CPT 27447</div>
@@ -599,6 +607,8 @@ footer a:hover{text-decoration:underline}
   <p>All patient data shown is synthetic and fictional. No real health information was used.</p>
   <div>
     <a href="https://github.com/smahanti8/prior-auth-agent/blob/main/EVALS.md" target="_blank" rel="noopener">Eval suite methodology</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/smahanti8/prior-auth-agent/blob/main/docs/audit_packet_sample.md" target="_blank" rel="noopener">Sample compliance audit packet</a>
     &nbsp;·&nbsp;
     <a href="https://github.com/smahanti8/prior-auth-agent" target="_blank" rel="noopener">View source on GitHub →</a>
   </div>
@@ -750,32 +760,23 @@ var CASES = {
   },
   case_008: {
     goldenFile: 'case_008_brain_mri_wrong_policy.yaml',
-    title: 'Brain MRI — Wrong Policy Retrieved', cpt: 'CPT 70553',
+    title: 'Brain MRI — Empty Retrieval, Vacuous Approval', cpt: 'CPT 70553',
     patient: '38F · Chronic migraine with new prolonged aura · Neurological exam normal',
     stage: 'determination',
-    badgeText: '✓ Wrong-policy retrieval correctly caught',
+    badgeText: '⚠ Known limitation — README #5',
+    badgeWarn: true,
     policyMismatch: {
-      note: 'CPT 70553 (brain MRI) has no policy document in this deployment\'s corpus. RAG retrieves the closest match by semantic similarity — the lumbar-spine MRI policy — because both are "MRI" procedures. The criteria mapped below are lumbar-specific and illustrate what the pipeline actually produces under this mismatch: none of them are answerable from brain MRI evidence, because they are the wrong criteria for this request.'
+      note: 'CPT 70553 (brain MRI) has no policy document in this deployment\'s corpus. Before the chunker fix (see README Known Limitations #4, now fixed), retrieval used to grab an unrelated policy\'s content by mistake. Today it correctly returns zero chunks instead — there is genuinely nothing to map. That correctness exposed a second, deeper problem: what should the pipeline do with zero criteria?'
     },
-    criteria: [
-      { id:'c1', text:'Low back pain symptoms present for ≥ 6 weeks (lumbar criterion — mismatched to a brain MRI request)', required:true, status:'insufficient',
-        summary:'This criterion comes from the mismatched lumbar-spine policy. The chart documents chronic migraine with aura, not low back pain — the bundle contains no evidence relevant to this criterion at all.',
-        policy_quote:'Patient must have documented low back pain symptoms for a minimum of 6 consecutive weeks.',
-        citations:[] },
-      { id:'c2', text:'Failure of conservative management, including physician-supervised PT (lumbar criterion — mismatched)', required:true, status:'insufficient',
-        summary:'Also mismatched from the lumbar policy. No physical therapy or low-back conservative-management record exists in this migraine-focused chart.',
-        policy_quote:'Patient must have documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks.',
-        citations:[] },
-      { id:'c3', text:'Absence of red-flag findings (lumbar criterion — mismatched)', required:true, status:'insufficient',
-        summary:'The neurological exam is normal, but it was performed to evaluate migraine, not lumbar red-flag findings — it does not map onto this criterion\'s intent.',
-        policy_quote:'The ordering clinician must document the absence of all red-flag findings: new or progressive neurological deficit, bowel or bladder dysfunction, saddle anesthesia, fever of unknown origin, unexplained significant weight loss.',
-        citations:[] }
-    ],
-    determination:{ decision:'insufficient_evidence', confidence:0.19,
-      rationale:'Every mapped criterion is insufficient — not because the chart is thin, but because the criteria themselves are wrong for this request. Retrieval grabbed a superficially similar policy (both are "MRI"), and no clinical evidence in a migraine chart can satisfy lumbar-spine criteria. Very low confidence reflects the pipeline correctly detecting that nothing here fits.',
-      gaps:['No CPT 70553 (brain MRI) policy exists in the corpus. This case cannot be correctly evaluated until the correct policy document is ingested — resubmitting more chart data will not fix a wrong-policy retrieval.'] },
-    route:'hitl', routeReason:'Every required criterion is insufficient and confidence is far below threshold. Per D3, this forces human review — a person can recognize the mismatch immediately, which the current pipeline has no explicit check for.',
-    time:'1m 41s'
+    vacuousApproval: {
+      note: 'With no criteria to evaluate, the determination model reasoned by <strong>vacuous truth</strong>: "no required criteria to evaluate" → "no criterion is unmet" → approve. This is the model\'s actual output, unedited: <em>"The criteria set for CPT 70553 is empty, so there are no required criteria to evaluate. With no required criterion left unresolved (vacuously satisfied)... all required criteria are considered \'met\' by absence of any conditions to satisfy."</em> A request for a procedure the system has zero policy knowledge of should route to a human as insufficient information — not be reasoned into an approval because there was nothing to check against. Confirmed via this exact live run; tracked as README Known Limitations item 5, not yet fixed.'
+    },
+    criteria: [],
+    determination:{ decision:'approve', confidence:0.5,
+      rationale:'"The criteria set for CPT 70553 is empty, so there are no required criteria to evaluate. With no required criterion left unresolved (vacuously satisfied), and eligibility confirmed as active with payer Acme Health Plan, there is no unmet requirement. Accordingly, all required criteria are considered \'met\' by absence of any conditions to satisfy, and no documentation gaps exist." — the model\'s actual rationale, reproduced verbatim as the finding itself.',
+      gaps:[] },
+    route:'hitl', routeReason:'Approve decision at 50% confidence — below the 85% auto-approval threshold. This is the safety net that catches this case: low confidence routes it to a human, not because the pipeline recognized the reasoning was flawed. A different, more confident version of the same mistake would be more dangerous.',
+    time:'58s'
   },
   case_009: {
     goldenFile: 'case_009_lapsed_coverage.yaml',
@@ -865,7 +866,8 @@ function evalBadgeHtml(c) {
   var n = (c.criteria||[]).length;
   var matchBadge;
   if (c.badgeText) {
-    matchBadge = '<span class="badge-verify">'+c.badgeText+'</span>';
+    var badgeCls = c.badgeWarn ? 'badge-warn' : 'badge-verify';
+    matchBadge = '<span class="'+badgeCls+'">'+c.badgeText+'</span>';
   } else if (c.stage === 'intake' || c.stage === 'eligibility') {
     matchBadge = '<span class="badge-verify">✓ Correctly rejected — 0 LLM calls</span>';
   } else {
@@ -903,43 +905,52 @@ function renderResult(c) {
     ? '<div class="mismatch-box"><div class="mismatch-lbl">⚠ Policy Mismatch Detected</div><div class="mismatch-body">'+c.policyMismatch.note+'</div></div>'
     : '';
 
+  var vacuousHtml = c.vacuousApproval
+    ? '<div class="vacuous-box"><div class="vacuous-lbl">⚠ Known Limitation — Vacuous-Truth Reasoning</div><div class="vacuous-body">'+c.vacuousApproval.note+'</div></div>'
+    : '';
+
   var isApprove = c.determination.decision === 'approve';
   var pct = Math.round(c.determination.confidence * 100);
   var confCls = pct>=80?'high':pct>=55?'mid':'low';
 
-  var crits = c.criteria.map(function(cr,i){
-    var origNote = (cr.originalStatus && cr.originalStatus !== cr.status)
-      ? '<span class="orig-note">model initially said '+cr.originalStatus.toUpperCase()+' → downgraded</span>'
-      : '';
-    return '<div class="crit-card">'
-      +'<div class="crit-head" onclick="toggleCrit('+i+')">'
-      +sIcon(cr.status)
-      +'<span class="c-text">'+cr.text+'</span>'
-      +'<span class="c-req '+(cr.required?'r':'o')+'">'+(cr.required?'Required':'Optional')+'</span>'
-      +sLabel(cr.status)
-      +origNote
-      +'<span class="c-chevron" id="chev-'+i+'">▾</span>'
-      +'</div>'
-      +'<div class="crit-body" id="cbody-'+i+'">'
-      +'<div class="cd"><div class="cd-l">Evidence summary</div><div class="cd-v">'+cr.summary+'</div></div>'
-      +'<div class="cd"><div class="cd-l">Policy quote</div><div class="cd-v italic">"'+cr.policy_quote+'"</div></div>'
-      +'<div class="cd"><div class="cd-l">FHIR Citation</div><div class="cd-v">'+citeTagsHtml(cr)+'</div></div>'
-      +'</div></div>';
-  }).join('');
+  var critSectionHtml = (c.criteria && c.criteria.length)
+    ? '<div class="crit-section-l">Criteria assessment</div>' + c.criteria.map(function(cr,i){
+        var origNote = (cr.originalStatus && cr.originalStatus !== cr.status)
+          ? '<span class="orig-note">model initially said '+cr.originalStatus.toUpperCase()+' → downgraded</span>'
+          : '';
+        return '<div class="crit-card">'
+          +'<div class="crit-head" onclick="toggleCrit('+i+')">'
+          +sIcon(cr.status)
+          +'<span class="c-text">'+cr.text+'</span>'
+          +'<span class="c-req '+(cr.required?'r':'o')+'">'+(cr.required?'Required':'Optional')+'</span>'
+          +sLabel(cr.status)
+          +origNote
+          +'<span class="c-chevron" id="chev-'+i+'">▾</span>'
+          +'</div>'
+          +'<div class="crit-body" id="cbody-'+i+'">'
+          +'<div class="cd"><div class="cd-l">Evidence summary</div><div class="cd-v">'+cr.summary+'</div></div>'
+          +'<div class="cd"><div class="cd-l">Policy quote</div><div class="cd-v italic">"'+cr.policy_quote+'"</div></div>'
+          +'<div class="cd"><div class="cd-l">FHIR Citation</div><div class="cd-v">'+citeTagsHtml(cr)+'</div></div>'
+          +'</div></div>';
+      }).join('')
+    : '<div class="empty-crit-note">No criteria were mapped for this request — zero policy chunks were retrieved, so criteria_mapper had nothing to map. See the note above.</div>';
 
   var gapsHtml = c.determination.gaps.length
     ? '<ul class="gap-list">'+c.determination.gaps.map(function(g){ return '<li>'+g+'</li>'; }).join('')+'</ul>'
     : '';
 
-  var decColor = isApprove ? 'var(--green)' : 'var(--orange)';
-  var decText = isApprove ? '✓ Approved' : '⚠ Insufficient Evidence';
+  var decColor = c.vacuousApproval ? 'var(--orange)' : (isApprove ? 'var(--green)' : 'var(--orange)');
+  var decText = c.vacuousApproval
+    ? '⚠ Approved (flawed reasoning — see warning above)'
+    : (isApprove ? '✓ Approved' : '⚠ Insufficient Evidence');
 
+  var detBoxCls = c.vacuousApproval ? 'insufficient' : (isApprove ? 'approve' : 'insufficient');
   var html = headerHtml
     +mismatchHtml
-    +'<div class="crit-section-l">Criteria assessment</div>'
-    +crits
-    +'<div class="det-box '+(isApprove?'approve':'insufficient')+'">'
-    +'<div class="det-lbl '+(isApprove?'approve':'insufficient')+'">AI Determination</div>'
+    +vacuousHtml
+    +critSectionHtml
+    +'<div class="det-box '+detBoxCls+'">'
+    +'<div class="det-lbl '+detBoxCls+'">AI Determination</div>'
     +'<div class="det-dec" style="color:'+decColor+'">'+decText+'</div>'
     +'<div class="det-rat">'+c.determination.rationale+'</div>'
     +gapsHtml
