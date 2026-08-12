@@ -368,3 +368,71 @@ same case. Only 3 criteria (one policy) are encoded today; whether this is
 worth maintaining long-term depends on whether more policies get
 hand-encoded, or this stays a demonstration of method rather than a growing
 subsystem.
+
+
+---
+
+## D13. Encoded criteria are the authoritative set; RAG-to-ID mapping is a divergence signal (extends D12)
+
+> **Extends [D12](#d12-policy-as-code-sits-beside-rag-extracted-criteria-not-instead-of-it).**
+> D12 established the encoding layer and conformance tests. D13 wires the
+> encoded criteria into the criteria mapper so they govern the pipeline on
+> every run — not just in CI.
+
+**Context.** D12 encoded three criteria for CPT 29827, but the criteria mapper
+still extracted its criteria list purely from RAG-retrieved text. The encoded
+layer existed in CI but had no effect at inference time. Two gaps remained:
+(1) nothing guaranteed the pipeline evaluated the encoded criteria rather than
+whatever the LLM extracted from the retrieved text; (2) the version of each
+criterion used in a determination was not recorded, making future audit
+reproductions ambiguous.
+
+**Decision.** When encoded criteria exist for the requested CPT code
+(`registry.load_by_cpt`), the criteria mapper:
+
+1. Uses the encoded criteria as the **authoritative list** — the pipeline
+   evaluates exactly the criteria in `data/policy/criteria/`, in the versions
+   active on the determination date.
+2. Asks the LLM to **map** each criterion it finds in the retrieved policy text
+   to an encoded ID or null — a divergence check, not a criteria-extraction task.
+3. Computes **divergence deterministically** (pure set comparison on IDs):
+   - `missing`: encoded ID not claimed by the LLM
+   - `unmatched`: LLM criterion with no encoded ID (null or invalid)
+   - `duplicate_mappings`: same ID claimed twice
+4. Records `criteria_versions` and `criteria_divergence` in the audit log entry.
+
+For procedures without encoded criteria, behavior is unchanged (RAG extraction
+only, no versions or divergence fields).
+
+**The divergence signal is observational, not blocking.** A `missing` entry
+means the LLM did not surface a criterion that the policy document should
+contain — worth reviewing, but the pipeline still evaluates the encoded set.
+An `unmatched` entry may indicate a policy sub-criterion that is not yet
+encoded. These signals accumulate in the audit log and inform future encoding
+decisions; they do not gate the determination.
+
+**Why ID-based matching, not word-overlap?** Clinical criteria share vocabulary
+while describing opposite conditions ("full-thickness tear" vs. "partial-thickness
+tear not meeting full-thickness criteria"). Bag-of-words or embedding similarity
+over criterion text is noise-dominated. The LLM maps to an ID or null — a
+bounded classification task where the valid label set is specified in the prompt
+— which reduces the mapping problem to a well-formed single-select.
+
+**Duplicate ID handling.** If the LLM assigns the same encoded ID to two
+extracted criteria, neither is authoritative. Both texts are recorded under
+`duplicate_mappings`. This typically indicates the policy document has two
+sub-clauses for one criterion that the encoding merged — a signal to review
+whether the criterion needs to be split.
+
+**Predicate hint.** Before any LLM evidence-extraction call, the predicate
+evaluator (D12) runs against the submitted FHIR bundle. Its result is attached
+to each criterion as `predicate_hint` — a directive the evidence extractor sees
+as part of the criterion data. This preserves the D4 ordering: deterministic
+evaluation (predicate) before probabilistic interpretation (evidence extraction).
+
+**Counter-argument.** The divergence check adds a round-trip LLM call that
+produces a signal no current node acts on. The value is prospective: divergence
+accumulates in the audit log, and a persistently `missing` criterion is evidence
+that either the policy document changed, the RAG retrieval is poor for that
+criterion, or the encoding is wrong. The call replaces the original extraction
+call — it is not an additional call; the schema changes but the cost is the same.
