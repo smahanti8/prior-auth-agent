@@ -5,7 +5,6 @@ Intake -> Eligibility -> Policy RAG -> Criteria Mapper -> Evidence Extractor
                                     --(high)-> Auto decision
 """
 
-
 from langgraph.graph import END, StateGraph
 
 from .audit_log import append_chained
@@ -106,12 +105,14 @@ def run(bundle_path: str, cpt_code: str) -> PriorAuthState:
     node_tel = telemetry.drain()
     cost_total = sum(t.cost_usd for t in node_tel)
     append_chained(AUDIT_LOG_PATH, {
-        "case_id":        state.get("case_id"),
-        "cpt_code":       cpt_code,
-        "final_decision": state.get("final_decision"),
-        "determination":  state.get("determination"),
-        "node_telemetry": [t.to_dict() for t in node_tel],
-        "cost_usd_total": cost_total,
+        "case_id":             state.get("case_id"),
+        "cpt_code":            cpt_code,
+        "final_decision":      state.get("final_decision"),
+        "determination":       state.get("determination"),
+        "criteria_versions":   state.get("criteria_versions", []),
+        "criteria_divergence": state.get("criteria_divergence"),
+        "node_telemetry":      [t.to_dict() for t in node_tel],
+        "cost_usd_total":      cost_total,
     })
 
     return state
