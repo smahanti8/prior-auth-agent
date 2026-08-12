@@ -40,3 +40,27 @@ def load_active(
     if not candidates:
         return None
     return max(candidates, key=lambda s: s.policy_effective_date)
+
+
+def load_by_cpt(
+    cpt_code: str,
+    as_of_date: str,
+    criteria_dir: Path = _CRITERIA_DIR,
+) -> list[CriterionSpec]:
+    """Return all active criteria for cpt_code as of as_of_date, one per criterion_id.
+
+    Returns the most-recent version of each criterion_id that lists cpt_code in
+    its cpt_codes field and has policy_effective_date <= as_of_date. Results are
+    sorted by criterion_id for deterministic ordering. Returns an empty list if
+    no criteria are encoded for this CPT code.
+    """
+    by_id: dict[str, CriterionSpec] = {}
+    for spec in load_all(criteria_dir):
+        if cpt_code not in spec.cpt_codes:
+            continue
+        if spec.policy_effective_date > as_of_date:
+            continue
+        existing = by_id.get(spec.criterion_id)
+        if existing is None or spec.policy_effective_date > existing.policy_effective_date:
+            by_id[spec.criterion_id] = spec
+    return sorted(by_id.values(), key=lambda s: s.criterion_id)

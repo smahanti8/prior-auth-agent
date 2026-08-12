@@ -103,4 +103,5 @@ class CriterionSpec(BaseModel):
     policy_ref: PolicyRef
     required: bool
     predicate: PredicateNode
+    cpt_codes: list[str] = []  # CPT codes this criterion applies to
     notes: str = ""            # documented limitations of this encoding

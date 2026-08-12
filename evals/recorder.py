@@ -22,7 +22,7 @@ from evals.fixtures import RECORDED_DIR, _fingerprint, _hash_string
 # Each node uses a distinct schema so fingerprinting is unambiguous.
 
 def _build_schema_map() -> dict[str, str]:
-    from prior_auth_agent.nodes.criteria_mapper import SCHEMA as CM
+    from prior_auth_agent.nodes.criteria_mapper import _SCHEMA_UNENCODED as CM
     from prior_auth_agent.nodes.evidence_extractor import SCHEMA as EE
     from prior_auth_agent.nodes.determination import SCHEMA as DET
     return {
@@ -33,6 +33,16 @@ def _build_schema_map() -> dict[str, str]:
 
 
 SCHEMA_TO_NODE: dict[str, str] = _build_schema_map()
+
+
+def _is_encoded_criteria_schema(schema: dict) -> bool:
+    """criteria_mapper's encoded-path schema is built per-CPT (varies with the
+    valid_ids list), so it can't have one fixed fingerprint like the other
+    nodes. Detect it by shape instead."""
+    try:
+        return "encoded_id" in schema["properties"]["criteria"]["items"]["properties"]
+    except (KeyError, TypeError):
+        return False
 
 
 # ── Call capture ───────────────────────────────────────────────────────────────
@@ -54,7 +64,12 @@ class CallCapture:
         model: str,
     ) -> None:
         fp = _fingerprint(schema)
-        node_name = SCHEMA_TO_NODE.get(fp, f"unknown_{fp}")
+        if fp in SCHEMA_TO_NODE:
+            node_name = SCHEMA_TO_NODE[fp]
+        elif _is_encoded_criteria_schema(schema):
+            node_name = "criteria_mapper"
+        else:
+            node_name = f"unknown_{fp}"
         self._calls.append({
             "node_name":         node_name,
             "schema_fingerprint": fp,

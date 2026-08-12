@@ -1,6 +1,8 @@
 criterion_id: SURG-041-C2
 version: "1.0"
 policy_effective_date: "2026-01-01"
+cpt_codes:
+  - "29827"
 criterion_text: >-
   Failure of at least 3 months of conservative management, which must include
   physician-supervised physical therapy. Documentation must include treating

@@ -1,6 +1,6 @@
 {
   "case_id": "case_007",
-  "recorded_at": "2026-08-02T17:23:02.064947+00:00",
+  "recorded_at": "2026-08-10T10:43:42.013922+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -39,34 +39,29 @@
     },
     "criteria_mapper": {
       "node_name": "criteria_mapper",
-      "schema_fingerprint": "b708e4c6b596",
-      "system_hash": "700f2dd524ca1549",
+      "schema_fingerprint": "c17f0b9e62ce",
+      "system_hash": "c960011320dc27c1",
       "response": {
         "criteria": [
           {
-            "id": "c1",
+            "encoded_id": "SURG-041-C1",
             "text": "Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram of the affected shoulder.",
             "required": true
           },
           {
-            "id": "c2",
-            "text": "Failure of at least 3 months of conservative management, which must include physician-supervised physical therapy, with documentation of treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement.",
+            "encoded_id": "SURG-041-C2",
+            "text": "Failure of at least 3 months of conservative management, including physician-supervised physical therapy, with documentation of treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement.",
             "required": true
           },
           {
-            "id": "c3",
+            "encoded_id": "SURG-041-C3",
             "text": "Documented functional impairment affecting activities of daily living, evidenced by a formal functional assessment, shoulder disability questionnaire, or equivalent standardized instrument with scoring.",
             "required": true
-          },
-          {
-            "id": "c4",
-            "text": "Tear is acute traumatic in nature (exception permitting a conservative management period of less than 3 months).",
-            "required": false
           }
         ]
       },
-      "input_tokens": 2643,
-      "output_tokens": 554,
+      "input_tokens": 2804,
+      "output_tokens": 311,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -76,46 +71,36 @@
       "response": {
         "evidence": [
           {
-            "criterion_id": "c1",
+            "criterion_id": "SURG-041-C1",
             "status": "met",
-            "summary": "MRI of the right shoulder documents a full-thickness supraspinatus (rotator cuff) tear with 1.5 cm medial retraction, confirming a full-thickness rotator cuff tear on MRI.",
+            "summary": "MRI of the right shoulder documents a full-thickness supraspinatus (rotator cuff) tear with 1.5 cm medial retraction, confirming a full-thickness rotator cuff tear by MRI.",
             "citations": [
               "ImagingStudy/mri-shoulder-007"
             ],
             "policy_quote": "Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram of the affected shoulder."
           },
           {
-            "criterion_id": "c2",
+            "criterion_id": "SURG-041-C2",
             "status": "met",
-            "summary": "A completed 14-week physician-directed physical therapy course (2026-01-06 to 2026-04-11) is documented with treatment content (rotator cuff strengthening, scapular stabilization, manual therapy) and clinical outcome (persistent weakness/pain, no functional improvement, conservative management deemed unsuccessful), exceeding the 3-month requirement. Note: a specific named treating provider is not explicitly recorded, which is a documentation gap, though the supervised PT, dates, and outcome are present.",
+            "summary": "A 14-week (Jan 6 \u2013 Apr 11, 2026) physician-directed physical therapy course for the right shoulder is documented, exceeding 3 months, with treatment dates and a clinical outcome of persistent weakness/pain and no functional improvement (conservative management deemed unsuccessful). A specific treating provider name is not explicitly recorded, but supervised PT dates and outcome are documented.",
             "citations": [
               "Procedure/pt-shoulder-007"
             ],
-            "policy_quote": "Failure of at least 3 months of conservative management, which must include physician-supervised physical therapy, with documentation of treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement."
+            "policy_quote": "Failure of at least 3 months of conservative management, which must include physician-supervised physical therapy. Documentation must include treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement."
           },
           {
-            "criterion_id": "c3",
+            "criterion_id": "SURG-041-C3",
             "status": "met",
-            "summary": "A formal functional assessment documents a DASH score of 68/100 (severe disability) with specific ADL limitations including inability to dress independently, difficulty with personal hygiene, and inability to lift objects over 2 lbs, satisfying the standardized functional assessment requirement.",
+            "summary": "A formal functional assessment documents a DASH (Disabilities of the Arm, Shoulder and Hand) score of 68/100 indicating severe disability, with documented ADL impairment including inability to dress independently and difficulty with personal hygiene.",
             "citations": [
               "Observation/functional-assessment-007"
             ],
-            "policy_quote": "Documented functional impairment affecting activities of daily living, evidenced by a formal functional assessment, shoulder disability questionnaire, or equivalent standardized instrument with scoring."
-          },
-          {
-            "criterion_id": "c4",
-            "status": "not_met",
-            "summary": "The MRI describes moderate tendon degeneration with no documentation of an acute traumatic mechanism, and the clinical course describes chronic shoulder pain and weakness rather than an acute traumatic injury; no evidence supports an acute traumatic tear.",
-            "citations": [
-              "ImagingStudy/mri-shoulder-007",
-              "Procedure/pt-shoulder-007"
-            ],
-            "policy_quote": "Tear is acute traumatic in nature (exception permitting a conservative management period of less than 3 months)."
+            "policy_quote": "Documented functional impairment affecting activities of daily living, as evidenced by a formal functional assessment, shoulder disability questionnaire, or equivalent standardized instrument with scoring."
           }
         ]
       },
-      "input_tokens": 2060,
-      "output_tokens": 1701,
+      "input_tokens": 2306,
+      "output_tokens": 1622,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -124,17 +109,21 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "insufficient_evidence",
-        "rationale": "c1 is met: MRI of the right shoulder documents a full-thickness supraspinatus tear with 1.5 cm retraction (ImagingStudy/mri-shoulder-007). c3 is met: a formal DASH assessment scoring 68/100 with specific ADL limitations documents functional impairment (Observation/functional-assessment-007). c2 remains unresolved: while a 14-week physician-directed PT course (2026-01-06 to 2026-04-11) with treatment dates and clinical outcome is documented (Procedure/pt-shoulder-007), the policy explicitly requires documentation of the treating provider, which is not recorded, so this required element is not fully supported. c4 is not required and is not applicable here (no acute traumatic mechanism documented).",
-        "confidence": 0.78,
+        "rationale": "Criterion SURG-041-C3 is met: a formal functional assessment (Observation/functional-assessment-007) documents a DASH score of 68/100 with ADL impairment, satisfying the standardized-instrument requirement. Criterion SURG-041-C1 remains unresolved: the confirming evidence is cited as ImagingStudy/mri-shoulder-007, but the encoded predicate requires a diagnostic interpretation (DiagnosticReport) establishing the full-thickness rotator cuff tear; the interpretive radiology report is not present in the bundle. Criterion SURG-041-C2 remains unresolved: while Procedure/pt-shoulder-007 documents a 14-week supervised PT course with dates and a clinical outcome of no improvement, the criterion also requires the treating provider, which the evidence itself notes is not explicitly recorded. These are missing supporting elements to obtain, not grounds for an adverse action.",
+        "confidence": 0.6,
         "gaps": [
           {
-            "criterion_id": "c2",
-            "needed_evidence": "Documentation identifying the named treating provider who supervised the physical therapy course (e.g., the supervising physician/therapist of record), to accompany the already-documented treatment dates (2026-01-06 to 2026-04-11) and clinical outcome."
+            "criterion_id": "SURG-041-C1",
+            "needed_evidence": "A radiology DiagnosticReport for the affected shoulder MRI/MR arthrogram containing the interpreted finding of a full-thickness rotator cuff tear (linked to ImagingStudy/mri-shoulder-007)."
+          },
+          {
+            "criterion_id": "SURG-041-C2",
+            "needed_evidence": "Documentation identifying the treating/supervising provider name for the physician-supervised physical therapy course (Procedure/pt-shoulder-007), in addition to the already-documented treatment dates (Jan 6 \u2013 Apr 11, 2026) and outcome."
           }
         ]
       },
-      "input_tokens": 2076,
-      "output_tokens": 703,
+      "input_tokens": 2087,
+      "output_tokens": 2135,
       "model": "claude-opus-4-8"
     }
   }

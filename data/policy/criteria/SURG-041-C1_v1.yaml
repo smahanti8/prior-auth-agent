@@ -1,6 +1,8 @@
 criterion_id: SURG-041-C1
 version: "1.0"
 policy_effective_date: "2026-01-01"
+cpt_codes:
+  - "29827"
 criterion_text: >-
   Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram of the
   affected shoulder.

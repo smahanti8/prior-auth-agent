@@ -1,6 +1,8 @@
 criterion_id: SURG-041-C3
 version: "1.0"
 policy_effective_date: "2026-01-01"
+cpt_codes:
+  - "29827"
 criterion_text: >-
   Documented functional impairment affecting activities of daily living, as
   evidenced by a formal functional assessment, shoulder disability

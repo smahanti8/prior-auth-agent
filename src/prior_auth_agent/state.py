@@ -1,12 +1,14 @@
 """LangGraph state schema for the prior-auth pipeline."""
 
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal, NotRequired, TypedDict
 
 
 class Criterion(TypedDict):
     id: str
     text: str
     required: bool
+    encoded_version: NotRequired[str]   # set on encoded-path criteria
+    predicate_hint: NotRequired[str]    # directive for evidence extractor
 
 
 class Evidence(TypedDict):
@@ -50,6 +52,8 @@ class PriorAuthState(TypedDict, total=False):
 
     # --- criteria mapping ---
     criteria: list[Criterion]
+    criteria_versions: list[dict]        # [{criterion_id, version}, ...] — set on encoded path
+    criteria_divergence: dict | None     # {missing, unmatched, duplicate_mappings} or None
 
     # --- evidence extraction ---
     evidence: list[Evidence]

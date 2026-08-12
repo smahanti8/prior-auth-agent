@@ -43,12 +43,17 @@ def _hash_string(s: str) -> str:
 
 def _current_system_hashes() -> dict[str, str]:
     """Compute system-prompt hashes from current source. Imported lazily to
-    avoid pulling in the full prior_auth_agent stack at import time."""
-    from prior_auth_agent.nodes.criteria_mapper import SYSTEM as CM_SYS
+    avoid pulling in the full prior_auth_agent stack at import time.
+
+    criteria_mapper is intentionally excluded: its system prompt is CPT-
+    dependent (the encoded path appends a per-CPT ID list, D13), so there is
+    no single current hash to compare against. Its staleness is instead
+    caught precisely, per call, in Cassette.replay_structured_call, which
+    hashes the exact system string used for that call.
+    """
     from prior_auth_agent.nodes.evidence_extractor import SYSTEM as EE_SYS
     from prior_auth_agent.nodes.determination import SYSTEM as DET_SYS
     return {
-        "criteria_mapper":    _hash_string(CM_SYS),
         "evidence_extractor": _hash_string(EE_SYS),
         "determination":      _hash_string(DET_SYS),
     }
