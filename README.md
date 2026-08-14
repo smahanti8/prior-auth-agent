@@ -133,6 +133,101 @@ python -m evals.run --live
 python -m evals.run --baseline-check
 ```
 
+## What Changes Inside a PHI Boundary
+
+> The `infra/` directory contains documentation-grade Terraform — a reference
+> architecture showing the compliance reasoning, not a provisioned production system.
+> All account IDs, ARNs, and region values are placeholders. See `infra/README.md`.
+
+### The default path does not satisfy a BAA
+
+`LLM_BACKEND=anthropic` (the default) routes model calls to the direct Anthropic API,
+which is not covered under a Business Associate Agreement (BAA) for PHI. Patient data
+in prompts would travel to Anthropic infrastructure under commercial terms, not a
+healthcare data-processing agreement. **Do not point this pipeline at real patient data
+without your compliance controls in place.**
+
+### The Bedrock path and what it buys
+
+`LLM_BACKEND=bedrock` routes all model calls through your AWS account via Amazon
+Bedrock. AWS BAA programs can cover Bedrock usage. PHI in prompts stays within your
+AWS compliance perimeter — the model is still Claude, but running on AWS infrastructure
+under your agreement with AWS.
+
+The switch is one environment variable. Internally, `llm.py` constructs
+`anthropic.AnthropicBedrock()` instead of `anthropic.Anthropic()`, and the task IAM
+role supplies credentials — no `ANTHROPIC_API_KEY` is injected. The Bedrock client is
+the same Anthropic Python SDK; `structured_call()` is unchanged except the model ID
+parameter changes to Bedrock's ARN-format string.
+
+**Known gap:** `output_config.format` (the JSON schema constraint used at every LLM
+node) is an Anthropic-platform API extension. Verify its availability on Bedrock before
+using `LLM_BACKEND=bedrock` in production; if unavailable, the structured-output
+constraint must be re-implemented via the `tools` API on the Bedrock path. Extended
+thinking (`thinking: {type: adaptive}`) is supported on Bedrock.
+
+### What must never enter logs or error traces
+
+The audit log records metadata only — `user_id`, `tokens_used`, `artifact_type`,
+`criteria_versions` — per the project security rules. Two additional constraints apply
+at the PHI boundary:
+
+1. **CloudWatch log group** (`/ecs/prior-auth-agent`): error traces from
+   `evidence_extractor` and `determination` may contain FHIR bundle fragments.
+   A log processor or CloudWatch metric filter must redact PHI fields before
+   retention. Raw bundle content must never persist in a log group.
+
+2. **HTTP error responses**: FastAPI exception handlers must not echo raw bundle
+   content in 422/500 responses. Return a case ID; not the data.
+
+PHI-adjacent fields: patient name, DOB, MRN, diagnosis code combinations, and
+medication + diagnosis together — re-identifiable by combination even without a name.
+
+### Key custody
+
+The KMS key in `infra/kms.tf` is a customer-managed key (CMK), not `aws/s3`. With
+`aws/s3`, AWS controls key material access; with a CMK, the customer owns the key
+policy and AWS cannot access customer-managed key material.
+
+The key policy separates admin from user:
+- **Key admin role**: can manage key lifecycle (rotate, disable, schedule deletion)
+  but cannot use the key for data operations.
+- **Task role** (the running container): can encrypt and decrypt audit log objects
+  but cannot manage, rotate, or disable the key.
+
+This prevents a compromised container from disabling its own audit trail.
+
+### Audit retention obligations
+
+HIPAA requires audit log retention for 6 years. The S3 bucket uses object lock in
+**COMPLIANCE** mode with a 7-year default (`audit_retention_days = 2556`).
+
+GOVERNANCE mode allows privileged IAM users to override retention. COMPLIANCE mode
+makes the retention floor unoverridable by any IAM principal, including root — this
+is the right setting for records that back clinical determinations and extend the
+tamper-evident guarantee from DECISIONS.md D7/D8 to the storage layer.
+
+### Network boundary
+
+All ECS tasks run in private subnets with no public IP. VPC endpoints for ECR
+(image pull), S3 (audit writes), Bedrock (model calls), and CloudWatch Logs mean
+production data for those services stays within the AWS network and never traverses
+the NAT gateway. Inbound FHIR bundles enter through an ALB in public subnets with
+TLS termination; the ECS service is not reachable from the internet directly.
+
+### Cost delta of the compliant path
+
+Bedrock pricing is comparable to the direct Anthropic API but includes a per-request
+markup (rate varies by model and region — verify current Bedrock pricing before
+projecting). Per-node telemetry (`telemetry.py`) captures cost per determination
+per node. Adding Bedrock model IDs to `_PRICING` makes the delta visible at per-node
+resolution; the Bedrock prefix entries are already in the table for the cross-region
+inference IDs (`us.anthropic.*`).
+
+Infrastructure cost adds: NAT gateway data processing, VPC interface endpoints
+(5 × ~$0.01/hr per AZ), Fargate vCPU/memory hours, ALB. At the scale this pipeline
+targets, the infrastructure cost is dominated by Fargate compute, not API pricing.
+
 ## Known Limitations
 
 1. **LLM node coverage comes from a 15-case golden eval suite, not exhaustive unit tests.** Cassette-based replay (`evals/run.py`) lets criteria mapping, evidence extraction, and determination run in CI without an API key — see [EVALS.md](EVALS.md) for what that suite does and doesn't validate.
