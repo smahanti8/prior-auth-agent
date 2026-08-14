@@ -13,7 +13,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0", "pyyaml>=6.0", "ruff>=0.16.0"]
+dev     = ["pytest>=8.0.0", "pyyaml>=6.0", "ruff>=0.16.0"]
+bedrock = ["anthropic[bedrock]>=0.116.0"]  # adds boto3; needed for LLM_BACKEND=bedrock
 
 [build-system]
 requires = ["setuptools>=68"]

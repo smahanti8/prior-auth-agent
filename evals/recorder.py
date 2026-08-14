@@ -93,7 +93,8 @@ def make_recording_wrapper(capture: CallCapture):
     Intercepts the real function before the node-level patches so that both
     the response AND the usage data (token counts, model) are captured.
     """
-    from prior_auth_agent.llm import client, MODEL
+    from prior_auth_agent.llm import client
+    from prior_auth_agent import config
     from prior_auth_agent import telemetry as _tel
     import json
     import time
@@ -104,7 +105,15 @@ def make_recording_wrapper(capture: CallCapture):
         schema: dict[str, Any],
         max_tokens: int = 16000,
     ) -> dict[str, Any]:
-        active_model = _tel._current_model_override.get() or MODEL
+        # Mirrors llm.structured_call's model-selection exactly, so a --live
+        # recording tags the cassette with the model actually invoked.
+        override = _tel._current_model_override.get()
+        if override:
+            active_model = override
+        elif config.LLM_BACKEND == "bedrock":
+            active_model = config.BEDROCK_MODEL_ID
+        else:
+            active_model = config.MODEL
         t0 = time.perf_counter()
         with client.messages.stream(
             model=active_model,

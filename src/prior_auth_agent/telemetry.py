@@ -27,11 +27,19 @@ from typing import Optional
 # Matched by prefix so version-dated IDs (e.g. claude-haiku-4-5-20251001) resolve.
 
 _PRICING: dict[str, tuple[float, float]] = {
+    # Direct Anthropic API — https://www.anthropic.com/pricing
     "claude-opus-5":       (15.00, 75.00),
     "claude-opus-4-8":     (15.00, 75.00),
     "claude-sonnet-5":      (3.00, 15.00),
     "claude-sonnet-4-6":    (3.00, 15.00),
     "claude-haiku-4-5":     (0.80,  4.00),
+    # Amazon Bedrock — ARN-format model IDs; verify current rates before projecting.
+    # Bedrock adds a per-request markup over direct API pricing (varies by model/region).
+    # https://aws.amazon.com/bedrock/pricing/
+    "us.anthropic.claude-opus-4-8":    (15.00, 75.00),
+    "us.anthropic.claude-sonnet-5":     (3.00, 15.00),
+    "us.anthropic.claude-sonnet-4-6":   (3.00, 15.00),
+    "us.anthropic.claude-haiku-4-5":    (0.80,  4.00),
 }
 
 KNOWN_MODEL_IDS = list(_PRICING.keys())
