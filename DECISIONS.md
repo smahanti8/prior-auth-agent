@@ -436,3 +436,45 @@ accumulates in the audit log, and a persistently `missing` criterion is evidence
 that either the policy document changed, the RAG retrieval is poor for that
 criterion, or the encoding is wrong. The call replaces the original extraction
 call — it is not an additional call; the schema changes but the cost is the same.
+
+---
+
+## D14. Fargate over EKS (and not App Runner)
+
+**Context.** The `infra/` reference architecture needs a container runtime. Three
+plausible candidates: ECS Fargate, EKS (Kubernetes), App Runner.
+
+**Decision.** ECS Fargate.
+
+**Against EKS.** Kubernetes is the right choice when a team needs: (a) cluster-level
+bin-packing across heterogeneous workloads, (b) custom scheduling or operators, or
+(c) existing cluster operations competence to amortize. None applies here. The prior-auth
+pipeline processes a small number of concurrent cases, runs three LLM nodes sequentially,
+and has no persistent-volume, inter-pod communication, or GPU scheduling requirement. EKS
+cluster management — control plane cost, node group patching, kube-proxy, CNI plugins,
+IRSA configuration — adds an operator surface that scales the compliance review scope
+without improving anything observable for this workload size.
+
+The harder signal: Kubernetes appeared in zero of the job descriptions this portfolio
+targets. Demonstrating Kubernetes competence is not the goal; demonstrating correct
+engineering judgment *not* to reach for it is. An architecture doc that deploys EKS for
+a 20-RPS pipeline is a portfolio liability, not an asset.
+
+**Against App Runner.** App Runner abstracts away the VPC configuration — which is
+useful in general, but a liability here. Placing the service inside a private subnet
+and adding VPC endpoints for Bedrock and S3 requires explicit VPC connector
+configuration in App Runner and offers less network topology control than the ECS
+approach. For a workload with PHI-boundary network requirements, being able to read
+and reason about the exact network boundary in `infra/vpc.tf` is more auditable than
+relying on App Runner's managed networking layer.
+
+**For Fargate.** No node management, no EC2 patching. The network configuration is
+explicit and fully reviewable in Terraform. IAM is at the task level, not the node
+level. ECS Fargate task role → Bedrock invocation is a well-documented, well-audited
+pattern for PHI-adjacent workloads on AWS.
+
+**Counter-argument.** ECS Fargate per-vCPU pricing is higher than equivalent EC2 at
+sustained load; above roughly 100 RPS the per-task compute cost compounds significantly
+relative to a managed node group. At that scale, revisiting EKS with Karpenter becomes
+the right call. This architecture documents the reasoning at the current scale and would
+need explicit re-evaluation before scaling beyond it.
