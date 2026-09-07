@@ -8,6 +8,8 @@ An agentic prior-authorization pipeline: it takes a FHIR bundle and a CPT code, 
 
 ## Architecture
 
+![Pipeline Architecture](docs/architecture.png)
+
 ```
 FHIR Bundle ─┐
              ├─> Intake ─> Eligibility ─> Policy RAG (ChromaDB) ─> Criteria Mapper
