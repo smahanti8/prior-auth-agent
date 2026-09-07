@@ -10,24 +10,6 @@ An agentic prior-authorization pipeline: it takes a FHIR bundle and a CPT code, 
 
 ![Pipeline Architecture](docs/architecture.png)
 
-```
-FHIR Bundle ─┐
-             ├─> Intake ─> Eligibility ─> Policy RAG (ChromaDB) ─> Criteria Mapper
-CPT Code  ───┘      │          │                                        │
-                 reject      reject                                      v
-                                            Evidence Extractor (policy quote + chart citations)
-                                                              │
-                              Citation Gate ──"met" claim missing a quote──> reject (hard)
-                                                              │ ok
-                              Determination (approve | insufficient_evidence — never denies)
-                                                              │
-                              Confidence Gate ──not-approve / low-confidence──> HITL Queue (Streamlit)
-                                                              │ auto (approvals only)
-                                                       Auto Decision
-                                                              │
-                                         tamper-evident, hash-chained audit log
-```
-
 ## Layout
 
 ```
