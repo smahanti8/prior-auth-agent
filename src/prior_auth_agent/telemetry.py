@@ -209,8 +209,13 @@ def rollup(records: list[NodeTelemetry]) -> dict:
             "avg_cost_usd": sum(costs) / len(costs),
         })
 
-    total_cost = sum(r.cost_usd for r in records)
-    total_latency = sum(r.latency_ms for r in records)
+    # Per-determination totals: sum each node's already-averaged cost/latency,
+    # not the raw records. Callers (cost_report.py, tier_analysis.py) flatten
+    # many cases' records together before calling rollup(), so a node can
+    # appear N times — summing raw records would scale with N instead of
+    # staying pinned to one determination.
+    total_cost = sum(n["avg_cost_usd"] for n in nodes_out)
+    total_latency = sum(n["avg_latency_ms"] for n in nodes_out)
 
     return {
         "nodes": nodes_out,
