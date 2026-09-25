@@ -1,6 +1,6 @@
 {
   "case_id": "case_001",
-  "recorded_at": "2026-08-02T17:20:31.136624+00:00",
+  "recorded_at": "2026-09-17T17:18:55.278570+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -65,18 +65,13 @@
           },
           {
             "id": "c5",
-            "text": "Documentation specifies treatment duration and clinical outcome of conservative management.",
-            "required": true
-          },
-          {
-            "id": "c6",
             "text": "Body mass index (BMI) documented as less than 40 kg/m2 at the time of the pre-surgical evaluation.",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 507,
+      "output_tokens": 600,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -88,7 +83,7 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "Standing AP weight-bearing X-ray of the right knee shows Grade IV osteoarthritis (bone-on-bone medial compartment) on the Kellgren-Lawrence scale, confirming severe knee OA.",
+            "summary": "Standing AP weight-bearing X-ray of the right knee documents Grade IV osteoarthritis (bone-on-bone medial compartment) on the Kellgren-Lawrence scale, satisfying the requirement for KL Grade III or IV confirmed on weight-bearing radiographs.",
             "citations": [
               "ImagingStudy/xray-right-knee-001"
             ],
@@ -97,7 +92,7 @@
           {
             "criterion_id": "c2",
             "status": "met",
-            "summary": "Condition documents failed conservative management with 8 months of PT and NSAID therapy, onset 2023-07-01 to abatement 2024-03-01, exceeding the 6-month minimum.",
+            "summary": "Condition documents failed conservative management with 8 months of PT and NSAID therapy (onset 2023-07-01, abatement 2024-03-01), exceeding the 6-month minimum.",
             "citations": [
               "Condition/conservative-failure-001"
             ],
@@ -106,7 +101,7 @@
           {
             "criterion_id": "c3",
             "status": "met",
-            "summary": "Conservative management included physical therapy (documented as 8 months PT). Note: the chart states PT but does not explicitly specify physician supervision.",
+            "summary": "The conservative management record documents 8 months of physical therapy (PT) as part of the failed conservative treatment.",
             "citations": [
               "Condition/conservative-failure-001"
             ],
@@ -115,7 +110,7 @@
           {
             "criterion_id": "c4",
             "status": "met",
-            "summary": "Conservative management included NSAID (anti-inflammatory) therapy as documented in the failed conservative management condition.",
+            "summary": "The conservative management record documents NSAID therapy, which is anti-inflammatory medication.",
             "citations": [
               "Condition/conservative-failure-001"
             ],
@@ -124,16 +119,7 @@
           {
             "criterion_id": "c5",
             "status": "met",
-            "summary": "Documentation specifies duration (8 months of PT and NSAID therapy, 2023-07-01 to 2024-03-01) and clinical outcome (failed/resolved conservative management).",
-            "citations": [
-              "Condition/conservative-failure-001"
-            ],
-            "policy_quote": "Documentation specifies treatment duration and clinical outcome of conservative management."
-          },
-          {
-            "criterion_id": "c6",
-            "status": "met",
-            "summary": "BMI recorded as 34.2 kg/m2 on 2024-03-15, which is less than 40 kg/m2, at the time of pre-surgical evaluation.",
+            "summary": "BMI observation of 34.2 kg/m2 recorded on 2024-03-15 (pre-surgical evaluation timeframe) is less than 40 kg/m2.",
             "citations": [
               "Observation/bmi-001"
             ],
@@ -141,8 +127,8 @@
           }
         ]
       },
-      "input_tokens": 1930,
-      "output_tokens": 1494,
+      "input_tokens": 1877,
+      "output_tokens": 1213,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -150,18 +136,13 @@
       "schema_fingerprint": "df1465ba9d6d",
       "system_hash": "40990d39c2435f5c",
       "response": {
-        "decision": "insufficient_evidence",
-        "rationale": "Criteria c1, c2, c4, c5, and c6 are supported: c1 confirmed by Grade IV OA on standing weight-bearing radiograph (ImagingStudy/xray-right-knee-001); c2 documented as 8 months of failed conservative management, 2023-07-01 to 2024-03-01, exceeding the 6-month minimum (Condition/conservative-failure-001); c4 anti-inflammatory/NSAID therapy documented (Condition/conservative-failure-001); c5 duration and clinical outcome specified (Condition/conservative-failure-001); c6 BMI 34.2 kg/m2 on 2024-03-15, under 40 (Observation/bmi-001). Criterion c3 remains unresolved: although physical therapy is documented (Condition/conservative-failure-001), the record does not explicitly state that the physical therapy was physician-supervised as the criterion requires. This is missing support to obtain, not grounds for denial.",
-        "confidence": 0.82,
-        "gaps": [
-          {
-            "criterion_id": "c3",
-            "needed_evidence": "Documentation explicitly confirming that the physical therapy was physician-supervised (e.g., a physician referral/prescription for PT and supervising physician notes referencing the 8-month PT course with dates)."
-          }
-        ]
+        "decision": "approve",
+        "rationale": "All required criteria are met. c1 is met per standing weight-bearing radiograph documenting KL Grade IV osteoarthritis of the right knee (ImagingStudy/xray-right-knee-001). c2 is met with 8 months of documented failed conservative management (Condition/conservative-failure-001), exceeding the 6-month minimum. c3 is met as the conservative management record documents physical therapy (Condition/conservative-failure-001). c4 is met with documented NSAID (anti-inflammatory) therapy (Condition/conservative-failure-001). c5 is met with a pre-surgical BMI of 34.2 kg/m2 on 2024-03-15 (Observation/bmi-001), below the 40 kg/m2 threshold.",
+        "confidence": 0.85,
+        "gaps": []
       },
-      "input_tokens": 2144,
-      "output_tokens": 628,
+      "input_tokens": 1939,
+      "output_tokens": 419,
       "model": "claude-opus-4-8"
     }
   }

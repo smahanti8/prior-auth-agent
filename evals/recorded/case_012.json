@@ -1,6 +1,6 @@
 {
   "case_id": "case_012",
-  "recorded_at": "2026-08-02T17:24:12.353234+00:00",
+  "recorded_at": "2026-09-17T17:23:07.801845+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -60,13 +60,13 @@
           },
           {
             "id": "c4",
-            "text": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications.",
+            "text": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming the absence of active psychiatric contraindications.",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 719,
+      "output_tokens": 646,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -78,7 +78,7 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "Documented BMI of 40.1 kg/m2 recorded on 2026-07-01, which meets the threshold of 40 kg/m2 or greater.",
+            "summary": "BMI documented at 40.1 kg/m2, which is 40 or greater.",
             "citations": [
               "Observation/bmi-012"
             ],
@@ -86,17 +86,15 @@
           },
           {
             "criterion_id": "c2",
-            "status": "not_met",
-            "summary": "BMI of 40.1 kg/m2 exceeds 35 kg/m2, but no obesity-related comorbidity (Type 2 diabetes, hypertension, obstructive sleep apnea, or cardiovascular disease) is documented in the bundle.",
-            "citations": [
-              "Observation/bmi-012"
-            ],
+            "status": "insufficient",
+            "summary": "BMI of 40.1 is documented, but no obesity-related comorbidity (Type 2 diabetes, hypertension, obstructive sleep apnea, or cardiovascular disease) is documented in the bundle.",
+            "citations": [],
             "policy_quote": "Patient has a documented BMI of 35 kg/m2 or greater with at least one obesity-related comorbidity (Type 2 diabetes mellitus, hypertension, obstructive sleep apnea, or clinically significant cardiovascular disease)."
           },
           {
             "criterion_id": "c3",
             "status": "not_met",
-            "summary": "Only a patient self-report of completing a 6-month weight management program is documented; no formal program records, supervising provider, dates, attendance documentation, or clinical summary are available. This does not meet the requirement for documented physician-supervised program completion.",
+            "summary": "Only a patient-reported weight management program is documented. No formal program records, provider, dates, attendance, or clinical summary from a supervising provider are available, so physician-supervised completion is not documented.",
             "citations": [
               "Observation/diet-attempt-012"
             ],
@@ -105,16 +103,16 @@
           {
             "criterion_id": "c4",
             "status": "met",
-            "summary": "A psychological evaluation for bariatric surgery dated 2026-06-15 documents clearance granted with no active psychiatric contraindications, within 12 months prior to the request.",
+            "summary": "Psychological evaluation dated 2026-06-15 granted clearance for bariatric surgery with no active psychiatric contraindications, within 12 months of the request.",
             "citations": [
               "DiagnosticReport/psych-eval-012"
             ],
-            "policy_quote": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications."
+            "policy_quote": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming the absence of active psychiatric contraindications."
           }
         ]
       },
-      "input_tokens": 1920,
-      "output_tokens": 938,
+      "input_tokens": 1921,
+      "output_tokens": 888,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -123,17 +121,17 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "insufficient_evidence",
-        "rationale": "Required criterion c4 is met: a formal psychological evaluation for bariatric surgery dated 2026-06-15 documents clearance with no active psychiatric contraindications within 12 months of the request (DiagnosticReport/psych-eval-012). Required criterion c3 remains unresolved: only a patient self-report of a 6-month weight management program is documented, without formal program records, supervising provider, dates, or clinical summary (Observation/diet-attempt-012), which does not satisfy the physician-supervised program requirement. Optional criteria c1 (BMI 40.1 kg/m2, Observation/bmi-012) is met and c2 is not met due to no documented obesity-related comorbidity; these are not required. Because a required criterion lacks supporting documentation, the request cannot be approved at this time.",
+        "rationale": "Required criterion c4 is met: a formal psychological evaluation dated 2026-06-15 granted bariatric surgery clearance with no active psychiatric contraindications within 12 months of the request (DiagnosticReport/psych-eval-012). Required criterion c3 is not yet supported: only a patient-reported weight management program is documented (Observation/diet-attempt-012), without records of physician or dietitian supervision, dates, attendance, or a clinical summary demonstrating a 6-month supervised program. Non-required BMI criterion c1 is met (BMI 40.1, Observation/bmi-012); c2 remains unresolved due to no documented obesity-related comorbidity, but it is optional. Because required criterion c3 lacks supporting documentation, the request cannot be approved as submitted.",
         "confidence": 0.9,
         "gaps": [
           {
             "criterion_id": "c3",
-            "needed_evidence": "Records documenting completion of a physician-supervised, structured diet and lifestyle modification program for at least 6 consecutive months, including the supervising licensed physician or registered dietitian, program start and end dates, attendance/visit documentation, and a clinical summary (self-directed weight loss does not qualify)."
+            "needed_evidence": "Documentation of completion of a physician-supervised, structured diet and lifestyle modification program lasting a minimum of 6 consecutive months, including the supervising licensed physician or registered dietitian, program start and end dates, attendance/visit records, and a clinical summary confirming physician oversight."
           }
         ]
       },
-      "input_tokens": 2029,
-      "output_tokens": 466,
+      "input_tokens": 1957,
+      "output_tokens": 511,
       "model": "claude-opus-4-8"
     }
   }

@@ -1,6 +1,6 @@
 {
   "case_id": "case_010",
-  "recorded_at": "2026-08-02T17:23:31.835047+00:00",
+  "recorded_at": "2026-09-17T17:22:26.346246+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -45,23 +45,23 @@
         "criteria": [
           {
             "id": "c1",
-            "text": "Patient has a documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee.",
+            "text": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee",
             "required": true
           },
           {
             "id": "c2",
-            "text": "Patient has documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documented treatment duration and clinical outcome.",
+            "text": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documented treatment duration and clinical outcome",
             "required": true
           },
           {
             "id": "c3",
-            "text": "Patient body mass index (BMI) is documented as less than 40 kg/m2 at the time of the pre-surgical evaluation.",
+            "text": "Body mass index (BMI) documented as less than 40 kg/m2 at the time of the pre-surgical evaluation",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 287,
+      "output_tokens": 271,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -73,34 +73,34 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "Standing AP weight-bearing X-ray of the left knee documents Kellgren-Lawrence Grade III osteoarthritis with medial joint-space narrowing, subchondral sclerosis, and marginal osteophytes.",
+            "summary": "Standing AP weight-bearing X-ray of the left knee shows Kellgren-Lawrence Grade III osteoarthritis with medial joint-space narrowing, subchondral sclerosis, and osteophyte formation.",
             "citations": [
               "ImagingStudy/xray-knee-010"
             ],
-            "policy_quote": "Patient has a documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee."
+            "policy_quote": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee"
           },
           {
             "criterion_id": "c2",
             "status": "met",
-            "summary": "Documented 7-month course of physician-supervised physical therapy (3 sessions/week) and naproxen 500mg BID from 2023-09-01 to 2024-04-01, with monthly functional assessments and orthopedist assessment concluding conservative management was exhausted.",
+            "summary": "Condition documents a 7-month course of physician-supervised physical therapy (3 sessions/week) and naproxen 500mg BID from 2023-09-01 to 2024-04-01 with monthly functional assessments and an orthopedist assessment concluding conservative management was exhausted.",
             "citations": [
               "Condition/conservative-failure-010"
             ],
-            "policy_quote": "Patient has documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documented treatment duration and clinical outcome."
+            "policy_quote": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documented treatment duration and clinical outcome"
           },
           {
             "criterion_id": "c3",
             "status": "met",
-            "summary": "BMI documented as 38.9 kg/m2 on 2026-04-25, around the time of the pre-surgical evaluation, which is less than 40 kg/m2.",
+            "summary": "BMI documented as 38.9 kg/m2, which is less than 40 kg/m2, recorded 2026-04-25.",
             "citations": [
               "Observation/bmi-010"
             ],
-            "policy_quote": "Patient body mass index (BMI) is documented as less than 40 kg/m2 at the time of the pre-surgical evaluation."
+            "policy_quote": "Body mass index (BMI) documented as less than 40 kg/m2 at the time of the pre-surgical evaluation"
           }
         ]
       },
-      "input_tokens": 2000,
-      "output_tokens": 714,
+      "input_tokens": 1987,
+      "output_tokens": 666,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -109,12 +109,12 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "approve",
-        "rationale": "All three required criteria are met. c1 is met: standing AP weight-bearing radiograph documents Kellgren-Lawrence Grade III osteoarthritis of the left knee (ImagingStudy/xray-knee-010). c2 is met: a 7-month physician-supervised course of physical therapy plus naproxen 500mg BID (2023-09-01 to 2024-04-01) with monthly functional assessments and an orthopedist conclusion that conservative management was exhausted (Condition/conservative-failure-010). c3 is met: BMI of 38.9 kg/m2 documented on 2026-04-25 at the pre-surgical evaluation, below the 40 kg/m2 threshold (Observation/bmi-010).",
-        "confidence": 0.82,
+        "rationale": "All three required criteria are met. c1 is satisfied by standing AP weight-bearing radiograph showing Kellgren-Lawrence Grade III osteoarthritis of the left knee (ImagingStudy/xray-knee-010). c2 is satisfied by a documented 7-month course of physician-supervised physical therapy plus naproxen 500mg BID (2023-09-01 to 2024-04-01) with monthly functional assessments and an orthopedist conclusion that conservative management was exhausted (Condition/conservative-failure-010). c3 is satisfied by a documented BMI of 38.9 kg/m2, below the 40 kg/m2 threshold (Observation/bmi-010). Coverage is active with Acme Health Plan.",
+        "confidence": 0.86,
         "gaps": []
       },
-      "input_tokens": 1706,
-      "output_tokens": 544,
+      "input_tokens": 1672,
+      "output_tokens": 432,
       "model": "claude-opus-4-8"
     }
   }

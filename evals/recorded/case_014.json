@@ -1,6 +1,6 @@
 {
   "case_id": "case_014",
-  "recorded_at": "2026-08-02T17:24:57.467763+00:00",
+  "recorded_at": "2026-09-17T17:23:56.301077+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -55,7 +55,7 @@
           },
           {
             "id": "c3",
-            "text": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify)",
+            "text": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months (supervised by a licensed physician or registered dietitian under physician oversight; self-directed attempts do not qualify)",
             "required": true
           },
           {
@@ -66,7 +66,7 @@
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 690,
+      "output_tokens": 560,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -78,7 +78,7 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "BMI documented at 42.8 kg/m2, which is 40 kg/m2 or greater.",
+            "summary": "BMI documented at 42.8 kg/m2 on 2026-06-10, which is 40 or greater.",
             "citations": [
               "Observation/bmi-014"
             ],
@@ -87,7 +87,7 @@
           {
             "criterion_id": "c2",
             "status": "not_met",
-            "summary": "BMI of 42.8 kg/m2 meets the 35 threshold, but no qualifying obesity-related comorbidity (Type 2 diabetes, hypertension, obstructive sleep apnea, or clinically significant cardiovascular disease) is documented in the bundle.",
+            "summary": "BMI of 42.8 satisfies the 35+ threshold, but the bundle contains no documentation of any qualifying obesity-related comorbidity (Type 2 diabetes, hypertension, obstructive sleep apnea, or cardiovascular disease).",
             "citations": [
               "Observation/bmi-014"
             ],
@@ -96,25 +96,25 @@
           {
             "criterion_id": "c3",
             "status": "met",
-            "summary": "A completed 6-month (2026-01-01 to 2026-06-30) physician-supervised structured diet and lifestyle modification program is documented, supervised by a licensed registered dietitian under physician oversight, with 100% session attendance.",
+            "summary": "Completed physician-supervised structured diet and lifestyle program from 2026-01-01 to 2026-06-30 (6 consecutive months), supervised by a licensed registered dietitian under physician oversight, with 100% attendance (24/24 sessions).",
             "citations": [
               "Procedure/diet-program-014"
             ],
-            "policy_quote": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify)"
+            "policy_quote": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months (supervised by a licensed physician or registered dietitian under physician oversight; self-directed attempts do not qualify)"
           },
           {
             "criterion_id": "c4",
             "status": "not_met",
-            "summary": "A psychiatric evaluation dated 2026-07-01 was completed, but it resulted in a DEFERRAL and explicitly states clearance for bariatric surgery is NOT granted due to active psychiatric contraindications (major depressive disorder, PHQ-9 18, and active binge eating disorder).",
+            "summary": "A psychiatric evaluation was completed on 2026-07-01, but it resulted in a DEFERRAL with active psychiatric contraindications (major depressive disorder PHQ-9 18 and active binge eating disorder). Clearance for bariatric surgery was explicitly NOT granted, so the requirement for documented clearance confirming absence of active contraindications is not met.",
             "citations": [
               "DiagnosticReport/psych-eval-014"
             ],
-            "policy_quote": "including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications"
+            "policy_quote": "Completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications"
           }
         ]
       },
-      "input_tokens": 2070,
-      "output_tokens": 902,
+      "input_tokens": 2069,
+      "output_tokens": 963,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -123,17 +123,17 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "insufficient_evidence",
-        "rationale": "Required criterion c3 is met: a completed 6-month physician-supervised structured diet and lifestyle modification program (2026-01-01 to 2026-06-30) under registered dietitian supervision with physician oversight is documented (Procedure/diet-program-014). Among the optional criteria, c1 is met with a documented BMI of 42.8 kg/m2 (Observation/bmi-014), while c2 is not established as no qualifying comorbidity is documented (Observation/bmi-014); since c1 is satisfied the anthropometric threshold is supported. Required criterion c4 is not yet resolved: the psychiatric evaluation dated 2026-07-01 (DiagnosticReport/psych-eval-014) resulted in a deferral and does not provide clearance, citing active psychiatric contraindications. Because a required criterion (c4) lacks supporting documentation of clearance, the request cannot be approved at this time.",
-        "confidence": 0.94,
+        "rationale": "Required criterion c3 is met: Procedure/diet-program-014 documents completion of a physician-supervised, structured diet and lifestyle program from 2026-01-01 to 2026-06-30 (6 consecutive months) under registered dietitian supervision with physician oversight. Required criterion c4 is not yet supported: DiagnosticReport/psych-eval-014 shows a psychiatric evaluation completed 2026-07-01 that resulted in a deferral with active psychiatric contraindications noted (major depressive disorder, active binge eating disorder), and no documented clearance for bariatric surgery confirming absence of active contraindications. Among the non-required BMI criteria, c1 is met (BMI 42.8 kg/m2 per Observation/bmi-014); c2 lacks documentation of a qualifying comorbidity but is not required. Because required criterion c4 remains unresolved, additional documentation is needed before this can be approved.",
+        "confidence": 0.9,
         "gaps": [
           {
             "criterion_id": "c4",
-            "needed_evidence": "An updated formal psychiatric or psychological evaluation completed within 12 months prior to the request that documents clearance for bariatric surgery and confirms the absence of active psychiatric contraindications (e.g., resolution/stabilization of the major depressive disorder and binge eating disorder noted in DiagnosticReport/psych-eval-014), with the evaluation date and evaluating clinician's clearance statement."
+            "needed_evidence": "A formal psychiatric/psychological evaluation dated within 12 months of the request that documents clearance for bariatric surgery confirming the absence of active psychiatric contraindications (e.g., updated evaluation showing resolution/stabilization of the major depressive disorder and binge eating disorder with explicit surgical clearance), cited to a DiagnosticReport."
           }
         ]
       },
-      "input_tokens": 1992,
-      "output_tokens": 581,
+      "input_tokens": 2049,
+      "output_tokens": 610,
       "model": "claude-opus-4-8"
     }
   }

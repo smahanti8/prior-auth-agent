@@ -1,6 +1,6 @@
 {
   "case_id": "case_008",
-  "recorded_at": "2026-08-02T17:23:11.734345+00:00",
+  "recorded_at": "2026-09-17T17:22:09.350570+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -45,7 +45,7 @@
         "criteria": []
       },
       "input_tokens": 2643,
-      "output_tokens": 142,
+      "output_tokens": 110,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -65,12 +65,12 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "approve",
-        "rationale": "The criteria set for CPT 70553 is empty, so there are no required criteria to evaluate. With no required criterion left unresolved (vacuously satisfied), and eligibility confirmed as active with payer Acme Health Plan, there is no unmet requirement. Accordingly, all required criteria are considered 'met' by absence of any conditions to satisfy, and no documentation gaps exist.",
+        "rationale": "Coverage is active with payer Acme Health Plan for CPT 70553 (MRI brain with and without contrast). The applicable criteria set is empty, so there are no required criteria to evaluate; every required criterion is therefore vacuously met and no gaps remain. Confidence is reduced because the absence of any criteria may reflect an incomplete policy load or ambiguous policy text rather than a truly criterion-free service.",
         "confidence": 0.5,
         "gaps": []
       },
       "input_tokens": 826,
-      "output_tokens": 310,
+      "output_tokens": 447,
       "model": "claude-opus-4-8"
     }
   }

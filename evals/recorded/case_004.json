@@ -1,6 +1,6 @@
 {
   "case_id": "case_004",
-  "recorded_at": "2026-08-02T17:21:56.259305+00:00",
+  "recorded_at": "2026-09-17T17:20:32.096093+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -45,12 +45,12 @@
         "criteria": [
           {
             "id": "c1",
-            "text": "Patient has documented low back pain symptoms for a minimum of 6 consecutive weeks (with documented symptom onset date or clinical note confirming duration).",
+            "text": "Patient has documented low back pain symptoms for a minimum of 6 consecutive weeks (documentation includes symptom onset date or clinical note confirming at least 6 weeks duration).",
             "required": true
           },
           {
             "id": "c2",
-            "text": "Patient has documented failure of a course of conservative management, including physician-supervised physical therapy for a minimum of 6 weeks, with treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement.",
+            "text": "Patient has documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks, with documentation of treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement.",
             "required": true
           },
           {
@@ -60,13 +60,13 @@
           },
           {
             "id": "c4",
-            "text": "Presence of red-flag findings permits immediate imaging without prior authorization (alternative pathway bypassing standard criteria).",
+            "text": "Presence of red-flag findings permits immediate imaging without prior authorization (alternative pathway that bypasses the standard criteria).",
             "required": false
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 628,
+      "output_tokens": 574,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -78,25 +78,25 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "Condition documents non-specific low back pain with onset 2024-05-10, documented at office visit 2024-07-07 noting an 8-week duration at time of MRI request, exceeding the 6-week minimum.",
+            "summary": "Condition of non-specific low back pain with onset date 2024-05-10, and clinical note documenting 8-week duration at time of MRI request, exceeding the 6-week minimum.",
             "citations": [
               "Condition/lbp-004"
             ],
-            "policy_quote": "Patient has documented low back pain symptoms for a minimum of 6 consecutive weeks (with documented symptom onset date or clinical note confirming duration)."
+            "policy_quote": "Patient has documented low back pain symptoms for a minimum of 6 consecutive weeks (documentation includes symptom onset date or clinical note confirming at least 6 weeks duration)."
           },
           {
             "criterion_id": "c2",
             "status": "met",
-            "summary": "A completed physical therapy course for low back pain ran from 2024-05-20 to 2024-07-01 (6 weeks, 6 sessions) with minimal improvement documented by the physical therapist, demonstrating conservative management failure over the required 6 weeks with treatment dates and outcome.",
+            "summary": "Completed physical therapy course for low back pain from 2024-05-20 to 2024-07-01 (6 weeks, 6 sessions) with documented minimal improvement noted by the physical therapist, demonstrating failure of conservative management. Treatment dates and clinical outcome are documented; the treating provider is identified as the physical therapist though not named.",
             "citations": [
               "Procedure/pt-course-004"
             ],
-            "policy_quote": "Patient has documented failure of a course of conservative management, including physician-supervised physical therapy for a minimum of 6 weeks, with treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement."
+            "policy_quote": "Patient has documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks, with documentation of treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement."
           },
           {
             "criterion_id": "c3",
             "status": "met",
-            "summary": "Neurological examination on 2024-07-07 documents intact bilateral lower extremity sensation and strength, no bowel or bladder dysfunction, no saddle anesthesia, no fever of unknown origin, and no unexplained weight loss, confirming absence of red-flag findings.",
+            "summary": "Neurological examination on 2024-07-07 documents lower extremity sensation and strength intact bilaterally, no bowel or bladder dysfunction, no saddle anesthesia, no fever of unknown origin, and no unexplained weight loss, confirming absence of red-flag findings.",
             "citations": [
               "Observation/neuro-exam-004"
             ],
@@ -105,16 +105,16 @@
           {
             "criterion_id": "c4",
             "status": "not_met",
-            "summary": "No red-flag findings are present; the neurological exam explicitly rules out bowel/bladder dysfunction, saddle anesthesia, fever, and weight loss, so the alternative immediate-imaging pathway does not apply.",
+            "summary": "No red-flag findings are present; the neurological exam explicitly documents absence of bowel/bladder dysfunction, saddle anesthesia, fever, and weight loss, so the alternative immediate-imaging pathway is not triggered.",
             "citations": [
               "Observation/neuro-exam-004"
             ],
-            "policy_quote": "Presence of red-flag findings permits immediate imaging without prior authorization (alternative pathway bypassing standard criteria)."
+            "policy_quote": "Presence of red-flag findings permits immediate imaging without prior authorization (alternative pathway that bypasses the standard criteria)."
           }
         ]
       },
-      "input_tokens": 1802,
-      "output_tokens": 1029,
+      "input_tokens": 1820,
+      "output_tokens": 1439,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -122,13 +122,18 @@
       "schema_fingerprint": "df1465ba9d6d",
       "system_hash": "40990d39c2435f5c",
       "response": {
-        "decision": "approve",
-        "rationale": "All required criteria are met. c1 is met: Condition/lbp-004 documents non-specific low back pain with onset 2024-05-10 and an 8-week duration noted at the 2024-07-07 visit, exceeding the 6-week minimum. c2 is met: Procedure/pt-course-004 documents a physician-supervised physical therapy course from 2024-05-20 to 2024-07-01 (6 weeks) with minimal improvement, demonstrating conservative-management failure with treatment dates and outcome. c3 is met: Observation/neuro-exam-004 on 2024-07-07 confirms absence of red-flag findings (intact sensation/strength, no bowel/bladder dysfunction, no saddle anesthesia, no fever, no unexplained weight loss). c4 is not required (alternative pathway) and not_met per Observation/neuro-exam-004, which does not affect approval since all required standard criteria are satisfied. Coverage is active with Acme Health Plan.",
-        "confidence": 0.9,
-        "gaps": []
+        "decision": "insufficient_evidence",
+        "rationale": "Required criteria c1 and c3 are met: c1 is supported by Condition/lbp-004 documenting an onset of 2024-05-10 and an 8-week symptom duration exceeding the 6-week minimum; c3 is supported by Observation/neuro-exam-004 documenting intact bilateral strength/sensation and absence of red-flag findings. c2 remains unresolved: Procedure/pt-course-004 documents a 6-week physical therapy course (2024-05-20 to 2024-07-01) with treatment dates and a clinical outcome of minimal improvement, but the treating provider is identified only by role (physical therapist) and is not named, and physician supervision of the therapy is not established. c4 is a non-required alternative pathway and is not triggered because no red-flag findings are present (Observation/neuro-exam-004). Because c2 lacks complete supporting documentation, this determination reflects missing support to obtain, not grounds for an adverse decision.",
+        "confidence": 0.55,
+        "gaps": [
+          {
+            "criterion_id": "c2",
+            "needed_evidence": "Documentation naming the treating provider and confirming physician supervision of the 6-week physical therapy course (e.g., supervising physician's name and role), in addition to the already-documented treatment dates (2024-05-20 to 2024-07-01) and clinical outcome of minimal improvement."
+          }
+        ]
       },
-      "input_tokens": 1917,
-      "output_tokens": 480,
+      "input_tokens": 1966,
+      "output_tokens": 1715,
       "model": "claude-opus-4-8"
     }
   }

@@ -1,6 +1,6 @@
 {
   "case_id": "case_002",
-  "recorded_at": "2026-08-02T17:21:00.438296+00:00",
+  "recorded_at": "2026-09-17T17:19:20.155935+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -55,18 +55,18 @@
           },
           {
             "id": "c3",
-            "text": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify).",
+            "text": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify), with program start/end dates, attendance/visit records, and a clinical summary from the supervising provider.",
             "required": true
           },
           {
             "id": "c4",
-            "text": "Completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming the absence of active psychiatric contraindications.",
+            "text": "Completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications.",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 1187,
+      "output_tokens": 763,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -78,7 +78,7 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "A BMI observation of 41.3 kg/m2 is documented, exceeding the 40 kg/m2 threshold.",
+            "summary": "BMI recorded as 41.3 kg/m2 on 2024-04-01, which exceeds the 40 kg/m2 threshold.",
             "citations": [
               "Observation/bmi-002"
             ],
@@ -87,7 +87,7 @@
           {
             "criterion_id": "c2",
             "status": "met",
-            "summary": "BMI of 41.3 kg/m2 (\u226535) is documented along with active uncontrolled Type 2 diabetes mellitus, an obesity-related comorbidity.",
+            "summary": "BMI of 41.3 kg/m2 (\u226535) documented along with an active diagnosis of uncontrolled Type 2 diabetes mellitus, an obesity-related comorbidity.",
             "citations": [
               "Observation/bmi-002",
               "Condition/t2dm-002"
@@ -97,23 +97,23 @@
           {
             "criterion_id": "c3",
             "status": "insufficient",
-            "summary": "No documentation of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months is present in the bundle.",
+            "summary": "No documentation of a physician-supervised structured diet and lifestyle modification program, program dates, attendance records, or a supervising provider summary appears in the bundle.",
             "citations": [],
-            "policy_quote": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify)."
+            "policy_quote": "Documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify), with program start/end dates, attendance/visit records, and a clinical summary from the supervising provider."
           },
           {
             "criterion_id": "c4",
             "status": "met",
-            "summary": "A psychiatric pre-surgical evaluation dated 2024-03-20 documents that the patient was cleared for bariatric surgery with no active psychiatric contraindications, within 12 months of the request.",
+            "summary": "A final psychiatric pre-surgical evaluation dated 2024-03-20 concluded the patient is cleared for bariatric surgery with no active psychiatric contraindications.",
             "citations": [
               "DiagnosticReport/psych-eval-002"
             ],
-            "policy_quote": "Completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming the absence of active psychiatric contraindications."
+            "policy_quote": "Completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications."
           }
         ]
       },
-      "input_tokens": 1870,
-      "output_tokens": 850,
+      "input_tokens": 1900,
+      "output_tokens": 902,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -122,17 +122,17 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "insufficient_evidence",
-        "rationale": "Required criterion c4 is met per DiagnosticReport/psych-eval-002 (psychiatric evaluation dated 2024-03-20 with clearance and no active contraindications). Optional criteria c1 (Observation/bmi-002, BMI 41.3) and c2 (Observation/bmi-002, Condition/t2dm-002) are also met. However, required criterion c3 is unresolved: no documentation of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months is present in the bundle. Because a required criterion lacks supporting documentation, the request cannot be approved at this time.",
+        "rationale": "Required criterion c4 is met per DiagnosticReport/psych-eval-002 (psychiatric clearance dated 2024-03-20). Optional criteria c1 (Observation/bmi-002, BMI 41.3) and c2 (Observation/bmi-002, Condition/t2dm-002) are also met. However, required criterion c3 is unresolved: no documentation of a physician-supervised, structured diet and lifestyle modification program, program dates, attendance records, or supervising provider summary appears in the bundle. Because a required criterion lacks supporting documentation, the request cannot be approved as submitted; additional records are needed.",
         "confidence": 0.9,
         "gaps": [
           {
             "criterion_id": "c3",
-            "needed_evidence": "Documentation of a physician-supervised, structured diet and lifestyle modification program lasting at least 6 consecutive months, including start and end dates and confirmation of supervision by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify)."
+            "needed_evidence": "Documentation of a completed physician-supervised (or RD under physician oversight) structured diet and lifestyle modification program spanning at least 6 consecutive months, including program start/end dates, attendance/visit records, and a clinical summary from the supervising provider."
           }
         ]
       },
-      "input_tokens": 1939,
-      "output_tokens": 361,
+      "input_tokens": 2006,
+      "output_tokens": 352,
       "model": "claude-opus-4-8"
     }
   }

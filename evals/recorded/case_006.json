@@ -1,6 +1,6 @@
 {
   "case_id": "case_006",
-  "recorded_at": "2026-08-02T17:22:25.496833+00:00",
+  "recorded_at": "2026-09-17T17:20:55.605930+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -50,7 +50,7 @@
           },
           {
             "id": "c2",
-            "text": "Presence of mechanical symptoms (locking, catching, giving way).",
+            "text": "Presence of mechanical symptoms (locking, catching, or giving way).",
             "required": false
           },
           {
@@ -60,38 +60,18 @@
           },
           {
             "id": "c4",
-            "text": "Failure of at least 6 weeks of conservative therapy.",
+            "text": "Failure of at least 6 weeks of conservative therapy, including at least one of: physical therapy, NSAIDs, activity modification, or intra-articular injection.",
             "required": true
           },
           {
             "id": "c5",
-            "text": "Conservative therapy included physical therapy.",
-            "required": false
-          },
-          {
-            "id": "c6",
-            "text": "Conservative therapy included NSAIDs.",
-            "required": false
-          },
-          {
-            "id": "c7",
-            "text": "Conservative therapy included activity modification.",
-            "required": false
-          },
-          {
-            "id": "c8",
-            "text": "Conservative therapy included intra-articular injection.",
-            "required": false
-          },
-          {
-            "id": "c9",
             "text": "Absence of advanced osteoarthritis (Kellgren-Lawrence grade 4) in the affected compartment.",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 966,
+      "output_tokens": 576,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -103,7 +83,7 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "MRI of the right knee documents a full-thickness horizontal tear of the medial meniscus posterior horn.",
+            "summary": "MRI of the right knee documents a full-thickness horizontal tear of the medial meniscus posterior horn, confirming a meniscal tear.",
             "citations": [
               "ImagingStudy/mri-knee-006"
             ],
@@ -112,16 +92,16 @@
           {
             "criterion_id": "c2",
             "status": "met",
-            "summary": "Patient reports right knee locking 2-3 times per week and documented giving-way episodes 4 times in the past month.",
+            "summary": "Patient reports right knee locking 2-3 times per week and giving-way episodes documented 4 times in the past month.",
             "citations": [
               "Observation/mechanical-symptoms-006"
             ],
-            "policy_quote": "Presence of mechanical symptoms (locking, catching, giving way)."
+            "policy_quote": "Presence of mechanical symptoms (locking, catching, or giving way)."
           },
           {
             "criterion_id": "c3",
             "status": "met",
-            "summary": "Exam shows positive McMurray test with medial joint-line tenderness and pain.",
+            "summary": "Exam shows positive McMurray test in the medial compartment with audible click and pain, plus medial joint-line tenderness.",
             "citations": [
               "Observation/mechanical-symptoms-006"
             ],
@@ -130,50 +110,16 @@
           {
             "criterion_id": "c4",
             "status": "met",
-            "summary": "An 8-week physical therapy course with concurrent NSAIDs was completed and deemed unsuccessful with persistent symptoms.",
+            "summary": "Patient completed an 8-week physical therapy course with concurrent NSAIDs (ibuprofen 600mg TID) and activity modification; conservative management deemed unsuccessful with persistent symptoms.",
             "citations": [
               "Procedure/pt-knee-006"
             ],
-            "policy_quote": "Failure of at least 6 weeks of conservative therapy."
+            "policy_quote": "Failure of at least 6 weeks of conservative therapy, including at least one of: physical therapy, NSAIDs, activity modification, or intra-articular injection."
           },
           {
             "criterion_id": "c5",
             "status": "met",
-            "summary": "Conservative therapy included an 8-week physical therapy course with quad strengthening and range of motion.",
-            "citations": [
-              "Procedure/pt-knee-006"
-            ],
-            "policy_quote": "Conservative therapy included physical therapy."
-          },
-          {
-            "criterion_id": "c6",
-            "status": "met",
-            "summary": "NSAIDs (ibuprofen 600mg TID) were prescribed concurrently with PT.",
-            "citations": [
-              "Procedure/pt-knee-006"
-            ],
-            "policy_quote": "Conservative therapy included NSAIDs."
-          },
-          {
-            "criterion_id": "c7",
-            "status": "met",
-            "summary": "Conservative therapy included activity modification as part of the PT course.",
-            "citations": [
-              "Procedure/pt-knee-006"
-            ],
-            "policy_quote": "Conservative therapy included activity modification."
-          },
-          {
-            "criterion_id": "c8",
-            "status": "insufficient",
-            "summary": "No documentation of intra-articular injection in the bundle.",
-            "citations": [],
-            "policy_quote": "Conservative therapy included intra-articular injection."
-          },
-          {
-            "criterion_id": "c9",
-            "status": "met",
-            "summary": "Both MRI and weight-bearing X-ray show Kellgren-Lawrence Grade 2 osteoarthritis with Grade 4 advanced OA absent.",
+            "summary": "Both MRI and weight-bearing X-ray document Kellgren-Lawrence Grade 2 osteoarthritis with explicit absence of Grade 4 advanced OA and no bone-on-bone narrowing.",
             "citations": [
               "ImagingStudy/mri-knee-006",
               "ImagingStudy/xray-knee-006"
@@ -182,8 +128,8 @@
           }
         ]
       },
-      "input_tokens": 2376,
-      "output_tokens": 1250,
+      "input_tokens": 2240,
+      "output_tokens": 977,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -192,12 +138,12 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "approve",
-        "rationale": "All required criteria are met. c1 (meniscal tear confirmed by MRI) is met per ImagingStudy/mri-knee-006 showing a full-thickness horizontal tear of the medial meniscus posterior horn. c4 (failure of at least 6 weeks of conservative therapy) is met per Procedure/pt-knee-006 documenting a completed 8-week PT course with concurrent NSAIDs deemed unsuccessful. c9 (absence of Kellgren-Lawrence grade 4 OA) is met per ImagingStudy/mri-knee-006 and ImagingStudy/xray-knee-006 showing Grade 2 OA with advanced Grade 4 OA absent. The optional criteria c2, c3, c5, c6, and c7 are also met, and c8 (intra-articular injection) is insufficient but not required and does not affect the determination.",
-        "confidence": 0.95,
+        "rationale": "All required criteria are met. c1 (meniscal tear confirmed by MRI) is met per ImagingStudy/mri-knee-006 showing a full-thickness horizontal tear of the medial meniscus posterior horn. c4 (failure of \u22656 weeks conservative therapy) is met per Procedure/pt-knee-006 documenting an 8-week PT course with concurrent NSAIDs and activity modification, unsuccessful. c5 (absence of KL grade 4 OA) is met per ImagingStudy/mri-knee-006 and ImagingStudy/xray-knee-006 documenting KL Grade 2 with explicit absence of advanced OA. The optional criteria c2 (mechanical symptoms, Observation/mechanical-symptoms-006) and c3 (joint-line pain with positive McMurray, Observation/mechanical-symptoms-006) are also met. Coverage is active with Acme Health Plan.",
+        "confidence": 0.92,
         "gaps": []
       },
-      "input_tokens": 2415,
-      "output_tokens": 366,
+      "input_tokens": 1946,
+      "output_tokens": 347,
       "model": "claude-opus-4-8"
     }
   }
