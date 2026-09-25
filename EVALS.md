@@ -93,6 +93,26 @@ for a `met` criterion must resolve to a real bundle entry.
 The count of stripped citations (removed by `resolve_citations`) is reported
 for visibility — it is expected for case_007 (ghost citation).
 
+### S5 — Confidence calibration
+
+Does the determination drafter's self-reported `confidence` (0-1) actually
+track whether the decision was correct?
+
+**Matching strategy:** Brier score — `mean((confidence - outcome)**2)` across
+all determination-stage cases, where `outcome` is 1.0 if S1 (determination
+accuracy) passed and 0.0 if it failed. Lower is better; 0 is perfect
+calibration, 0.25 is what a constant `confidence=0.5` guess produces.
+
+Unlike S1-S4, this is not a per-case pass/fail check — confidence itself has
+no "expected" value in the ground truth (only the decision does), so there is
+nothing to gate on per case. S5 is reported, not enforced: it does not fail
+CI and is not part of `--baseline-check`.
+
+**Sample size:** only 13 of 15 cases reach the determination stage (the other
+2 stop at intake/eligibility, before any confidence is produced). N=13 is far
+too small for a statistically defensible calibration curve — see Limitations
+below.
+
 ---
 
 ## Test cases
@@ -106,14 +126,32 @@ for visibility — it is expected for case_007 (ghost citation).
 | case_005 | Malformed bundle — Patient missing | intake | — | — | Intake rejects missing Patient resource |
 | case_006 | KL Grade III at lower bound | determination | approve | auto | Marginal meeting of imaging threshold |
 | case_007 | Ghost citation — strip-and-log fires | determination | approve | auto | LLM cites a resource referenced in a note but absent as a bundle entry; resolve_citations strips it; criterion stays met via surviving citations |
-| case_008 | Gold-card clean approve (all met) | determination | approve | auto | Alternative payer, all three criteria met cleanly |
+| case_008 | Brain MRI — no matching policy, wrong policy retrieved via RAG | determination | insufficient_evidence | hitl | No CPT 70553 policy in the corpus; none of the mapped criteria are satisfied by brain-MRI evidence (README Known Limitations #5) |
 | case_009 | Lapsed coverage — eligibility rejection | eligibility | — | — | Coverage.status=cancelled → pipeline halts before LLM |
-| case_010 | Near-threshold — HITL route | determination | approve | hitl | Decision approve but confidence exactly at threshold |
+| case_010 | TKA — Grade III OA lower-bound criterion check | determination | approve | auto | All 3 criteria met; C1 tests the "Grade III-IV" boundary; solid documentation → confidence ≥ 0.85 |
 | case_011 | Empty chart — all criteria insufficient | determination | insufficient_evidence | hitl | Bundle has only Patient+Coverage; all criteria silent |
-| case_012 | Near-threshold — auto route | determination | approve | auto | Decision approve with confidence clearly above threshold |
-| case_013 | Wrong policy retrieved | determination | insufficient_evidence | hitl | RAG retrieves wrong CPT policy; criteria unmet |
+| case_012 | Bariatric sleeve — near-threshold HITL, thin C2 documentation | determination | approve | hitl | All 3 criteria technically met, but thin C2 documentation and borderline BMI push confidence below 0.85 → HITL on the confidence branch, not criterion insufficiency |
+| case_013 | TKA — near-threshold auto, solid documentation | determination | approve | auto | Paired with case_012 (same CPT family, similar clinical picture) — complete C2 documentation keeps confidence ≥ 0.85 → auto |
 | case_014 | Psych deferral — required criterion not_met | determination | insufficient_evidence | hitl | DiagnosticReport documents psychiatric clearance NOT granted |
 | case_015 | PT refusal — required criterion not_met | determination | insufficient_evidence | hitl | Observation documents patient refused PT; C2 not_met |
+
+### Known eval failures
+
+S1 is 9/13 on the cases that reach the drafter (11/15 overall; the two
+intake/eligibility cases pass by construction) in the recordings made
+2026-09-17. The previous recordings were also 9/13, with a different failing
+set. No fixture or cassette has been adjusted to make these pass.
+
+| Case | Expected | Recorded | Status |
+|------|----------|----------|--------|
+| case_004 | approve (HITL on confidence) | insufficient_evidence @ 0.55 | Run-to-run variance: approve @ 0.90 in the previous recording. The drafter holds c2 unresolved because the treating provider is named only by role and physician supervision is not established; the fixture sits on that boundary. |
+| case_007 | approve | insufficient_evidence @ 0.72 | Reproducible (0.60 previously). S3 passes 3/3; the drafter still holds c2 unresolved because no named treating provider is recorded. S4 shows 0 stripped citations in both recordings: the recorded model did not cite the ghost resource, so these recordings do not exercise strip-and-log (`tests/test_citation_resolution.py` covers the mechanism). |
+| case_008 | insufficient_evidence | approve @ 0.50 | Known: empty criteria vacuously approve (README Known Limitations #5). Failed in both recordings. |
+| case_012 | approve (HITL on confidence) | insufficient_evidence @ 0.90 | Reproducible: failed in both recordings, and also fails S3 (fixture c2 expected met, recorded not_met). The recorded drafter treats the missing physician/dietitian supervision as failing the supervised-program criterion; the fixture treats it as met with thin documentation. Not adjudicated, and not a scorer bug. |
+
+case_001 failed S1 in the previous recording (insufficient_evidence @ 0.82) and
+passes in the current one, like case_004 in reverse. Each cassette is one
+sample of a non-deterministic model, so S1 status can flip between recordings.
 
 ---
 
@@ -193,6 +231,23 @@ Specific limitations:
 6. **No adversarial cases**: There are no cases designed to elicit prompt
    injection, policy bypass, or reasoning shortcuts. The suite tests the
    happy path and a few error paths; it does not test the security surface.
+
+7. **Calibration sample size**: N=13 confidence/correctness pairs is far too
+   small to estimate a reliability diagram or expected calibration error
+   (ECE) meaningfully — a single case flipping pass/fail moves the Brier
+   score by ~1/13 ≈ 0.077. Treat S5's output as a smoke check that the
+   confidence field is wired correctly and roughly tracks correctness, not
+   as a statistically defensible calibration curve. A binned reliability
+   diagram is planned once the golden set is large enough for bins to hold
+   more than 0-1 samples each.
+
+8. **The committed baseline is a placeholder**: `evals/baseline.json` holds
+   zero floors on every dimension (`git_sha: "placeholder"`), so
+   `--baseline-check`, including the CI step that runs it, cannot fail
+   whatever the scores are. It guards nothing until it is populated with
+   `python -m evals.run --live && python -m evals.run --update-baseline`,
+   which would also lock in the current pass counts (including the failures
+   above) as the floor.
 
 What this suite is good for: **catching regressions**. If a system prompt
 change causes a previously-passing case to fail, the harness will detect it
