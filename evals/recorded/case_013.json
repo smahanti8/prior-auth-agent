@@ -1,6 +1,6 @@
 {
   "case_id": "case_013",
-  "recorded_at": "2026-08-02T17:24:30.849026+00:00",
+  "recorded_at": "2026-09-17T17:23:30.769720+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -45,23 +45,38 @@
         "criteria": [
           {
             "id": "c1",
-            "text": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee.",
+            "text": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee",
             "required": true
           },
           {
             "id": "c2",
-            "text": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documentation specifying treatment duration and clinical outcome.",
+            "text": "Documented failure of conservative management for a minimum of 6 consecutive months",
             "required": true
           },
           {
             "id": "c3",
-            "text": "Documented body mass index (BMI) less than 40 kg/m2 at the time of the pre-surgical evaluation.",
+            "text": "Conservative management included physician-supervised physical therapy",
+            "required": true
+          },
+          {
+            "id": "c4",
+            "text": "Conservative management included anti-inflammatory medication",
+            "required": true
+          },
+          {
+            "id": "c5",
+            "text": "Documentation specifies treatment duration and clinical outcome of conservative management",
+            "required": true
+          },
+          {
+            "id": "c6",
+            "text": "Body mass index (BMI) documented as less than 40 kg/m2 at the time of the pre-surgical evaluation",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 266,
+      "output_tokens": 398,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -73,34 +88,61 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "Standing AP weight-bearing X-ray of the right knee documents Kellgren-Lawrence Grade III osteoarthritis with medial joint-space narrowing, subchondral sclerosis, and osteophyte formation.",
+            "summary": "Standing AP weight-bearing X-ray of the right knee documents Kellgren-Lawrence Grade III osteoarthritis, medial compartment predominant.",
             "citations": [
               "ImagingStudy/xray-knee-013"
             ],
-            "policy_quote": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee."
+            "policy_quote": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee"
           },
           {
             "criterion_id": "c2",
             "status": "met",
-            "summary": "A 7-month course of physician-supervised physical therapy (2 sessions/week) and naproxen 500mg daily is documented with monthly VAS pain assessments showing no meaningful improvement, and an orthopedic surgeon assessment deeming conservative management unsuccessful.",
+            "summary": "Condition documents a 7-month course of physical therapy and NSAID therapy (2025-08-01 to 2026-03-01) that was deemed unsuccessful, exceeding the 6-month minimum.",
             "citations": [
               "Condition/conservative-failure-013"
             ],
-            "policy_quote": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documentation specifying treatment duration and clinical outcome."
+            "policy_quote": "Documented failure of conservative management for a minimum of 6 consecutive months"
           },
           {
             "criterion_id": "c3",
             "status": "met",
-            "summary": "BMI recorded as 35.1 kg/m2 on 2026-03-10, at the time of pre-surgical evaluation, which is less than 40.",
+            "summary": "Conservative management included a 7-month course of physical therapy (2 sessions per week) with monthly functional pain assessments and an orthopedic surgeon assessment.",
+            "citations": [
+              "Condition/conservative-failure-013"
+            ],
+            "policy_quote": "Conservative management included physician-supervised physical therapy"
+          },
+          {
+            "criterion_id": "c4",
+            "status": "met",
+            "summary": "Conservative management included naproxen 500mg daily, an anti-inflammatory (NSAID) medication.",
+            "citations": [
+              "Condition/conservative-failure-013"
+            ],
+            "policy_quote": "Conservative management included anti-inflammatory medication"
+          },
+          {
+            "criterion_id": "c5",
+            "status": "met",
+            "summary": "Documentation specifies a 7-month treatment duration with clinical outcome: VAS 7/10 at baseline, 6.5/10 at 4 months, 7/10 at 7 months with no clinically meaningful improvement; conservative management deemed unsuccessful.",
+            "citations": [
+              "Condition/conservative-failure-013"
+            ],
+            "policy_quote": "Documentation specifies treatment duration and clinical outcome of conservative management"
+          },
+          {
+            "criterion_id": "c6",
+            "status": "met",
+            "summary": "BMI recorded as 35.1 kg/m2 on 2026-03-10 at pre-surgical evaluation, which is less than 40 kg/m2.",
             "citations": [
               "Observation/bmi-013"
             ],
-            "policy_quote": "Documented body mass index (BMI) less than 40 kg/m2 at the time of the pre-surgical evaluation."
+            "policy_quote": "Body mass index (BMI) documented as less than 40 kg/m2 at the time of the pre-surgical evaluation"
           }
         ]
       },
-      "input_tokens": 2096,
-      "output_tokens": 767,
+      "input_tokens": 2191,
+      "output_tokens": 1216,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -109,12 +151,12 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "approve",
-        "rationale": "All three required criteria are met. c1 is met: standing AP weight-bearing X-ray of the right knee documents Kellgren-Lawrence Grade III osteoarthritis (ImagingStudy/xray-knee-013). c2 is met: a 7-month course of physician-supervised physical therapy plus naproxen 500mg daily with monthly VAS assessments showing no meaningful improvement and an orthopedic surgeon deeming conservative management unsuccessful (Condition/conservative-failure-013), satisfying the 6-month minimum with documented duration and outcome. c3 is met: BMI recorded as 35.1 kg/m2 at pre-surgical evaluation on 2026-03-10, below the 40 threshold (Observation/bmi-013). Coverage is active with Acme Health Plan.",
+        "rationale": "All six required criteria are met. c1 is met per standing AP weight-bearing X-ray documenting Kellgren-Lawrence Grade III osteoarthritis of the right knee (ImagingStudy/xray-knee-013). c2 is met with a 7-month course of conservative management (2025-08-01 to 2026-03-01) exceeding the 6-month minimum (Condition/conservative-failure-013). c3 is met via 7-month physician-supervised physical therapy with orthopedic surgeon assessment (Condition/conservative-failure-013). c4 is met with naproxen 500mg daily NSAID therapy (Condition/conservative-failure-013). c5 is met with documented 7-month duration and clinical outcome showing no meaningful improvement (VAS 7/10 baseline to 7/10 at 7 months) (Condition/conservative-failure-013). c6 is met with BMI 35.1 kg/m2 at pre-surgical evaluation on 2026-03-10 (Observation/bmi-013).",
         "confidence": 0.94,
         "gaps": []
       },
-      "input_tokens": 1688,
-      "output_tokens": 319,
+      "input_tokens": 2149,
+      "output_tokens": 374,
       "model": "claude-opus-4-8"
     }
   }

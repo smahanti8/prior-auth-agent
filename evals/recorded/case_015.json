@@ -1,6 +1,6 @@
 {
   "case_id": "case_015",
-  "recorded_at": "2026-08-02T17:25:28.267656+00:00",
+  "recorded_at": "2026-09-17T17:24:19.163584+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -45,12 +45,12 @@
         "criteria": [
           {
             "id": "c1",
-            "text": "Documented low back pain symptoms for a minimum of 6 consecutive weeks (documentation includes symptom onset date or clinical note confirming duration of at least 6 weeks).",
+            "text": "Patient has documented low back pain symptoms for a minimum of 6 consecutive weeks (with symptom onset date or clinical note confirming duration of at least 6 weeks).",
             "required": true
           },
           {
             "id": "c2",
-            "text": "Documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks (documentation includes treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement).",
+            "text": "Patient has documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks, with treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement.",
             "required": true
           },
           {
@@ -60,13 +60,13 @@
           },
           {
             "id": "c4",
-            "text": "Presence of red-flag findings, which permit immediate imaging without prior authorization (alternative pathway bypassing standard criteria).",
+            "text": "Presence of red-flag findings permits immediate imaging without prior authorization (alternative pathway bypassing standard criteria).",
             "required": false
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 599,
+      "output_tokens": 363,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -78,25 +78,25 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "Condition documents low back pain with right leg radiation of 10-week duration with onset date 2026-05-10, exceeding the 6-week minimum.",
+            "summary": "Condition documents low back pain with right lower extremity radiation, onset 2026-05-10, with a clinical note stating 10-week duration, exceeding the 6-week minimum.",
             "citations": [
               "Condition/lbp-015"
             ],
-            "policy_quote": "Documented low back pain symptoms for a minimum of 6 consecutive weeks (documentation includes symptom onset date or clinical note confirming duration of at least 6 weeks)."
+            "policy_quote": "Patient has documented low back pain symptoms for a minimum of 6 consecutive weeks (with symptom onset date or clinical note confirming duration of at least 6 weeks)."
           },
           {
             "criterion_id": "c2",
             "status": "not_met",
-            "summary": "The patient was offered physician-supervised physical therapy but declined it, opting for imaging-first workup. No structured exercise program or physician-supervised conservative management trial was initiated or completed, so there is no documented failure of a 6-week PT course.",
+            "summary": "Patient was offered physician-supervised physical therapy but declined, preferring imaging-first workup. No structured exercise program or physician-supervised conservative management trial was initiated or completed, so there is no documented failure of conservative management.",
             "citations": [
               "Observation/pt-refusal-015"
             ],
-            "policy_quote": "Documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks (documentation includes treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement)."
+            "policy_quote": "Patient has documented failure of a course of conservative management, including physician-supervised physical therapy administered for a minimum of 6 weeks, with treating provider, treatment dates, and clinical outcome demonstrating lack of adequate improvement."
           },
           {
             "criterion_id": "c3",
             "status": "met",
-            "summary": "Neurological examination dated 2026-07-20 documents intact reflexes, no focal motor deficits, intact sensation, no bowel/bladder dysfunction, no saddle anesthesia, no fever, and no unexplained weight loss, with all five red-flag categories documented as absent.",
+            "summary": "Neurological examination documents intact reflexes, no focal motor deficits, intact sensation, no bowel/bladder dysfunction, no saddle anesthesia, no fever, and no unexplained weight loss. All five red-flag categories documented as absent.",
             "citations": [
               "Observation/neuro-exam-015"
             ],
@@ -105,16 +105,16 @@
           {
             "criterion_id": "c4",
             "status": "not_met",
-            "summary": "No red-flag findings are present; the neurological exam explicitly documents all five red-flag categories as absent, so the alternative pathway does not apply.",
+            "summary": "No red-flag findings are present; the neurological examination explicitly documents all five red-flag categories as absent, so the alternative immediate-imaging pathway is not triggered.",
             "citations": [
               "Observation/neuro-exam-015"
             ],
-            "policy_quote": "Presence of red-flag findings, which permit immediate imaging without prior authorization (alternative pathway bypassing standard criteria)."
+            "policy_quote": "Presence of red-flag findings permits immediate imaging without prior authorization (alternative pathway bypassing standard criteria)."
           }
         ]
       },
-      "input_tokens": 2149,
-      "output_tokens": 811,
+      "input_tokens": 2145,
+      "output_tokens": 839,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -123,17 +123,17 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "insufficient_evidence",
-        "rationale": "Criterion c1 is met: Condition/lbp-015 documents low back pain with 10-week duration and onset 2026-05-10, exceeding the 6-week minimum. Criterion c3 is met: Observation/neuro-exam-015 dated 2026-07-20 documents absence of all five red-flag categories. Criterion c2 (required) is unresolved: Observation/pt-refusal-015 indicates the patient declined physician-supervised physical therapy, so no completed 6-week conservative-management trial with documented failure is on file. Criterion c4 is an optional alternative pathway and does not apply since no red-flag findings are present (Observation/neuro-exam-015). Because required criterion c2 lacks supporting documentation, the case cannot be approved as submitted.",
+        "rationale": "Criterion c1 is met: Condition/lbp-015 documents low back pain onset 2026-05-10 with a clinical note confirming 10-week duration, exceeding the 6-week minimum. Criterion c3 is met: Observation/neuro-exam-015 documents all five red-flag categories as absent. Criterion c2 is unresolved: Observation/pt-refusal-015 indicates physician-supervised physical therapy was offered but declined, so no documented failure of a completed conservative-management course exists. Criterion c4 is a non-required alternative pathway and is not triggered (Observation/neuro-exam-015), which does not affect the standard-pathway determination. Because required criterion c2 lacks supporting documentation, additional support is needed.",
         "confidence": 0.9,
         "gaps": [
           {
             "criterion_id": "c2",
-            "needed_evidence": "Documentation of a completed physician-supervised physical therapy course of at least 6 weeks, including treating provider name, specific treatment dates, and a clinical outcome note demonstrating inadequate improvement (i.e., failure of conservative management)."
+            "needed_evidence": "Documentation of a completed physician-supervised conservative-management course, including at least 6 weeks of physical therapy with treating provider name, specific treatment dates, and a clinical outcome demonstrating lack of adequate improvement."
           }
         ]
       },
-      "input_tokens": 1884,
-      "output_tokens": 467,
+      "input_tokens": 1877,
+      "output_tokens": 422,
       "model": "claude-opus-4-8"
     }
   }

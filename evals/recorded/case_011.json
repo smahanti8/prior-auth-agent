@@ -1,6 +1,6 @@
 {
   "case_id": "case_011",
-  "recorded_at": "2026-08-02T17:23:47.985471+00:00",
+  "recorded_at": "2026-09-17T17:22:42.254592+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -45,23 +45,23 @@
         "criteria": [
           {
             "id": "c1",
-            "text": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee.",
+            "text": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee",
             "required": true
           },
           {
             "id": "c2",
-            "text": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documentation specifying treatment duration and clinical outcome.",
+            "text": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documented treatment duration and clinical outcome",
             "required": true
           },
           {
             "id": "c3",
-            "text": "Documented body mass index (BMI) less than 40 kg/m2 at the time of the pre-surgical evaluation.",
+            "text": "Body mass index (BMI) documented as less than 40 kg/m2 at the time of the pre-surgical evaluation",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 275,
+      "output_tokens": 269,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -73,28 +73,28 @@
           {
             "criterion_id": "c1",
             "status": "insufficient",
-            "summary": "The bundle contains only a Patient and Coverage resource. There is no diagnosis, condition, or radiographic documentation of knee osteoarthritis or Kellgren-Lawrence grading.",
+            "summary": "The bundle contains only a Patient and Coverage resource. There is no diagnosis, radiograph report, or condition documenting knee osteoarthritis or Kellgren-Lawrence grade.",
             "citations": [],
-            "policy_quote": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee."
+            "policy_quote": "Documented diagnosis of severe knee osteoarthritis, Kellgren-Lawrence Grade III or IV, confirmed on standing weight-bearing radiographs of the affected knee"
           },
           {
             "criterion_id": "c2",
             "status": "insufficient",
-            "summary": "No documentation of conservative management, physical therapy, anti-inflammatory medication, treatment duration, or clinical outcomes is present in the bundle.",
+            "summary": "No documentation of conservative management, physical therapy, anti-inflammatory medication, or treatment duration/outcomes appears in the bundle.",
             "citations": [],
-            "policy_quote": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documentation specifying treatment duration and clinical outcome."
+            "policy_quote": "Documented failure of conservative management for a minimum of 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication, with documented treatment duration and clinical outcome"
           },
           {
             "criterion_id": "c3",
             "status": "insufficient",
-            "summary": "No BMI or anthropometric observation is documented in the bundle.",
+            "summary": "No BMI observation or pre-surgical evaluation data is present in the bundle.",
             "citations": [],
-            "policy_quote": "Documented body mass index (BMI) less than 40 kg/m2 at the time of the pre-surgical evaluation."
+            "policy_quote": "Body mass index (BMI) documented as less than 40 kg/m2 at the time of the pre-surgical evaluation"
           }
         ]
       },
-      "input_tokens": 1204,
-      "output_tokens": 434,
+      "input_tokens": 1198,
+      "output_tokens": 433,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -103,25 +103,25 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "insufficient_evidence",
-        "rationale": "None of the three required criteria are currently supported by the bundle, which contains only Patient and Coverage resources. c1 (severe knee osteoarthritis, Kellgren-Lawrence Grade III/IV on weight-bearing radiographs) is unresolved with no diagnosis, condition, or radiographic documentation. c2 (failure of conservative management for at least 6 consecutive months, including physician-supervised physical therapy and anti-inflammatory medication with duration and outcomes) is unresolved with no documentation present. c3 (BMI less than 40 kg/m2 at pre-surgical evaluation) is unresolved with no anthropometric observation documented. No citations accompany any evidence item.",
-        "confidence": 0.97,
+        "rationale": "CPT 27447 (total knee arthroplasty) request under active Acme Health Plan coverage. All three required criteria are currently unresolved: c1 (severe knee osteoarthritis, Kellgren-Lawrence Grade III/IV on standing weight-bearing radiographs) is insufficient \u2014 the bundle contains only Patient and Coverage resources with no diagnosis or radiograph report; c2 (documented failure of \u22656 consecutive months of conservative management including physician-supervised physical therapy and anti-inflammatory medication) is insufficient \u2014 no such documentation is present; c3 (BMI < 40 kg/m2 at pre-surgical evaluation) is insufficient \u2014 no BMI observation or pre-surgical evaluation data is present. No citations were available for any criterion. Additional documentation is needed to establish these criteria.",
+        "confidence": 0.95,
         "gaps": [
           {
             "criterion_id": "c1",
-            "needed_evidence": "A documented diagnosis of severe knee osteoarthritis with a Condition resource and standing weight-bearing radiograph report of the affected knee specifying Kellgren-Lawrence Grade III or IV."
+            "needed_evidence": "A Condition/diagnosis resource documenting severe knee osteoarthritis and a standing weight-bearing radiograph report of the affected knee confirming Kellgren-Lawrence Grade III or IV."
           },
           {
             "criterion_id": "c2",
-            "needed_evidence": "Documentation of at least 6 consecutive months of conservative management, including physician-supervised physical therapy and anti-inflammatory medication, with specific treatment start/end dates and clinical outcomes."
+            "needed_evidence": "Records of at least 6 consecutive months of conservative management with specific dates, including physician-supervised physical therapy and anti-inflammatory medication, and documented treatment duration and clinical outcome."
           },
           {
             "criterion_id": "c3",
-            "needed_evidence": "A BMI observation (value less than 40 kg/m2) recorded at the time of the pre-surgical evaluation, with date."
+            "needed_evidence": "A BMI observation of less than 40 kg/m2 recorded at the time of the pre-surgical evaluation."
           }
         ]
       },
-      "input_tokens": 1558,
-      "output_tokens": 508,
+      "input_tokens": 1551,
+      "output_tokens": 550,
       "model": "claude-opus-4-8"
     }
   }

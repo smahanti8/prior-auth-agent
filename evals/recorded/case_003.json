@@ -1,6 +1,6 @@
 {
   "case_id": "case_003",
-  "recorded_at": "2026-08-02T17:21:30.334668+00:00",
+  "recorded_at": "2026-09-17T17:19:44.950824+00:00",
   "model": "claude-opus-4-8",
   "nodes": {
     "policy_rag": {
@@ -45,38 +45,28 @@
         "criteria": [
           {
             "id": "c1",
-            "text": "Patient has a documented BMI of 40 kg/m2 or greater",
+            "text": "Patient has a documented body mass index (BMI) of 40 kg/m2 or greater.",
             "required": false
           },
           {
             "id": "c2",
-            "text": "Patient has a documented BMI of 35 kg/m2 or greater with at least one qualifying obesity-related comorbidity (Type 2 diabetes mellitus, hypertension, obstructive sleep apnea, or clinically significant cardiovascular disease)",
+            "text": "Patient has a documented body mass index (BMI) of 35 kg/m2 or greater with at least one qualifying obesity-related comorbidity (Type 2 diabetes mellitus, hypertension, obstructive sleep apnea, or clinically significant cardiovascular disease).",
             "required": false
           },
           {
             "id": "c3",
-            "text": "Patient has documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify)",
+            "text": "Patient has documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify).",
             "required": true
           },
           {
             "id": "c4",
-            "text": "Documentation of the diet program includes program start and end dates, attendance or visit records, and a clinical summary from the supervising provider",
-            "required": true
-          },
-          {
-            "id": "c5",
-            "text": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request",
-            "required": true
-          },
-          {
-            "id": "c6",
-            "text": "The psychiatric/psychological evaluation includes documented clearance for bariatric surgery, confirming absence of active psychiatric contraindications",
+            "text": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications.",
             "required": true
           }
         ]
       },
       "input_tokens": 2643,
-      "output_tokens": 760,
+      "output_tokens": 698,
       "model": "claude-opus-4-8"
     },
     "evidence_extractor": {
@@ -88,63 +78,45 @@
           {
             "criterion_id": "c1",
             "status": "met",
-            "summary": "Documented BMI of 41.3 kg/m2 recorded on 2024-04-01, which exceeds the 40 kg/m2 threshold.",
+            "summary": "Documented BMI of 41.3 kg/m2, which is 40 or greater.",
             "citations": [
               "Observation/bmi-003"
             ],
-            "policy_quote": "Patient has a documented BMI of 40 kg/m2 or greater"
+            "policy_quote": "Patient has a documented body mass index (BMI) of 40 kg/m2 or greater."
           },
           {
             "criterion_id": "c2",
             "status": "met",
-            "summary": "BMI is 41.3 kg/m2 (\u226535) and patient has active uncontrolled Type 2 diabetes mellitus, a qualifying obesity-related comorbidity.",
+            "summary": "BMI 41.3 kg/m2 (\u226535) documented along with active uncontrolled Type 2 diabetes mellitus, a qualifying comorbidity.",
             "citations": [
               "Observation/bmi-003",
               "Condition/t2dm-003"
             ],
-            "policy_quote": "Patient has a documented BMI of 35 kg/m2 or greater with at least one qualifying obesity-related comorbidity (Type 2 diabetes mellitus, hypertension, obstructive sleep apnea, or clinically significant cardiovascular disease)"
+            "policy_quote": "Patient has a documented body mass index (BMI) of 35 kg/m2 or greater with at least one qualifying obesity-related comorbidity (Type 2 diabetes mellitus, hypertension, obstructive sleep apnea, or clinically significant cardiovascular disease)."
           },
           {
             "criterion_id": "c3",
             "status": "not_met",
-            "summary": "No documentation of a physician-supervised, structured diet and lifestyle program of at least 6 months. The only weight-related record is a 12-month weight trend based on patient self-report, and the bariatric consult notes the program completion documentation is still awaited.",
+            "summary": "The only weight-related documentation is a 12-month weight trend based on patient self-report, which does not meet the requirement for a physician-supervised, structured diet and lifestyle program. The bariatric consult note states the program completion documentation is still awaited.",
             "citations": [
               "Observation/weight-history-003",
               "Procedure/bariatric-consult-003"
             ],
-            "policy_quote": "Patient has documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify)"
+            "policy_quote": "Patient has documented completion of a physician-supervised, structured diet and lifestyle modification program for a minimum of 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight (self-directed weight loss does not qualify)."
           },
           {
             "criterion_id": "c4",
-            "status": "not_met",
-            "summary": "No diet program documentation with start/end dates, attendance/visit records, or a supervising provider clinical summary is present in the bundle; the surgical consult explicitly notes it is awaiting program completion documentation.",
-            "citations": [
-              "Procedure/bariatric-consult-003"
-            ],
-            "policy_quote": "Documentation of the diet program includes program start and end dates, attendance or visit records, and a clinical summary from the supervising provider"
-          },
-          {
-            "criterion_id": "c5",
             "status": "met",
-            "summary": "A psychiatric pre-surgical evaluation was completed on 2024-03-20, within 12 months prior to the request.",
+            "summary": "Psychiatric pre-surgical evaluation dated 2024-03-20 (within 12 months of the request) concluded the patient is cleared for bariatric surgery with no active psychiatric contraindications.",
             "citations": [
               "DiagnosticReport/psych-eval-003"
             ],
-            "policy_quote": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request"
-          },
-          {
-            "criterion_id": "c6",
-            "status": "met",
-            "summary": "The psychiatric evaluation concludes the patient is cleared for bariatric surgery with no active psychiatric contraindications.",
-            "citations": [
-              "DiagnosticReport/psych-eval-003"
-            ],
-            "policy_quote": "The psychiatric/psychological evaluation includes documented clearance for bariatric surgery, confirming absence of active psychiatric contraindications"
+            "policy_quote": "Patient has completed a formal psychiatric or psychological evaluation within 12 months prior to the authorization request, including documented clearance for bariatric surgery confirming absence of active psychiatric contraindications."
           }
         ]
       },
-      "input_tokens": 2340,
-      "output_tokens": 1218,
+      "input_tokens": 2243,
+      "output_tokens": 861,
       "model": "claude-opus-4-8"
     },
     "determination": {
@@ -153,21 +125,17 @@
       "system_hash": "40990d39c2435f5c",
       "response": {
         "decision": "insufficient_evidence",
-        "rationale": "Required criteria c5 (Observation DiagnosticReport/psych-eval-003) and c6 (DiagnosticReport/psych-eval-003) are met, with a psychiatric evaluation completed 2024-03-20 confirming clearance. Optional criteria c1 (Observation/bmi-003) and c2 (Observation/bmi-003, Condition/t2dm-003) are also met. However, required criterion c3 is unresolved: no documentation of a physician-supervised, structured diet and lifestyle program of at least 6 months exists, as the only record is a self-reported weight trend and the bariatric consult (Observation/weight-history-003, Procedure/bariatric-consult-003) notes program documentation is still awaited. Required criterion c4 is likewise unresolved: no diet program documentation with dates, attendance records, or supervising provider summary is present (Procedure/bariatric-consult-003). These two required criteria lack supporting documentation to obtain.",
-        "confidence": 0.95,
+        "rationale": "Eligibility is active with Acme Health Plan. Required criterion c4 is met per DiagnosticReport/psych-eval-003 (psychiatric evaluation dated 2024-03-20 within 12 months, with documented clearance and no active contraindications). The non-required criteria c1 (BMI 41.3 per Observation/bmi-003) and c2 (BMI \u226535 with Type 2 diabetes per Observation/bmi-003 and Condition/t2dm-003) are also met. However, required criterion c3 remains unresolved: the only documentation is a self-reported 12-month weight trend (Observation/weight-history-003) and a bariatric consult note (Procedure/bariatric-consult-003) indicating program completion documentation is still awaited, which does not establish a physician-supervised, structured diet and lifestyle program. Because a required criterion lacks supporting documentation, the request cannot be approved as submitted.",
+        "confidence": 0.94,
         "gaps": [
           {
             "criterion_id": "c3",
-            "needed_evidence": "Documentation of a completed physician-supervised (physician or registered dietitian under physician oversight) structured diet and lifestyle modification program lasting at least 6 consecutive months, with the supervising provider identified."
-          },
-          {
-            "criterion_id": "c4",
-            "needed_evidence": "Diet program records including program start and end dates, attendance/visit logs, and a clinical summary from the supervising provider."
+            "needed_evidence": "Documentation confirming completion of a physician-supervised, structured diet and lifestyle modification program for at least 6 consecutive months, supervised by a licensed physician or registered dietitian under physician oversight, including program start and end dates and the name/credentials of the supervising provider (self-directed weight loss does not qualify)."
           }
         ]
       },
-      "input_tokens": 2438,
-      "output_tokens": 559,
+      "input_tokens": 2035,
+      "output_tokens": 493,
       "model": "claude-opus-4-8"
     }
   }
