@@ -346,6 +346,40 @@ def _routing_precision_recall(eval_data: dict) -> dict:
     }
 
 
+def _calibration_metrics(eval_data: Optional[dict]) -> dict:
+    """Brier score for S1 determination confidence: mean((confidence - outcome)**2)
+    over determination-stage cases, where outcome is 1.0 if S1 passed else 0.0.
+
+    N is small (13 determination-stage golden cases) — this is a smoke check
+    that confidence is wired correctly and roughly tracks correctness, not a
+    statistically powered calibration curve. See EVALS.md S5.
+    """
+    if eval_data is None:
+        return {"n": 0, "brier_score": None, "pairs": []}
+
+    pairs = []
+    for case in eval_data.get("cases", []):
+        s1 = case.get("scores", {}).get("determination", {})
+        confidence = s1.get("confidence")
+        if confidence is None:
+            continue
+        correct = s1.get("result") == "pass"
+        pairs.append({
+            "case_id": case["case_id"],
+            "confidence": confidence,
+            "correct": correct,
+        })
+
+    n = len(pairs)
+    if n == 0:
+        return {"n": 0, "brier_score": None, "pairs": []}
+
+    brier_score = sum(
+        (p["confidence"] - (1.0 if p["correct"] else 0.0)) ** 2 for p in pairs
+    ) / n
+    return {"n": n, "brier_score": brier_score, "pairs": pairs}
+
+
 # ── Markdown section builders ─────────────────────────────────────────────────
 
 
@@ -478,6 +512,25 @@ def _section_scoreboard(eval_data: Optional[dict], run_tests: bool) -> str:
         f"| Recall | {recall_str} |\n"
     )
 
+    # Confidence calibration (S5 — see EVALS.md)
+    cal = _calibration_metrics(eval_data)
+    brier_str = f"{cal['brier_score']:.4f}" if cal["brier_score"] is not None else "n/a"
+    cal_rows = "\n".join(
+        f"| `{p['case_id']}` | {p['confidence']:.2f} | {'yes' if p['correct'] else 'no'} |"
+        for p in cal["pairs"]
+    )
+    cal_table = (
+        "\n**S1 confidence calibration (Brier score):**\n\n"
+        f"N={cal['n']} determination-stage cases. Too small for a statistically "
+        "powered calibration curve (see EVALS.md S5) — treat as a smoke check "
+        "that confidence is wired correctly, not a calibration guarantee.\n\n"
+        "| Metric | Value |\n|--------|-------|\n"
+        f"| Cases scored | {cal['n']} |\n"
+        f"| Brier score (lower is better; 0 = perfect) | {brier_str} |\n\n"
+        "| Case | Confidence | Correct |\n|------|------------|---------|\n"
+        + cal_rows + "\n"
+    )
+
     # Key behavioral cases
     cases_by_id = {c["case_id"]: c for c in eval_data.get("cases", [])}
     key_rows = []
@@ -501,7 +554,7 @@ def _section_scoreboard(eval_data: Optional[dict], run_tests: bool) -> str:
         + "\n".join(key_rows)
     )
 
-    return meta + table + pr_table + key_table
+    return meta + table + pr_table + cal_table + key_table
 
 
 def _section_citation_coverage(eval_data: Optional[dict]) -> str:

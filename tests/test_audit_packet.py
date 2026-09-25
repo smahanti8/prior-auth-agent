@@ -9,6 +9,8 @@ would check when reviewing the packet.
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
@@ -16,6 +18,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from prior_auth_agent.audit_packet import (
     _INVARIANT_CONFIG,
     _CRITERION_CONFIG,
+    _calibration_metrics,
     _render_html,
     _section_cost,
     _section_identity,
@@ -51,7 +54,7 @@ FAKE_EVAL_DATA = {
             "title": "Full evidence, bilateral citations",
             "overall": "pass",
             "scores": {
-                "determination": {"result": "pass", "expected": "approve", "actual": "approve"},
+                "determination": {"result": "pass", "expected": "approve", "actual": "approve", "confidence": 0.9},
                 "routing":       {"result": "pass", "expected": "auto",   "actual": "auto"},
                 "criterion_evidence": {
                     "result": "pass",
@@ -71,7 +74,7 @@ FAKE_EVAL_DATA = {
             "title": "Strip-and-log",
             "overall": "pass",
             "scores": {
-                "determination": {"result": "pass", "expected": "approve", "actual": "approve"},
+                "determination": {"result": "pass", "expected": "approve", "actual": "approve", "confidence": 0.85},
                 "routing":       {"result": "pass", "expected": "auto",   "actual": "auto"},
                 "criterion_evidence": {
                     "result": "pass",
@@ -236,6 +239,41 @@ def test_scoreboard_shows_all_four_dimensions():
     for label in ["S1 Determination accuracy", "S2 Routing accuracy",
                   "S3 Criterion-level evidence accuracy", "S4 Citation validity"]:
         assert label in section, f"Missing dimension: {label}"
+
+
+def test_calibration_metrics_excludes_skipped_cases():
+    """case_009 (skip, no confidence) must not count toward n."""
+    cal = _calibration_metrics(FAKE_EVAL_DATA)
+    assert cal["n"] == 2
+
+
+def test_calibration_metrics_brier_score():
+    """Brier score = mean((confidence - outcome)**2). Both fixture cases pass
+    (outcome=1), confidences 0.9 and 0.85: ((0.9-1)**2 + (0.85-1)**2) / 2."""
+    cal = _calibration_metrics(FAKE_EVAL_DATA)
+    expected = ((0.9 - 1) ** 2 + (0.85 - 1) ** 2) / 2
+    assert cal["brier_score"] == pytest.approx(expected)
+
+
+def test_calibration_metrics_pairs_list():
+    cal = _calibration_metrics(FAKE_EVAL_DATA)
+    pairs_by_id = {p["case_id"]: p for p in cal["pairs"]}
+    assert pairs_by_id["case_001"] == {"case_id": "case_001", "confidence": 0.9, "correct": True}
+    assert pairs_by_id["case_007"] == {"case_id": "case_007", "confidence": 0.85, "correct": True}
+    assert "case_009" not in pairs_by_id
+
+
+def test_calibration_metrics_no_data():
+    cal = _calibration_metrics(None)
+    assert cal["n"] == 0
+    assert cal["brier_score"] is None
+    assert cal["pairs"] == []
+
+
+def test_scoreboard_shows_calibration_block():
+    section = _section_scoreboard(FAKE_EVAL_DATA, run_tests=False)
+    assert "S1 confidence calibration" in section
+    assert "Brier score" in section
 
 
 def test_cost_section_no_live_run_required_when_data_present():
