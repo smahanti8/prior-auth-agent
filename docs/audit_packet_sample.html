@@ -33,7 +33,7 @@ em { font-style: italic; }
 </head>
 <body>
 <h1>AI Prior-Authorization System — Compliance Audit Packet</h1>
-<p><strong>Generated:</strong> 2026-08-08T11:39:00+00:00 <strong>Git commit:</strong> <code>7f577f7</code> <strong>Model:</strong> <code>claude-opus-4-8</code> <strong>Eval run:</strong> <code>evals/results/run_20260802_172528.json</code> (2026-08-02T17:25:28.270472+00:00) <strong>Cost report:</strong> not available</p>
+<p><strong>Generated:</strong> 2026-09-25T21:56:28+00:00 <strong>Git commit:</strong> <code>8bfe236</code> <strong>Model:</strong> <code>claude-opus-4-8</code> <strong>Eval run:</strong> <code>evals/results/run_20260925_213400.json</code> (2026-09-25T21:34:00.527030+00:00) <strong>Cost report:</strong> available (2026-09-17T17:28:38.153712+00:00)</p>
 <p>This packet is machine-generated from live system data. It does not require manual maintenance. To regenerate after any system change:</p>
 <pre><code>python -m prior_auth_agent.audit_packet</code></pre>
 <p>The packet describes the system at the Git SHA above. A different commit, a different model, or a new eval run produces a different packet. Do not use a packet whose SHA does not match the deployed system.</p>
@@ -43,9 +43,9 @@ em { font-style: italic; }
 <tr><th>Component</th><th>Value</th></tr>
 <tr><td>LLM model</td><td><code>claude-opus-4-8</code></td></tr>
 <tr><td>Confidence threshold</td><td>0.85</td></tr>
-<tr><td>Criteria Mapper prompt</td><td><code>700f2dd524ca1549</code><br>(SHA-256[:16] of SYSTEM string, commit <code>7f577f7</code>)</td></tr>
-<tr><td>Evidence Extractor prompt</td><td><code>479d79ee670e7b3f</code><br>(SHA-256[:16] of SYSTEM string, commit <code>7f577f7</code>)</td></tr>
-<tr><td>Determination prompt</td><td><code>40990d39c2435f5c</code><br>(SHA-256[:16] of SYSTEM string, commit <code>7f577f7</code>)</td></tr>
+<tr><td>Criteria Mapper prompt</td><td><code>700f2dd524ca1549</code><br>(SHA-256[:16] of SYSTEM string, commit <code>8bfe236</code>)</td></tr>
+<tr><td>Evidence Extractor prompt</td><td><code>479d79ee670e7b3f</code><br>(SHA-256[:16] of SYSTEM string, commit <code>8bfe236</code>)</td></tr>
+<tr><td>Determination prompt</td><td><code>40990d39c2435f5c</code><br>(SHA-256[:16] of SYSTEM string, commit <code>8bfe236</code>)</td></tr>
 </table>
 <p><em>Prompt hashes are computed from each node's <code>SYSTEM</code> constant at generation time. A changed prompt produces a different hash and this table changes on next regeneration.</em></p>
 <hr>
@@ -62,11 +62,11 @@ em { font-style: italic; }
 <p><em>A rule without a passing test is not a rule — it is a comment. Status is computed by running each test file at generation time.</em></p>
 <hr>
 <h2>3. Golden-Set Evaluation Scoreboard</h2>
-<p><strong>Eval run:</strong> <code>evals/results/run_20260802_172528.json</code><br> <strong>Run timestamp:</strong> 2026-08-02T17:25:28.270472+00:00<br> <strong>Eval git SHA:</strong> <code>5f71d70</code><br> <strong>Cases:</strong> 15 ran of 15 total<br> <strong>Ground truth:</strong> human-authored from policy documents — LLM never used to generate expected outcomes.</p>
+<p><strong>Eval run:</strong> <code>evals/results/run_20260925_213400.json</code><br> <strong>Run timestamp:</strong> 2026-09-25T21:34:00.527030+00:00<br> <strong>Eval git SHA:</strong> <code>efdb315</code><br> <strong>Cases:</strong> 15 ran of 15 total<br> <strong>Ground truth:</strong> human-authored from policy documents — LLM never used to generate expected outcomes.</p>
 <table>
 <tr><th>Dimension</th><th>What it measures</th><th>Scoreable</th><th>Result</th></tr>
 <tr><td>S1 Determination accuracy</td><td>Pipeline decision matches expected (approve / insufficient_evidence / reject)</td><td>15</td><td>11/15</td></tr>
-<tr><td>S2 Routing accuracy</td><td>auto vs HITL routing matches expected for determination-stage cases</td><td>13</td><td>9/13</td></tr>
+<tr><td>S2 Routing accuracy</td><td>auto vs HITL routing matches expected for determination-stage cases</td><td>13</td><td>12/13</td></tr>
 <tr><td>S3 Criterion-level evidence accuracy</td><td>Each criterion matched to correct pipeline evidence with correct status and citations</td><td>12</td><td>11/12</td></tr>
 <tr><td>S4 Citation validity</td><td>Surviving citations in <code>met</code> evidence resolve against the submitted bundle</td><td>13</td><td><strong>13/13</strong></td></tr>
 </table>
@@ -74,11 +74,34 @@ em { font-style: italic; }
 <table>
 <tr><th>Metric</th><th>Value</th></tr>
 <tr><td>Cases expected HITL</td><td>8</td></tr>
-<tr><td>True positives (correctly sent to HITL)</td><td>7</td></tr>
-<tr><td>False positives (sent to HITL unnecessarily)</td><td>3</td></tr>
-<tr><td>False negatives (missed — sent to auto)</td><td>1</td></tr>
-<tr><td>Precision</td><td>70%</td></tr>
-<tr><td>Recall</td><td>88%</td></tr>
+<tr><td>True positives (correctly sent to HITL)</td><td>8</td></tr>
+<tr><td>False positives (sent to HITL unnecessarily)</td><td>1</td></tr>
+<tr><td>False negatives (missed — sent to auto)</td><td>0</td></tr>
+<tr><td>Precision</td><td>89%</td></tr>
+<tr><td>Recall</td><td>100%</td></tr>
+</table>
+<p><strong>S1 confidence calibration (Brier score):</strong></p>
+<p>N=13 determination-stage cases. Too small for a statistically powered calibration curve (see EVALS.md S5) — treat as a smoke check that confidence is wired correctly, not a calibration guarantee.</p>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Cases scored</td><td>13</td></tr>
+<tr><td>Brier score (lower is better; 0 = perfect)</td><td>0.1515</td></tr>
+</table>
+<table>
+<tr><th>Case</th><th>Confidence</th><th>Correct</th></tr>
+<tr><td><code>case_001</code></td><td>0.85</td><td>yes</td></tr>
+<tr><td><code>case_002</code></td><td>0.90</td><td>yes</td></tr>
+<tr><td><code>case_003</code></td><td>0.94</td><td>yes</td></tr>
+<tr><td><code>case_004</code></td><td>0.55</td><td>no</td></tr>
+<tr><td><code>case_006</code></td><td>0.92</td><td>yes</td></tr>
+<tr><td><code>case_007</code></td><td>0.72</td><td>no</td></tr>
+<tr><td><code>case_008</code></td><td>0.50</td><td>no</td></tr>
+<tr><td><code>case_010</code></td><td>0.86</td><td>yes</td></tr>
+<tr><td><code>case_011</code></td><td>0.95</td><td>yes</td></tr>
+<tr><td><code>case_012</code></td><td>0.90</td><td>no</td></tr>
+<tr><td><code>case_013</code></td><td>0.94</td><td>yes</td></tr>
+<tr><td><code>case_014</code></td><td>0.90</td><td>yes</td></tr>
+<tr><td><code>case_015</code></td><td>0.90</td><td>yes</td></tr>
 </table>
 <p><strong>Key behavioral cases:</strong></p>
 <table>
@@ -105,17 +128,36 @@ em { font-style: italic; }
 <p><strong>Policy document:</strong> <code>data/policies/rotator_cuff_repair_29827.md</code><br> <strong>CPT code:</strong> 29827</p>
 <table>
 <tr><th>ID</th><th>Criterion</th><th>Required</th><th>Met in</th><th>Insufficient in</th><th>Not-met in</th><th>Covering test patterns</th><th>Status</th></tr>
-<tr><td>C1</td><td>MRI-confirmed full-thickness rotator cuff tear</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code></td><td><strong>PASS</strong> (288/288)</td></tr>
-<tr><td>C2</td><td>Failure of ≥3 months conservative management including PT</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code><br><code>test_case_007_ghost_citation_absent_from_bundle</code></td><td><strong>PASS</strong> (288/288)</td></tr>
-<tr><td>C3</td><td>Documented functional impairment affecting ADLs</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code></td><td><strong>PASS</strong> (288/288)</td></tr>
+<tr><td>C1</td><td>MRI-confirmed full-thickness rotator cuff tear</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code></td><td><strong>PASS</strong> (364/364)</td></tr>
+<tr><td>C2</td><td>Failure of ≥3 months conservative management including PT</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code><br><code>test_case_007_ghost_citation_absent_from_bundle</code></td><td><strong>PASS</strong> (364/364)</td></tr>
+<tr><td>C3</td><td>Documented functional impairment affecting ADLs</td><td>Yes</td><td><code>case_007</code></td><td>—</td><td>—</td><td><code>test_met_expected_citations_resolve_in_bundle[case_007]</code></td><td><strong>PASS</strong> (364/364)</td></tr>
 </table>
 <p><em>The criterion→test mapping in this table is declared in the generator config (~10 lines). It is the only section requiring human update when criteria or test names change. CPT 29827 currently has exactly one golden case (<code>case_007</code>), which exercises <code>met</code> for all three criteria — there is no <code>insufficient</code> or <code>not_met</code> example for this policy in the golden set yet, hence the empty columns above.</em></p>
 <hr>
 <h2>6. Cost per Determination</h2>
-<blockquote>
-<p><strong>[LIVE RUN REQUIRED]</strong> No cost report found.<br></p>
-<p>Run: <code>python -m evals.run --live &amp;&amp; python -m evals.cost_report</code></p>
-</blockquote>
+<p><strong>Source:</strong> cassette_replay (recorded token counts from live run)<br> <strong>Model:</strong> <code>claude-opus-4-8</code><br> <strong>Cases averaged:</strong> 13 LLM-stage golden-set cases</p>
+<table>
+<tr><th>Node</th><th>Type</th><th>Avg tokens (in / out)</th><th>Cost / determination</th></tr>
+<tr><td>intake</td><td>deterministic</td><td>—</td><td>$0.0000</td></tr>
+<tr><td>eligibility</td><td>deterministic</td><td>—</td><td>$0.0000</td></tr>
+<tr><td>policy_rag</td><td>deterministic</td><td>—</td><td>$0.0000</td></tr>
+<tr><td><strong>criteria_mapper</strong></td><td>llm</td><td>2655 / 489</td><td><strong>$0.0765</strong></td></tr>
+<tr><td><strong>evidence_extractor</strong></td><td>llm</td><td>1958 / 929</td><td><strong>$0.0990</strong></td></tr>
+<tr><td>citation_gate</td><td>deterministic</td><td>—</td><td>$0.0000</td></tr>
+<tr><td><strong>determination</strong></td><td>llm</td><td>1852 / 705</td><td><strong>$0.0806</strong></td></tr>
+<tr><td>confidence_gate</td><td>deterministic</td><td>—</td><td>$0.0000</td></tr>
+<tr><td>auto_decision</td><td>deterministic</td><td>—</td><td>$0.0000</td></tr>
+<tr><td>hitl_enqueue</td><td>deterministic</td><td>—</td><td>$0.0000</td></tr>
+<tr><td><strong>TOTAL</strong></td><td></td><td></td><td><strong>$0.2562</strong></td></tr>
+</table>
+<p><em>5 of 8 nodes cost $0 in LLM terms. The cost story: three nodes are billable; the rest — including all safety-critical gates — are deterministic code.</em></p>
+<p><strong>Monthly projection:</strong></p>
+<table>
+<tr><th>Volume</th><th>Monthly cost</th></tr>
+<tr><td>1,000 determinations / month</td><td>$256.15</td></tr>
+<tr><td>100,000 determinations / month</td><td>$25,615.38</td></tr>
+<tr><td>1,000,000 determinations / month</td><td>$256,153.85</td></tr>
+</table>
 <hr>
 <h2>7. Limitations</h2>
 <h3>From the evaluation methodology (EVALS.md)</h3>
@@ -146,6 +188,14 @@ em { font-style: italic; }
 <li><strong>No adversarial cases</strong>: There are no cases designed to elicit prompt</li>
 </ul>
 <p><br> injection, policy bypass, or reasoning shortcuts. The suite tests the <br> happy path and a few error paths; it does not test the security surface.</p>
+<ol>
+<li><strong>Calibration sample size</strong>: N=13 confidence/correctness pairs is far too</li>
+</ul>
+<p><br> small to estimate a reliability diagram or expected calibration error <br> (ECE) meaningfully — a single case flipping pass/fail moves the Brier <br> score by ~1/13 ≈ 0.077. Treat S5's output as a smoke check that the <br> confidence field is wired correctly and roughly tracks correctness, not <br> as a statistically defensible calibration curve. A binned reliability <br> diagram is planned once the golden set is large enough for bins to hold <br> more than 0-1 samples each.</p>
+<ol>
+<li><strong>The committed baseline is a placeholder</strong>: <code>evals/baseline.json</code> holds</li>
+</ul>
+<p><br> zero floors on every dimension (<code>git_sha: "placeholder"</code>), so <br> <code>--baseline-check</code>, including the CI step that runs it, cannot fail <br> whatever the scores are. It guards nothing until it is populated with <br> <code>python -m evals.run --live &amp;&amp; python -m evals.run --update-baseline</code>, <br> which would also lock in the current pass counts (including the failures <br> above) as the floor.</p>
 <p>What this suite is good for: <strong>catching regressions</strong>. If a system prompt change causes a previously-passing case to fail, the harness will detect it in CI. That is its intended purpose. It is not a substitute for clinical validation, red-teaming, or production monitoring.</p>
 <h3>Operational limitations (from README)</h3>
 <ul>
@@ -159,12 +209,12 @@ em { font-style: italic; }
 <h2>8. Generation Provenance</h2>
 <table>
 <tr><th>Field</th><th>Value</th></tr>
-<tr><td>Generated at</td><td>2026-08-08T11:39:00+00:00</td></tr>
-<tr><td>Git SHA</td><td><code>7f577f7</code></td></tr>
+<tr><td>Generated at</td><td>2026-09-25T21:56:28+00:00</td></tr>
+<tr><td>Git SHA</td><td><code>8bfe236</code></td></tr>
 <tr><td>Generator</td><td><code>python -m prior_auth_agent.audit_packet</code></td></tr>
-<tr><td>Eval results</td><td><code>evals/results/run_20260802_172528.json</code></td></tr>
-<tr><td>Cost report</td><td>not available</td></tr>
-<tr><td>Test run at generation</td><td><strong>PASS</strong> (288/288)</td></tr>
+<tr><td>Eval results</td><td><code>evals/results/run_20260925_213400.json</code></td></tr>
+<tr><td>Cost report</td><td><code>evals/results/cost_report_20260917.json</code></td></tr>
+<tr><td>Test run at generation</td><td><strong>PASS</strong> (364/364)</td></tr>
 </table>
 <p><em>Regenerate after any model change, prompt change, or new eval run. Do not use a packet whose SHA does not match the deployed system.</em></p>
 </body>
