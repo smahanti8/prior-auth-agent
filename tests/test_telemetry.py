@@ -203,12 +203,33 @@ def test_rollup_averages_tokens_and_cost():
 
 
 def test_rollup_total_cost_is_sum_not_average():
+    """Within ONE determination, total cost sums across nodes (not averaged)."""
     records = [
         NodeTelemetry("criteria_mapper", "llm", 1_000_000, 0, "claude-opus-4-8", 1000.0, 15.0),
         NodeTelemetry("evidence_extractor", "llm", 1_000_000, 0, "claude-opus-4-8", 2000.0, 15.0),
     ]
     result = rollup(records)
     assert result["total_cost_usd"] == pytest.approx(30.0)
+
+
+def test_rollup_total_cost_averages_per_determination_across_cases():
+    """cost_report.py/tier_analysis.py flatten N cases' records together before
+    calling rollup() — the same node then appears N times. total_cost_usd must
+    stay the cost of ONE determination (sum of each node's per-determination
+    average), not grow with the number of cases fed in."""
+    records = [
+        NodeTelemetry("criteria_mapper", "llm", None, None, "claude-opus-4-8", 0.0, 10.0),
+        NodeTelemetry("criteria_mapper", "llm", None, None, "claude-opus-4-8", 0.0, 10.0),
+        NodeTelemetry("criteria_mapper", "llm", None, None, "claude-opus-4-8", 0.0, 10.0),
+        NodeTelemetry("evidence_extractor", "llm", None, None, "claude-opus-4-8", 0.0, 5.0),
+        NodeTelemetry("evidence_extractor", "llm", None, None, "claude-opus-4-8", 0.0, 5.0),
+        NodeTelemetry("evidence_extractor", "llm", None, None, "claude-opus-4-8", 0.0, 5.0),
+    ]
+    result = rollup(records)
+    # criteria_mapper avg=10.0, evidence_extractor avg=5.0 -> $15.00 per determination.
+    # NOT the raw sum of all 6 records (10*3 + 5*3 = $45.00).
+    assert result["total_cost_usd"] == pytest.approx(15.0)
+    assert result["projections"]["1k_per_month"] == pytest.approx(15_000.0)
 
 
 def test_rollup_projections():
