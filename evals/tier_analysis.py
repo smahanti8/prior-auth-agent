@@ -302,7 +302,10 @@ def print_tier_table(
                 continue
             t_proj_1m = tier_node["avg_cost_usd"] * 1_000_000
             saving_pct = ((b_proj_1m - t_proj_1m) / b_proj_1m * 100) if b_proj_1m else 0
-            row += f" ${t_proj_1m:,.0f} (-{saving_pct:.0f}%) |"
+            # saving_pct > 0 is a real saving (-X%); < 0 is a cost increase (+X%) —
+            # don't hardcode the sign, or a negative saving prints as "--6%".
+            sign = "-" if saving_pct >= 0 else "+"
+            row += f" ${t_proj_1m:,.0f} ({sign}{abs(saving_pct):.0f}%) |"
         print(row)
 
     # Recommendation sentences
