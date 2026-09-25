@@ -114,11 +114,14 @@ def make_recording_wrapper(capture: CallCapture):
             active_model = config.BEDROCK_MODEL_ID
         else:
             active_model = config.MODEL
+        # Mirrors llm.structured_call's thinking selection: haiku rejects
+        # adaptive thinking (400, confirmed live) — only opus/sonnet support it.
+        thinking = {"type": "disabled"} if "haiku" in active_model else {"type": "adaptive"}
         t0 = time.perf_counter()
         with client.messages.stream(
             model=active_model,
             max_tokens=max_tokens,
-            thinking={"type": "adaptive"},
+            thinking=thinking,
             system=system,
             messages=[{"role": "user", "content": user_content}],
             output_config={"format": {"type": "json_schema", "schema": schema}},

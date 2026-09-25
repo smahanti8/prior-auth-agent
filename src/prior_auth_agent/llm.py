@@ -58,11 +58,16 @@ def structured_call(
     else:
         active_model = config.MODEL
 
+    # Haiku models reject thinking={"type": "adaptive"} (400: "adaptive
+    # thinking is not supported on this model") — confirmed live. Only
+    # opus/sonnet tiers support it.
+    thinking = {"type": "disabled"} if "haiku" in active_model else {"type": "adaptive"}
+
     t0 = time.perf_counter()
     with client.messages.stream(
         model=active_model,
         max_tokens=max_tokens,
-        thinking={"type": "adaptive"},
+        thinking=thinking,
         system=system,
         messages=[{"role": "user", "content": user_content}],
         # NOTE: output_config.format (JSON schema constraint) is an Anthropic-platform
