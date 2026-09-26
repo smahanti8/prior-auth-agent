@@ -212,6 +212,59 @@ Infrastructure cost adds: NAT gateway data processing, VPC interface endpoints
 (5 × ~$0.01/hr per AZ), Fargate vCPU/memory hours, ALB. At the scale this pipeline
 targets, the infrastructure cost is dominated by Fargate compute, not API pricing.
 
+---
+
+## MCP Server
+
+The policy corpus is exposed as a read-only [Model Context Protocol](https://modelcontextprotocol.io) server so any MCP-capable client can query payer policies and encoded criteria without invoking the determination pipeline.
+
+### Running the server
+
+```bash
+pip install -e ".[mcp]"
+python -m prior_auth_agent.mcp_server   # stdio transport
+```
+
+Add to `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/`):
+
+```json
+{
+  "mcpServers": {
+    "prior-auth-policy": {
+      "command": "python",
+      "args": ["-m", "prior_auth_agent.mcp_server"],
+      "env": { "PYTHONPATH": "src" }
+    }
+  }
+}
+```
+
+### Tools exposed
+
+| Tool | Input | What it returns |
+|------|-------|-----------------|
+| `search_policies` | `query`, opt `cpt_code`, opt `n_results` (1–20) | Ranked policy chunks with `citation` and `chunk_id` |
+| `get_policy_chunk` | `chunk_id` (e.g. `SURG-041-rotator-cuff.md#3`) | Chunk text, section, `prev_chunk_id`, `next_chunk_id`, `citation` |
+| `get_policy_document` | `policy_id` (e.g. `SURG-041-rotator-cuff.md`) | Full document text + `chunk_ids` (explicit opt-in) |
+| `get_criteria` | `cpt_code`, opt `as_of_date` (ISO, defaults to today) | Encoded `CriterionSpec` list with `predicate_summary`, `predicate_tree`, `citation` |
+
+Every response carries a `citation` field — consistent with the repo's principle that no determination stands without a resolving source.
+
+`get_criteria` returns both `predicate_summary` (human-readable string for review) and `predicate_tree` (exact `model_dump` of the `PredicateNode` for programmatic use). If those two ever diverge, the tree is authoritative.
+
+`cpt_code` in `search_policies` enriches the query text — it is not a strict metadata filter. For an authoritative CPT-to-criteria lookup, use `get_criteria`.
+
+### What the server deliberately does NOT expose
+
+| Excluded | Why |
+|----------|-----|
+| `run_determination` | The pipeline is not invokable via MCP. Determination is a clinical act; retrieval is not. |
+| `evaluate_predicate(bundle)` | Predicate evaluation against a FHIR bundle is the first node of the determination pipeline. Exposing it crosses the retrieval/determination boundary. |
+| `submit_bundle` | FHIR patient data cannot enter the system through the MCP server. The server is read-only over the policy corpus. |
+| `get_audit_log` | The hash-chained log is append-only and is operator access only — not a retrieval tool. |
+
+---
+
 ## Known Limitations
 
 1. **LLM node coverage comes from a 15-case golden eval suite, not exhaustive unit tests.** Cassette-based replay (`evals/run.py`) lets criteria mapping, evidence extraction, and determination run in CI without an API key — see [EVALS.md](EVALS.md) for what that suite does and doesn't validate.
