@@ -1,0 +1,47 @@
+# Retrieval labeled case: Bariatric sleeve gastrectomy (CPT 43644)
+#
+# text_fragments derived from criterion text in
+# evals/golden/cases/case_012_bariatric_near_threshold_hitl.yaml.
+# No CriterionSpec YAML exists for CPT 43644.
+#
+# validation_status: inferred
+
+case_id: ret-004
+description: "Bariatric sleeve gastrectomy (CPT 43644) — three prior-auth criteria"
+cpt_code: "43644"
+validation_status: inferred
+
+expected_passages:
+  - passage_id: p1-bmi-threshold
+    text_fragment: "Patient must have a documented body mass index (BMI) of 40 kg/m2 or greater"
+    source: bariatric_43644.md
+    criterion_id: null
+    required: true
+    notes: >
+      The BMI threshold for bariatric surgery. Orthopedic TKA policy also
+      references BMI but as an upper bound (BMI < 40). A rank-inversion
+      failure here — where TKA policy ranks above bariatric policy — would
+      retrieve text whose BMI threshold has the opposite clinical direction.
+      This is the most clinically dangerous rank inversion in the labeled set.
+
+  - passage_id: p2-diet-program
+    text_fragment: "physician-supervised"
+    source: bariatric_43644.md
+    criterion_id: null
+    required: true
+    notes: >
+      The physician-supervised diet program requirement. This phrase is
+      relatively distinctive to bariatric policy. Retrieval failure here
+      means the LLM cannot evaluate documentation quality against the
+      policy's explicit evidentiary requirements (which drove the HITL
+      routing in case_012).
+
+  - passage_id: p3-psych-eval
+    text_fragment: "psychological evaluation"
+    source: bariatric_43644.md
+    criterion_id: null
+    required: true
+    notes: >
+      Psychiatric clearance is standard bariatric criteria. If this
+      passage is not retrieved, the LLM may not identify the psychological
+      evaluation as a required criterion at all, producing a false approve.

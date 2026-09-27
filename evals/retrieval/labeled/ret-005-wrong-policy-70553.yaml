@@ -1,0 +1,43 @@
+# Retrieval labeled case: Brain MRI (CPT 70553) — no policy in corpus
+#
+# This case documents a known gap: no policy document for CPT 70553 has
+# been indexed into the ChromaDB collection.
+#
+# The important thing this case tests is NOT that recall is zero — that's
+# expected and correct given the gap. What it tests is that the failure
+# mode is OBSERVABLE and DISTINGUISHABLE:
+#
+#   1. recall@k = 0  (no required passages found — expected)
+#   2. wrong-policy surfaced  (RAG returns lumbar MRI policy — observable)
+#   3. The mechanism is documented in the report, not silently swallowed
+#
+# From case_008 comment: "RAG will retrieve the closest available policy —
+# most likely lumbar_mri_72148.md (both are MRI procedures). The criteria
+# mapped will be lumbar-specific and the brain MRI clinical evidence
+# satisfies none of them."
+#
+# When CPT 70553 policy is added to data/policies/:
+#   1. Remove known_gap: true
+#   2. Remove expected_wrong_source
+#   3. Add expected_passages from the actual policy text
+#
+# validation_status: known_gap
+
+case_id: ret-005
+description: "Brain MRI (CPT 70553) — no policy in corpus; documents wrong-policy retrieval"
+cpt_code: "70553"
+known_gap: true
+expected_passages: []
+expected_wrong_source: lumbar_mri_72148.md
+notes: >
+  This case makes a structural argument about the pipeline: if retrieval
+  silently surfaces the wrong policy and the model reasons correctly over
+  that wrong policy, the determination can appear confident while being
+  entirely wrong. The determination evaluation would not catch this because
+  it scores the final output — it has no visibility into which policy
+  text grounded the reasoning.
+
+  Retrieval evaluation catches it at the source: no brain MRI passages
+  in top-6, and the wrong source (lumbar MRI) is rank 1. This is a
+  different failure mode from a low-confidence determination, and it
+  requires a different fix (add the policy, not tune the model).

@@ -1,0 +1,50 @@
+# Retrieval labeled case: Rotator cuff repair (CPT 29827)
+#
+# text_fragments are taken verbatim from the CriterionSpec policy_ref.text_fragment
+# fields in data/policy/criteria/SURG-041-C*.yaml. These are ground truth — the
+# conformance tests assert each fragment appears verbatim in the policy file, so
+# if this labeled case fails, the failure is retrieval, not labeling.
+#
+# validation_status: ground_truth
+# All three criteria passages must appear in top-6 for the LLM to reason over
+# complete policy evidence. If any is missing, the determination may be wrong
+# even if it appears confident.
+
+case_id: ret-001
+description: "Rotator cuff repair (CPT 29827) — three encoded prior-auth criteria"
+cpt_code: "29827"
+validation_status: ground_truth
+
+expected_passages:
+  - passage_id: p1-imaging
+    text_fragment: "Full-thickness rotator cuff tear confirmed by MRI or MR arthrogram"
+    source: rotator_cuff_repair_29827.md
+    criterion_id: SURG-041-C1
+    required: true
+    notes: >
+      C1 is the gateway criterion. If this passage is not retrieved, the LLM
+      cannot evaluate the imaging requirement. A determination without this
+      passage is necessarily incomplete.
+
+  - passage_id: p2-conservative-mgmt
+    text_fragment: "Failure of at least 3 months of conservative management, which must include"
+    source: rotator_cuff_repair_29827.md
+    criterion_id: SURG-041-C2
+    required: true
+    notes: >
+      The 3-month duration requirement is non-obvious; the policy language is
+      specific. If this passage is missed, the LLM may apply a different duration
+      threshold or omit the criterion entirely. Rank inversion risk: the phrase
+      "conservative management" appears in multiple orthopedic policies, so this
+      chunk may rank behind a near-match from an adjacent procedure policy.
+
+  - passage_id: p3-functional-assessment
+    text_fragment: "equivalent standardized instrument with scoring"
+    source: rotator_cuff_repair_29827.md
+    criterion_id: SURG-041-C3
+    required: true
+    notes: >
+      C3 is the most likely to fail retrieval — "equivalent standardized
+      instrument with scoring" is low-frequency clinical language that may not
+      embed close to a generic prior-auth query. If missed, functional assessment
+      is not evaluated despite being required by the policy.

@@ -1,0 +1,57 @@
+# Retrieval labeled case: Knee arthroscopy meniscectomy (CPT 29881)
+#
+# text_fragments derived from criterion text in
+# evals/golden/cases/case_006_knee_arthroscopy_clean.yaml.
+# No CriterionSpec YAML exists for CPT 29881.
+#
+# validation_status: inferred
+
+case_id: ret-003
+description: "Knee arthroscopy meniscectomy (CPT 29881) — four prior-auth criteria"
+cpt_code: "29881"
+validation_status: inferred
+
+expected_passages:
+  - passage_id: p1-meniscal-tear
+    text_fragment: "meniscal tear confirmed by MRI"
+    source: knee_arthroscopy_29881.md
+    criterion_id: null
+    required: true
+    notes: >
+      The imaging confirmation requirement. "Meniscal tear confirmed by MRI"
+      is specific to arthroscopy policy; a rotator cuff policy would reference
+      shoulder imaging. A retrieval of the wrong orthopedic policy here would
+      produce a p1 miss.
+
+  - passage_id: p2-mechanical-symptoms
+    text_fragment: "mechanical symptoms"
+    source: knee_arthroscopy_29881.md
+    criterion_id: null
+    required: true
+    notes: >
+      The mechanical-symptoms criterion (locking, giving-way) is distinctive
+      to meniscal pathology. Generic prior-auth language for other procedures
+      does not use this term, making it a reasonable retrieval anchor.
+
+  - passage_id: p3-conservative-failure
+    text_fragment: "conservative therapy"
+    source: knee_arthroscopy_29881.md
+    criterion_id: null
+    required: true
+    notes: >
+      6-week conservative therapy threshold for arthroscopy vs 3-month
+      threshold for rotator cuff. If the wrong policy is retrieved, the
+      pipeline may evaluate a different duration requirement — the answer
+      would be wrong despite the model reasoning correctly over the retrieved text.
+
+  - passage_id: p4-kl-exclusion
+    text_fragment: "Kellgren-Lawrence grade 4"
+    source: knee_arthroscopy_29881.md
+    criterion_id: null
+    required: true
+    notes: >
+      The absence-criterion: arthroscopy is not indicated for end-stage OA
+      (KL grade 4). This phrase also appears in TKA policy, but in the
+      opposite direction (TKA requires KL III-IV). Rank inversion here
+      would not just miss a criterion — it would retrieve text with the
+      opposite clinical meaning.
