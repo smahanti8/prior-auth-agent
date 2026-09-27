@@ -53,6 +53,33 @@ jobs:
         run: |
           python -m evals.run --no-llm
 
+  retrieval-eval:
+    name: Retrieval quality eval (no API key)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Build the vector store (.chroma is gitignored; rebuild it fresh each run)
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m prior_auth_agent.vectorstore.ingest
+
+      - name: Run retrieval eval against baseline
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m evals.retrieval.runner --baseline-check
+
   mcp-server-tests:
     name: MCP server contract tests (no API key)
     runs-on: ubuntu-latest
