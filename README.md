@@ -117,6 +117,54 @@ python -m evals.run --live
 python -m evals.run --baseline-check
 ```
 
+## Retrieval Quality Eval
+
+Determination accuracy depends on retrieving the right policy chunks before any LLM call happens.
+A wrong or missing chunk poisons every downstream criterion, so retrieval is measured and gated
+separately from determination accuracy, not assumed to be correct because the pipeline runs.
+
+5 labeled cases score `policy_rag`'s ChromaDB retrieval directly, with no LLM in the loop:
+recall@k (did the required passages make it into the top-k?), MRR (how high did they rank?),
+and rank inversion (did an irrelevant chunk outrank a required one?). One case (CPT 70553) is a
+known gap — no policy for that CPT exists in the corpus yet — and is reported separately rather
+than either silently dropped or blended into the aggregate.
+
+```bash
+# Deterministic: fixed corpus, fixed queries, fixed embeddings, no API key, no cost
+python -m evals.retrieval.runner
+
+# Gate against evals/retrieval/baseline.json
+python -m evals.retrieval.runner --baseline-check
+```
+
+**Measured, 2026-09-27** (4 scored cases; TOP_K=6):
+
+| Metric | Value |
+|---|---|
+| Recall@1 | 0.583 |
+| Recall@3 | 0.750 |
+| Recall@6 | 1.000 |
+| MRR | 0.681 |
+| Rank-inversion rate | 0.250 (1 of 4 cases) |
+| Chunking-failure rate | 0.000 |
+
+All 4 scored cases eventually retrieve every required passage within the top 6, but not evenly:
+one case (CPT 29881, knee arthroscopy) has every required passage land at rank 6 — the last slot
+in the window — which is what drags its MRR down to 0.167 and trips the rank-inversion flag. That
+is a real retrieval-quality gap, not a passing score dressed up; it stays open rather than getting
+folded into an average that reads better than the worst case actually performed.
+
+The known-gap case (CPT 70553) does not just miss — it confidently retrieves a different policy's
+chunks (`total_knee_arthroplasty_27447.md`) with no indication anything is wrong. That is the
+retrieval-side counterpart to Known Limitation #4 below: retrieval can be wrong and confident at
+the same time, and the CPT code alone does not reliably disambiguate near-identical policy corpora.
+
+**Baseline floors** (`evals/retrieval/baseline.json`) are set below the measured numbers, not at
+them: this eval is fully deterministic, so the margin isn't tolerance for run-to-run noise — it's
+headroom for adding new labeled cases later without an imperfect-but-acceptable new case tripping
+CI on day one, plus slack for the already-fragile CPT 29881 case. A real regression (a corpus edit,
+a chunker change, an embedding-model swap that meaningfully degrades retrieval) still fails the gate.
+
 ## What Changes Inside a PHI Boundary
 
 > The `infra/` directory contains documentation-grade Terraform — a reference
@@ -270,7 +318,7 @@ Every response carries a `citation` field — consistent with the repo's princip
 1. **LLM node coverage comes from a 15-case golden eval suite, not exhaustive unit tests.** Cassette-based replay (`evals/run.py`) lets criteria mapping, evidence extraction, and determination run in CI without an API key — see [EVALS.md](EVALS.md) for what that suite does and doesn't validate.
 2. **Eligibility is a stub.** It reads `Coverage.status` from the bundle and nothing more; it does not perform a real 270/271 eligibility transaction or call a payer coverage API.
 3. **The audit log is tamper-evident, not tamper-proof.** The hash chain detects edits, deletions, and reordering, but an attacker who can rewrite the whole file can rebuild the chain. Anchoring the head hash externally is not yet implemented.
-4. **RAG retrieval can select the wrong policy document.** The query's only reliably distinguishing feature between similar policies is the numeric CPT code; the local embedding model (all-MiniLM-L6-v2) doesn't always weight that distinctly enough against near-identical boilerplate shared across policy documents. Confirmed via a live eval run: 3 of 5 test CPTs retrieved a different policy's chunks as the top match. Not yet fixed.
+4. **RAG retrieval can select the wrong policy document.** The query's only reliably distinguishing feature between similar policies is the numeric CPT code; the local embedding model (all-MiniLM-L6-v2) doesn't always weight that distinctly enough against near-identical boilerplate shared across policy documents. Confirmed via a live eval run: 3 of 5 test CPTs retrieved a different policy's chunks as the top match. Not yet fixed. The [Retrieval Quality Eval](#retrieval-quality-eval) section above measures this failure mode formally on a separate 5-case labeled suite — its known-gap case shows the same confidently-wrong retrieval, at a different, measured rate.
 5. **Empty criteria can vacuously auto-approve.** When retrieval returns zero applicable policy chunks (e.g., no policy exists for the requested CPT), the determination step can reason "no required criteria to evaluate" as trivially satisfied and approve, rather than treating the absence of any policy knowledge as insufficient. Confirmed via `case_008`'s live eval run. Not yet fixed.
 
 **Fixed 2026-08-02:** the policy chunker in `ingest.py` previously crawled forward one character at a time whenever a paragraph break fell within the overlap window — up to ~200 near-duplicate chunks from a ~1KB document. Not just wasteful: once more than one policy existed in the same ChromaDB collection, the resulting dense cluster could dominate retrieval for every query, regardless of the actual CPT. See `tests/test_ingest.py`.
