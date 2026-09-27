@@ -1,0 +1,5 @@
+{
+  "min_recall_at_6": 0.90,
+  "min_mrr": 0.60,
+  "_note": "Measured 2026-09-27 on the 4 scored cases (ret-005 is a known-gap case, excluded): recall@6=1.000, MRR=0.681. Retrieval here is deterministic (fixed corpus, fixed queries, fixed embeddings) -- there is no run-to-run noise to buffer against. The floor is set below the measurement, not at it, for two reasons: (1) headroom to add new labeled cases later without an imperfect-but-acceptable new case tripping the gate on day one, and (2) ret-003 (CPT 29881) already sits at MRR 0.167 with a rank-inversion warning -- every required passage lands at rank 6, the edge of the window -- so the aggregate MRR is fragile to one more case behaving like it. A real regression (a corpus edit, chunker change, or embedding-model swap that meaningfully degrades retrieval) will still fail this gate; the margin exists for legitimate suite growth, not to mask a regression."
+}

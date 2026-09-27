@@ -1,0 +1,49 @@
+# Retrieval labeled case: Total knee arthroplasty (CPT 27447)
+#
+# text_fragments are derived from the criterion text in
+# evals/golden/cases/case_001_clean_approve.yaml (TKA gold-card case).
+# No CriterionSpec YAML exists for CPT 27447 yet — these fragments are
+# inferred from the criterion text and need validation against the actual
+# policy file (tka_27447.md or equivalent) before this case is promoted
+# to ground_truth status.
+#
+# validation_status: inferred
+
+case_id: ret-002
+description: "Total knee arthroplasty (CPT 27447) — three prior-auth criteria"
+cpt_code: "27447"
+validation_status: inferred
+
+expected_passages:
+  - passage_id: p1-oa-grade
+    text_fragment: "Kellgren-Lawrence Grade III"
+    source: tka_27447.md
+    criterion_id: null
+    required: true
+    notes: >
+      The OA severity threshold is the primary gateway criterion for TKA.
+      Kellgren-Lawrence grading is the standard instrument and the specific
+      text should appear in the policy. If retrieved from the wrong document
+      (e.g. knee arthroscopy policy which also references KL grading) this
+      represents a rank-inversion or wrong-policy failure.
+
+  - passage_id: p2-conservative-failure
+    text_fragment: "failure of conservative management"
+    source: tka_27447.md
+    criterion_id: null
+    required: true
+    notes: >
+      "Conservative management failure" is generic language shared across
+      many orthopedic policies. High rank-inversion risk — the TKA-specific
+      policy may rank below a rotator cuff or knee arthroscopy policy for
+      this phrase.
+
+  - passage_id: p3-bmi-threshold
+    text_fragment: "body mass index"
+    source: tka_27447.md
+    criterion_id: null
+    required: true
+    notes: >
+      BMI threshold criteria appear in both TKA and bariatric policies.
+      If the bariatric policy is indexed, it may rank above the TKA policy
+      for the term "body mass index," producing a wrong-source result.
