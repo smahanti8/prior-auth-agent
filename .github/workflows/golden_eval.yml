@@ -17,6 +17,11 @@ on:
       - "data/policies/**"
       - "data/policy/**"
       - "tests/**"
+  # A push that only edits this file (a CI-only change) doesn't match the
+  # paths filters above, so it never self-tests. workflow_dispatch lets it
+  # be run on demand from the Actions tab or `gh workflow run` for exactly
+  # that case, without loosening what push/pull_request trigger on.
+  workflow_dispatch: {}
 
 # No ANTHROPIC_API_KEY is set — this workflow must never make live API calls.
 # Replay mode is the only valid mode in CI. Re-record cassettes locally with
