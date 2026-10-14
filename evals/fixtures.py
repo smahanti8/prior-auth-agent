@@ -75,8 +75,8 @@ class Cassette:
                 self._by_fp[fp] = entry
 
     @classmethod
-    def load(cls, case_id: str) -> "Cassette":
-        path = RECORDED_DIR / f"{case_id}.json"
+    def load(cls, case_id: str, recorded_dir: Path = RECORDED_DIR) -> "Cassette":
+        path = recorded_dir / f"{case_id}.json"
         if not path.exists():
             raise FileNotFoundError(
                 f"No cassette for {case_id}. "
@@ -86,8 +86,8 @@ class Cassette:
         return cls(case_id, data)
 
     @classmethod
-    def exists(cls, case_id: str) -> bool:
-        return (RECORDED_DIR / f"{case_id}.json").exists()
+    def exists(cls, case_id: str, recorded_dir: Path = RECORDED_DIR) -> bool:
+        return (recorded_dir / f"{case_id}.json").exists()
 
     def check_staleness(self) -> None:
         """Raise StalenessError if any node's system prompt changed since recording."""

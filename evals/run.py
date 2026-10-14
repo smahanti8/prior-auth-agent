@@ -41,7 +41,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from evals.golden.schema import CaseSpec, CriterionGroundTruth
 from evals.golden.generator import generate_bundle, CASES_DIR
-from evals.fixtures import Cassette, StalenessError
+from evals.fixtures import Cassette, StalenessError, RECORDED_DIR
 from evals.recorder import CallCapture, make_recording_wrapper, save_cassette
 from prior_auth_agent.validation import _build_ref_index
 
@@ -326,7 +326,9 @@ def _is_deterministic(spec: CaseSpec) -> bool:
     return spec.ground_truth.outcome.stage in ("intake", "eligibility")
 
 
-def run_case(spec: CaseSpec, graph, *, live: bool = False) -> dict:
+def run_case(
+    spec: CaseSpec, graph, *, live: bool = False, recorded_dir: Path = RECORDED_DIR
+) -> dict:
     """Run one case.  Uses cassette replay unless live=True."""
     bundle = generate_bundle(spec)
 
@@ -345,7 +347,7 @@ def run_case(spec: CaseSpec, graph, *, live: bool = False) -> dict:
         print(f"              recorded -> {cassette_path.relative_to(REPO_ROOT)}")
 
     else:
-        cassette = Cassette.load(spec.id)
+        cassette = Cassette.load(spec.id, recorded_dir=recorded_dir)
         cassette.check_staleness()
         with _replay_context(cassette):
             state = graph.invoke({"fhir_bundle": bundle, "cpt_code": spec.cpt})
@@ -553,7 +555,10 @@ def main(argv: list[str]) -> int:
     do_update_baseline = "--update-baseline" in argv
     prefixes = [a for a in argv if not a.startswith("--")]
 
-    specs = CaseSpec.load_all(CASES_DIR)
+    cases_dir = CASES_DIR
+    recorded_dir = RECORDED_DIR
+
+    specs = CaseSpec.load_all(cases_dir)
     if prefixes:
         specs = [s for s in specs if any(s.id.startswith(p) for p in prefixes)]
     if no_llm:
@@ -578,7 +583,7 @@ def main(argv: list[str]) -> int:
     for spec in specs:
         needs_llm = not _is_deterministic(spec)
 
-        if needs_llm and not live and not Cassette.exists(spec.id):
+        if needs_llm and not live and not Cassette.exists(spec.id, recorded_dir=recorded_dir):
             print(
                 f"  {_YELLOW}SKIP{_RESET} {spec.id:<10}  "
                 f"(no cassette — run: python -m evals.run --live {spec.id})"
@@ -599,7 +604,7 @@ def main(argv: list[str]) -> int:
             continue
 
         try:
-            result = run_case(spec, graph, live=live)
+            result = run_case(spec, graph, live=live, recorded_dir=recorded_dir)
         except StalenessError as exc:
             print(f"  {_RED}STALE{_RESET} {spec.id:<10}")
             print(f"              {_RED}{exc}{_RESET}")
