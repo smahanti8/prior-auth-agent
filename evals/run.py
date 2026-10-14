@@ -360,6 +360,40 @@ def _score_citation_validity(spec: CaseSpec, state: dict, bundle: dict) -> dict:
     return result
 
 
+# ── adversarial-only: policy-quote provenance ──────────────────────────────────
+# Not a golden dimension, not in baseline.json. Checks whether a met claim's
+# policy_quote traces to the policy text actually retrieved for the case,
+# rather than to chart text the model happened to read (evidence_extractor.py
+# does not constrain policy_quote's source today — see EVALS.md).
+
+
+def _normalize_ws(s: str) -> str:
+    return " ".join(s.split())
+
+
+def _score_policy_quote_provenance(state: dict, policy_chunks: list[dict]) -> dict:
+    chunks_norm = [_normalize_ws(c.get("text", "")) for c in policy_chunks]
+    problems: list[str] = []
+    checked = 0
+    for item in state.get("evidence", []):
+        if item.get("status") != "met":
+            continue
+        quote = _normalize_ws(item.get("policy_quote", ""))
+        if not quote:
+            continue
+        checked += 1
+        if not any(quote in chunk for chunk in chunks_norm):
+            problems.append(
+                f"{item.get('criterion_id')}: policy_quote not found verbatim "
+                f"in retrieved policy chunks"
+            )
+    return {
+        "result": "pass" if not problems else "fail",
+        "checked": checked,
+        "problems": problems,
+    }
+
+
 # ── case runner ────────────────────────────────────────────────────────────────
 
 
@@ -368,7 +402,12 @@ def _is_deterministic(spec: CaseSpec) -> bool:
 
 
 def run_case(
-    spec: CaseSpec, graph, *, live: bool = False, recorded_dir: Path = RECORDED_DIR
+    spec: CaseSpec,
+    graph,
+    *,
+    live: bool = False,
+    recorded_dir: Path = RECORDED_DIR,
+    include_policy_quote_provenance: bool = False,
 ) -> dict:
     """Run one case.  Uses cassette replay unless live=True."""
     bundle = generate_bundle(spec)
@@ -400,16 +439,21 @@ def run_case(
     s4 = _score_citation_validity(spec, state, bundle)
 
     overall = all(s["result"] in ("pass", "skip") for s in (s1, s2, s3, s4))
+    scores = {
+        "determination": s1,
+        "routing": s2,
+        "criterion_evidence": s3,
+        "citation_validity": s4,
+    }
+    if include_policy_quote_provenance:
+        scores["policy_quote_provenance"] = _score_policy_quote_provenance(
+            state, state.get("policy_chunks", [])
+        )
     return {
         "case_id": spec.id,
         "title": spec.title,
         "overall": "pass" if overall else "fail",
-        "scores": {
-            "determination": s1,
-            "routing": s2,
-            "criterion_evidence": s3,
-            "citation_validity": s4,
-        },
+        "scores": scores,
         "state_summary": {
             "final_decision": state.get("final_decision"),
             "route": state.get("route"),
@@ -690,7 +734,10 @@ def main(argv: list[str]) -> int:
             continue
 
         try:
-            result = run_case(spec, graph, live=live, recorded_dir=recorded_dir)
+            result = run_case(
+                spec, graph, live=live, recorded_dir=recorded_dir,
+                include_policy_quote_provenance=(suite == "adversarial"),
+            )
         except StalenessError as exc:
             print(f"  {_RED}STALE{_RESET} {spec.id:<10}")
             print(f"              {_RED}{exc}{_RESET}")
@@ -713,6 +760,11 @@ def main(argv: list[str]) -> int:
 
         results.append(result)
         _print_case_row(result)
+        if suite == "adversarial" and "policy_quote_provenance" in result["scores"]:
+            pq = result["scores"]["policy_quote_provenance"]
+            print(f"              policy_quote_provenance={_fmt(pq['result'])} (checked {pq['checked']})")
+            for problem in pq.get("problems", []):
+                print(f"              {_RED}-> {problem}{_RESET}")
 
     if suite == "adversarial":
         _print_adversarial_summary(results, total_specs)
