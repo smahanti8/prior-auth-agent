@@ -52,6 +52,15 @@ jobs:
         run: |
           pytest tests/test_eval_fixtures.py -q --no-header
 
+      # The other jobs name individual files; without this step most of the
+      # suite (the no-denial invariant, the audit log, the adversarial-suite
+      # tests) never ran in CI. No API key and no vector store are needed.
+      - name: Run the full unit test suite
+        env:
+          PYTHONPATH: src
+        run: |
+          pytest tests/ -q --no-header
+
       - name: Run eval suite (deterministic-only cases)
         env:
           PYTHONPATH: src
