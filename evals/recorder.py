@@ -157,11 +157,12 @@ def save_cassette(
     case_id: str,
     capture: CallCapture,
     policy_chunks: list[dict],
+    recorded_dir: Path = RECORDED_DIR,
 ) -> Path:
     from prior_auth_agent.config import MODEL
 
-    RECORDED_DIR.mkdir(parents=True, exist_ok=True)
-    path = RECORDED_DIR / f"{case_id}.json"
+    recorded_dir.mkdir(parents=True, exist_ok=True)
+    path = recorded_dir / f"{case_id}.json"
 
     payload: dict = {
         "case_id":     case_id,

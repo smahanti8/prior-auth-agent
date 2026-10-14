@@ -55,6 +55,47 @@ _RESET = "\033[0m"
 _PASS = f"{_GREEN}PASS{_RESET}"
 _FAIL = f"{_RED}FAIL{_RESET}"
 _SKIP = f"{_YELLOW}SKIP{_RESET}"
+_NOTEVAL = f"{_YELLOW}NOT EVALUATED{_RESET}"
+
+# ── suite selection ─────────────────────────────────────────────────────────────
+# "golden" is the committed 15-case regression suite (has a baseline.json).
+# "adversarial" is a separate, isolated fixture set with no baseline — a case
+# with no cassette is reported as NOT EVALUATED, never SKIP, and never scored
+# as if it passed.
+
+ADVERSARIAL_CASES_DIR = REPO_ROOT / "evals" / "adversarial" / "cases"
+ADVERSARIAL_RECORDED_DIR = REPO_ROOT / "evals" / "adversarial" / "recorded"
+
+SUITES: dict[str, dict[str, Path]] = {
+    "golden": {"cases_dir": CASES_DIR, "recorded_dir": RECORDED_DIR},
+    "adversarial": {"cases_dir": ADVERSARIAL_CASES_DIR, "recorded_dir": ADVERSARIAL_RECORDED_DIR},
+}
+
+
+def _extract_flag_value(argv: list[str], flag: str) -> tuple[Optional[str], list[str]]:
+    """Pop `flag <value>` out of argv, returning (value, remaining argv).
+
+    Must run before any `"--x" in argv` / prefix-filtering logic, or the
+    value token (e.g. "adversarial") would be mistaken for a case-id filter.
+    """
+    if flag not in argv:
+        return None, list(argv)
+    idx = argv.index(flag)
+    if idx + 1 >= len(argv):
+        raise SystemExit(f"{flag} requires a value")
+    value = argv[idx + 1]
+    rest = argv[:idx] + argv[idx + 2:]
+    return value, rest
+
+
+def _resolve_suite(argv: list[str]) -> tuple[str, Path, Path, list[str]]:
+    """Return (suite_name, cases_dir, recorded_dir, remaining_argv)."""
+    suite, rest = _extract_flag_value(argv, "--suite")
+    suite = suite or "golden"
+    if suite not in SUITES:
+        raise SystemExit(f"Unknown --suite {suite!r}; choices: {', '.join(SUITES)}")
+    cfg = SUITES[suite]
+    return suite, cfg["cases_dir"], cfg["recorded_dir"], rest
 
 
 # ── pipeline patching contexts ─────────────────────────────────────────────────
@@ -343,6 +384,7 @@ def run_case(
             spec.id,
             capture,
             state.get("policy_chunks", []),
+            recorded_dir=recorded_dir,
         )
         print(f"              recorded -> {cassette_path.relative_to(REPO_ROOT)}")
 
@@ -548,15 +590,43 @@ def _check_baseline(results: list[dict]) -> tuple[bool, list[str]]:
 # ── main ───────────────────────────────────────────────────────────────────────
 
 
+def _print_adversarial_summary(results: list[dict], total: int) -> None:
+    evaluated = [r for r in results if r["overall"] != "not_evaluated"]
+    print()
+    print("  " + "-" * 70)
+    print(f"  EVALUATED {len(evaluated)} of {total} adversarial case(s)")
+    if not evaluated:
+        print(
+            f"  {_YELLOW}No adversarial case has a recording yet — "
+            f"nothing has been verified.{_RESET}"
+        )
+        return
+    passed = sum(1 for r in evaluated if r["overall"] == "pass")
+    failed = sum(1 for r in evaluated if r["overall"] == "fail")
+    print(f"  {passed} passed, {failed} failed among evaluated cases")
+    if len(evaluated) < total:
+        print(
+            f"  {_YELLOW}{total - len(evaluated)} case(s) not yet evaluated "
+            f"(no recording).{_RESET}"
+        )
+
+
 def main(argv: list[str]) -> int:
+    suite, cases_dir, recorded_dir, argv = _resolve_suite(argv)
     live = "--live" in argv
     no_llm = "--no-llm" in argv
     do_baseline_check = "--baseline-check" in argv
     do_update_baseline = "--update-baseline" in argv
+    require_recorded = "--require-recorded" in argv
     prefixes = [a for a in argv if not a.startswith("--")]
 
-    cases_dir = CASES_DIR
-    recorded_dir = RECORDED_DIR
+    if suite != "golden" and (do_baseline_check or do_update_baseline):
+        print(
+            f"  {_RED}ERROR:{_RESET} --baseline-check/--update-baseline are not "
+            f"supported for --suite {suite!r} — no baseline.json is maintained "
+            f"for this suite."
+        )
+        return 1
 
     specs = CaseSpec.load_all(cases_dir)
     if prefixes:
@@ -568,11 +638,13 @@ def main(argv: list[str]) -> int:
         print("No matching cases found.")
         return 1
 
+    total_specs = len(specs)
     has_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
     mode_label = "LIVE (recording)" if live else "REPLAY (cassettes)"
     if no_llm:
         mode_label = "DETERMINISTIC only"
-    print(f"\nRunning {len(specs)} golden case(s) [{mode_label}]...\n")
+    suite_label = "golden" if suite == "golden" else "adversarial"
+    print(f"\nRunning {len(specs)} {suite_label} case(s) [{mode_label}]...\n")
 
     from prior_auth_agent.graph import build_graph
     graph = build_graph()
@@ -584,18 +656,32 @@ def main(argv: list[str]) -> int:
         needs_llm = not _is_deterministic(spec)
 
         if needs_llm and not live and not Cassette.exists(spec.id, recorded_dir=recorded_dir):
-            print(
-                f"  {_YELLOW}SKIP{_RESET} {spec.id:<10}  "
-                f"(no cassette — run: python -m evals.run --live {spec.id})"
-            )
-            skipped_ids.append(spec.id)
-            results.append({
-                "case_id": spec.id, "title": spec.title, "overall": "skipped",
-                "scores": {d: {"result": "skip"} for d in [
-                    "determination", "routing", "criterion_evidence", "citation_validity"
-                ]},
-                "state_summary": {},
-            })
+            if suite == "adversarial":
+                print(
+                    f"  {_NOTEVAL} {spec.id:<10}  (no recording — record with: "
+                    f"python -m evals.run --suite adversarial --live {spec.id})"
+                )
+                skipped_ids.append(spec.id)
+                results.append({
+                    "case_id": spec.id, "title": spec.title, "overall": "not_evaluated",
+                    "scores": {d: {"result": "skip"} for d in [
+                        "determination", "routing", "criterion_evidence", "citation_validity"
+                    ]},
+                    "state_summary": {},
+                })
+            else:
+                print(
+                    f"  {_YELLOW}SKIP{_RESET} {spec.id:<10}  "
+                    f"(no cassette — run: python -m evals.run --live {spec.id})"
+                )
+                skipped_ids.append(spec.id)
+                results.append({
+                    "case_id": spec.id, "title": spec.title, "overall": "skipped",
+                    "scores": {d: {"result": "skip"} for d in [
+                        "determination", "routing", "criterion_evidence", "citation_validity"
+                    ]},
+                    "state_summary": {},
+                })
             continue
 
         if needs_llm and live and not has_key:
@@ -627,6 +713,14 @@ def main(argv: list[str]) -> int:
 
         results.append(result)
         _print_case_row(result)
+
+    if suite == "adversarial":
+        _print_adversarial_summary(results, total_specs)
+
+        exit_code = 0
+        if require_recorded and any(r["overall"] == "not_evaluated" for r in results):
+            exit_code = 1
+        return exit_code
 
     _print_summary(results, len(skipped_ids))
 
