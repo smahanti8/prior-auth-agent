@@ -144,6 +144,15 @@ jobs:
         run: |
           python -m evals.run --baseline-check
 
+      # Every adversarial case has a committed cassette. Replay them and fail
+      # on a missing recording or on any failed case. policy_quote_provenance
+      # is reported but non-gating (see DECISIONS.md D15).
+      - name: Replay the adversarial suite (all cases must be recorded)
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m evals.run --suite adversarial --require-recorded
+
       - name: Upload eval artifact
         uses: actions/upload-artifact@v4
         if: always()
