@@ -82,3 +82,32 @@ def test_non_met_and_empty_quotes_are_not_checked():
     result = _score_policy_quote_provenance(state, CHUNKS)
     assert result["result"] == "pass"
     assert result["checked"] == 0
+
+
+def test_failing_provenance_does_not_print_a_bogus_expected_got_line(capsys):
+    # Regression: the generic "-> dim: expected X, got Y" printer assumed every
+    # failing dimension carries expected/actual. policy_quote_provenance carries
+    # `problems` instead, so a real failure printed "expected '?', got '?'".
+    # Found on the first adversarial recording (2026-10-14).
+    from evals.run import _print_case_row
+
+    ok = {"result": "pass"}
+    _print_case_row(
+        {
+            "case_id": "adv_x",
+            "overall": "pass",
+            "scores": {
+                "determination": ok,
+                "routing": ok,
+                "criterion_evidence": {"result": "pass", "matched": 4, "total": 4},
+                "citation_validity": ok,
+                "policy_quote_provenance": {
+                    "result": "fail",
+                    "checked": 2,
+                    "problems": ["c2: policy_quote not found verbatim"],
+                },
+            },
+        }
+    )
+    out = capsys.readouterr().out
+    assert "expected '?'" not in out

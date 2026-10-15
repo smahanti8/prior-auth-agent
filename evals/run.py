@@ -502,6 +502,10 @@ def _print_case_row(result: dict) -> None:
         f"cite={cite_str}"
     )
     for dim, score in s.items():
+        # policy_quote_provenance has no expected/actual; main() prints its
+        # own checked count and problems under the case row.
+        if dim == "policy_quote_provenance":
+            continue
         if score["result"] == "fail":
             if dim == "criterion_evidence":
                 for d in score.get("details", []):
