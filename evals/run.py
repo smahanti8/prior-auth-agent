@@ -774,6 +774,12 @@ def main(argv: list[str]) -> int:
         _print_adversarial_summary(results, total_specs)
 
         exit_code = 0
+        # A recorded case that fails (stale cassette, replay error, or a broken
+        # invariant) is always a failure. NOT EVALUATED only fails the run
+        # under --require-recorded. policy_quote_provenance never affects
+        # `overall`, so it stays non-gating.
+        if any(r["overall"] == "fail" for r in results):
+            exit_code = 1
         if require_recorded and any(r["overall"] == "not_evaluated" for r in results):
             exit_code = 1
         return exit_code

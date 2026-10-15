@@ -122,3 +122,20 @@ def test_update_baseline_refuses_under_adversarial_suite(adversarial_dirs, capsy
     out = capsys.readouterr().out
     assert "not supported for --suite" in out
     assert exit_code == 1
+
+
+def test_adversarial_case_that_fails_exits_nonzero_without_require_recorded(
+    adversarial_dirs, capsys
+):
+    # Regression: the adversarial exit code only looked at NOT EVALUATED, so a
+    # case that was recorded but failed (stale cassette, replay error, or a
+    # real invariant break) still exited 0 and a CI step could not catch it.
+    # Found while adding the --require-recorded CI step (2026-10-14).
+    _, recorded_dir = adversarial_dirs
+    (recorded_dir / "synth_001.json").write_text(
+        '{"case_id": "synth_001", "nodes": {}}', encoding="utf-8"
+    )
+    exit_code = run_module.main(["--suite", "adversarial"])
+    out = capsys.readouterr().out
+    assert "EVALUATED 1 of 1" in out
+    assert exit_code == 1
