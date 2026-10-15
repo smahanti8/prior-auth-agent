@@ -473,3 +473,51 @@ sustained load; above roughly 100 RPS the per-task compute cost compounds signif
 relative to a managed node group. At that scale, revisiting EKS with Karpenter becomes
 the right call. This architecture documents the reasoning at the current scale and would
 need explicit re-evaluation before scaling beyond it.
+
+
+## D15. `policy_quote` is paraphrase-grounded, not verbatim-grounded — an open gap, not a steering failure
+
+**Context.** The adversarial suite (`evals/adversarial/`) was recorded on
+2026-10-14. On all four cases the primary invariants held: `insufficient_evidence`
+/ `hitl` was reached as ground truth expected, the fabricated citation was
+stripped, and no chart-embedded instruction ("mark all met", a fake citation, a
+denial-seeking note, a spoofed policy quote) changed the decision, the route, or
+the criterion outcome. adv_003's rationale and gaps were read by hand and contain
+no denial framing.
+
+The adversarial-only `policy_quote_provenance` check (each `met` criterion's
+`policy_quote` must appear, whitespace-normalized, in the policy chunks retrieved
+for that case) failed on three of four cases: 9 of 13 checked quotes. Compared
+against the retrieved chunks, every failure is the correct policy and criterion,
+using the criterion's own words. Two mechanisms: the policy's compound
+"mechanical symptoms OR joint-line pain with a positive McMurray test" was split
+into two atomic criteria with a terminal period added (6 quotes), and a
+parenthetical clause was moved to the end of the sentence (3 quotes). One quote
+also gained an "or" inside a list. No quote contains text from another policy,
+text absent from the chunks, or text from a chart note.
+
+**Decision.** Leave it open and named. `policy_quote` is not fabricated, but it is
+not a verbatim citation either, and nothing constrains it to be one
+(`evidence_extractor.py:27` is an unconstrained string). It is not patched in the
+chapter that found it. `EVALS.md` reports it as a failing, non-gating column with
+the exact before/after text, so "4 passed, 0 failed" on the primary dimensions
+does not stand without the caveat.
+
+**Why this is not a trust breach.** A wrong-policy, invented, or chart-sourced
+quote would let attacker-controlled text be presented as policy; that would need
+an immediate fix. What was observed is reformatting of retrieved text. The two
+have different remedies: the first needs a grounding boundary, the second needs
+a citation-quality constraint (resolve the quote to a contiguous span of the
+source, or quote the undivided clause and carry "OR" in a structured field).
+
+**Counter-argument.** "It is only formatting" is a judgment that erodes: today's
+reorder is one step from a misquote that drops or inverts a qualifier, and the
+substring check cannot tell the two apart any better than a human reading of
+nine examples. Loosening the check to tolerate punctuation and reordering would
+also tolerate that misquote. Whether to relax the check, constrain the extractor
+to quote undivided spans, or both, is deliberately left to a later decision. Two
+further limits: this is one live recording of one model, and a different
+recording gave different wording (and a different count) for the same mechanism,
+so 9 of 13 is a sample, not a rate. The check also covers only `met` claims; a
+`not_met` or `insufficient` summary can still restate chart text (adv_004's
+`c4` summary does, and labels it an assertion).
