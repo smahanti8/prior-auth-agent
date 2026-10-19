@@ -104,6 +104,28 @@ python -m evals.tier_analysis --live --tier haiku   # all three LLM nodes
 
 See [EVALS.md](EVALS.md) for methodology and known limitations.
 
+## Optional: OpenTelemetry tracing
+
+Per-node telemetry (latency, model, token counts, cost — see the table above) can additionally be
+emitted as OpenTelemetry spans, for inspection in any OTel backend. This is purely additive: the
+hash-chained audit log is unchanged. Spans are emitted only when a tracer provider is configured;
+the console option below configures one.
+
+Enable it with `pip install -e ".[otel]"`. Then, for local console output:
+
+```bash
+OTEL_TRACES_EXPORTER=console python -m prior_auth_agent.graph <bundle.json> <cpt_code>
+```
+
+Span attributes are limited to `case_id`, node type, latency, cost, model and token counts — the same
+fields already in the audit log. Chart content (prompts, completions, citations, criterion text) never
+reaches a span, including on the exception path (see DECISIONS.md D16). A test asserts this with a
+distinctive marker string.
+
+OTLP export to a collector is not wired up and not tested here. If you want it, install
+`opentelemetry-exporter-otlp-proto-grpc` and configure your own tracer provider with an
+`OTLPSpanExporter`; that is a pointer, not a supported path.
+
 ## Eval Suite
 
 A 15-case golden eval suite scores four dimensions per case: determination
