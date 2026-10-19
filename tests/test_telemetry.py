@@ -20,6 +20,7 @@ from prior_auth_agent.telemetry import (
     _timed,
     cost_usd,
     drain,
+    peek_last,
     record_deterministic,
     record_llm,
     reset,
@@ -116,6 +117,21 @@ def test_reset_clears_accumulator():
     record_deterministic("intake", 1.0)
     reset()
     assert drain() == []
+
+
+def test_peek_last_returns_none_when_empty():
+    reset()
+    assert peek_last() is None
+
+
+def test_peek_last_returns_latest_without_draining():
+    reset()
+    record_deterministic("intake", 1.0)
+    record_deterministic("eligibility", 2.0)
+    last = peek_last()
+    assert last is not None and last.node_name == "eligibility"
+    # Unlike drain(), peeking leaves the accumulator intact.
+    assert [r.node_name for r in drain()] == ["intake", "eligibility"]
 
 
 def test_multiple_records_accumulate():

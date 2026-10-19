@@ -97,6 +97,11 @@ def drain() -> list[NodeTelemetry]:
     return result
 
 
+def peek_last() -> Optional[NodeTelemetry]:
+    """Return the most recently recorded entry without draining the accumulator."""
+    return _accumulator[-1] if _accumulator else None
+
+
 def record_llm(
     input_tokens: int,
     output_tokens: int,
