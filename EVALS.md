@@ -113,6 +113,21 @@ CI and is not part of `--baseline-check`.
 too small for a statistically defensible calibration curve — see Limitations
 below.
 
+**Standalone report:** `python -m evals.calibration` reads the latest
+`evals/results/run_*.json`, prints the Brier score, and writes its own
+`evals/results/calibration_report_*.json` artifact. It reuses
+`prior_auth_agent.audit_packet._calibration_metrics` — the audit packet's S1
+scoreboard consumes the same computation, so there is one source of truth for
+the number, not two.
+
+**Binned reliability diagram / ECE:** gated on sample size, not yet
+implemented. With the standard convention of 10 bins and a minimum of 5
+samples per bin for a bin's average to be meaningful, the minimum N is 50.
+Actual N is 13, so `evals.calibration` reports this explicitly
+(`ECE not reported: N too small; minimum N for 10 bins is 50.`) instead of
+printing a number the sample size can't support. Once the golden set reaches
+N=50 the gate opens and the reliability-diagram computation can be added.
+
 ---
 
 ## Test cases
