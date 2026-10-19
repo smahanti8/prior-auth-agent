@@ -19,6 +19,11 @@ src/prior_auth_agent/
 ├── graph.py               # graph wiring + entrypoint
 ├── llm.py                 # shared Anthropic client + structured-output helper (streamed)
 ├── validation.py          # pydantic citation rule: no citation -> no claim
+├── telemetry.py           # per-node token, latency, and cost instrumentation
+├── otel_tracing.py        # optional OpenTelemetry spans for that telemetry (off unless installed and configured)
+├── audit_log.py           # tamper-evident, hash-chained append-only JSONL logs
+├── audit_packet.py        # compliance audit-packet generator
+├── mcp_server.py          # read-only MCP server over the policy corpus
 ├── nodes/
 │   ├── intake.py          # FHIR bundle + CPT validation
 │   ├── eligibility.py     # coverage / eligibility check (stub for payer API)
@@ -28,11 +33,31 @@ src/prior_auth_agent/
 │   ├── citation_gate.py   # hard reject: any met claim missing a policy or chart quote
 │   ├── determination.py   # draft approve | insufficient_evidence + rationale (never denies)
 │   └── confidence_gate.py # routes approvals to auto decision, everything else to HITL
+├── policy/
+│   ├── schema.py          # versioned, machine-readable criterion schema
+│   ├── registry.py        # load versioned criterion YAML; version-date lookup
+│   └── evaluator.py       # evaluate a predicate against bundle fragments
 ├── vectorstore/
 │   ├── store.py           # ChromaDB persistent client + collection
 │   └── ingest.py          # chunk & index policy documents
 └── hitl/
     └── review_app.py      # Streamlit review queue UI
+
+evals/
+├── run.py                 # eval runner: golden suite (cassette replay by default) or --suite adversarial
+├── fixtures.py            # cassette replay
+├── recorder.py            # cassette recording
+├── calibration.py         # standalone Brier-score calibration report
+├── cost_report.py         # cost per determination, 1K / 100K / 1M monthly projections
+├── tier_analysis.py       # model-tiering analysis: cost vs accuracy
+├── golden/                # the 15 golden cases, bundle generator, schema
+├── adversarial/           # 4 hostile-chart cases (own runner path, no baseline)
+├── retrieval/             # retrieval-quality eval: recall@k / MRR
+└── recorded/              # committed cassettes for the golden suite
+
+data/                      # policy documents, encoded criteria, sample bundles, HITL review queue
+infra/                     # documentation-grade Terraform (never applied)
+docs/                      # architecture diagram, audit-packet samples, static demo page
 ```
 
 ## Quickstart
