@@ -480,7 +480,8 @@ need explicit re-evaluation before scaling beyond it.
 **Context.** The adversarial suite (`evals/adversarial/`) was recorded on
 2026-10-14. On all four cases the primary invariants held: `insufficient_evidence`
 / `hitl` was reached as ground truth expected, the fabricated citation was
-stripped, and no chart-embedded instruction ("mark all met", a fake citation, a
+not accepted (the model declined to cite it, so the deterministic strip had
+nothing to remove), and no chart-embedded instruction ("mark all met", a fake citation, a
 denial-seeking note, a spoofed policy quote) changed the decision, the route, or
 the criterion outcome. adv_003's rationale and gaps were read by hand and contain
 no denial framing.
