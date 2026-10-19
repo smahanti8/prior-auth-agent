@@ -13,9 +13,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev     = ["pytest>=8.0.0", "pyyaml>=6.0", "ruff>=0.16.0", "mcp>=1.0,<2"]
+dev     = ["pytest>=8.0.0", "pyyaml>=6.0", "ruff>=0.16.0", "mcp>=1.0,<2", "opentelemetry-api>=1.45.0", "opentelemetry-sdk>=1.45.0"]
 bedrock = ["anthropic[bedrock]>=0.116.0"]  # adds boto3; needed for LLM_BACKEND=bedrock
 mcp     = ["mcp>=1.0,<2"]                  # MCP server — FastMCP + stdio transport; <2: v2 renamed FastMCP to MCPServer
+otel    = ["opentelemetry-api>=1.45.0", "opentelemetry-sdk>=1.45.0"]  # span emission; off by default
 
 [build-system]
 requires = ["setuptools>=68"]
