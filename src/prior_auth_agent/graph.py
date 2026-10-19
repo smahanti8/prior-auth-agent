@@ -24,7 +24,7 @@ from .nodes import (
 )
 from .state import PriorAuthState
 from . import telemetry
-from .telemetry import _timed
+from .otel_tracing import traced as _timed
 
 
 # ── Routing predicates ─────────────────────────────────────────────────────────
@@ -120,10 +120,15 @@ def run(bundle_path: str, cpt_code: str) -> PriorAuthState:
 
 if __name__ == "__main__":
     import json
+    import os
     import sys
 
     if len(sys.argv) != 3:
         sys.exit("usage: python -m prior_auth_agent.graph <bundle.json> <cpt_code>")
+
+    if os.environ.get("OTEL_TRACES_EXPORTER") == "console":
+        from .otel_tracing import enable_console_tracing
+        enable_console_tracing()
 
     final_state = run(sys.argv[1], sys.argv[2])
     print(f"\ncase_id:  {final_state.get('case_id')}")

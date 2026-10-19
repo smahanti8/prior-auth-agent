@@ -140,3 +140,21 @@ def test_traced_falls_back_to_timed_when_otel_unavailable(monkeypatch, exporter)
     records = telemetry.drain()
     assert len(records) == 1
     assert records[0].node_name == "intake"
+
+
+def test_graph_nodes_emit_spans_through_the_real_graph(exporter):
+    # Wiring test: the unit tests above wrap hand-written nodes; this one
+    # checks graph.py actually routes its nodes through traced(). Case 009
+    # (lapsed coverage) stops at a deterministic gate, so no LLM is involved.
+    from evals.golden.generator import CASES_DIR, generate_bundle
+    from evals.golden.schema import CaseSpec
+    from prior_auth_agent.graph import build_graph
+
+    spec = CaseSpec.load(next(CASES_DIR.glob("case_009*.yaml")))
+    build_graph().invoke({"fhir_bundle": generate_bundle(spec), "cpt_code": spec.cpt})
+
+    spans = exporter.get_finished_spans()
+    names = [s.name for s in spans]
+    assert "node.intake" in names
+    assert all(n.startswith("node.") for n in names)
+    assert all("prior_auth.case_id" in s.attributes for s in spans)
