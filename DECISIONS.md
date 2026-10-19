@@ -521,3 +521,59 @@ recording gave different wording (and a different count) for the same mechanism,
 so 9 of 13 is a sample, not a rate. The check also covers only `met` claims; a
 `not_met` or `insufficient` summary can still restate chart text (adv_004's
 `c4` summary does, and labels it an assertion).
+
+
+## D16. OpenTelemetry spans are an additional sink for node telemetry, not a replacement
+
+**Context.** `telemetry.py`'s `_timed()` wrapper already records per-node latency,
+model, token counts, and cost, which `graph.run()` drains into the hash-chained
+audit log (D7). That log is the record of truth for a determination and must stay
+exactly as it is. Separately, being able to inspect a run in a real tracing
+backend — span durations, per-node breakdown, error status — is useful for
+operating the pipeline day to day, which the audit log's flat JSONL was never
+meant to serve.
+
+**Decision.** `graph.py`'s node wrapping goes through `otel_tracing.traced()`
+instead of `telemetry._timed()` directly; `traced()` calls `_timed()` unchanged
+and, when `opentelemetry` is installed, wraps it in a span carrying the same
+fields `_timed()` already recorded (node type, latency, model, tokens, cost) plus
+the `case_id` that is already written to the audit log. `opentelemetry-api` and
+`opentelemetry-sdk` are declared as their own `otel` extra in `pyproject.toml`,
+not relied on transitively through `chromadb` (which happens to pull them in
+today): a dependency chromadb drops in a future release should not silently break
+tracing. They are also listed in the `dev` extra, because the tracing tests import
+them and CI installs only `.[dev]`. Nothing from chart content (FHIR bundle
+fields, prompts, completions, citations, criterion text) is read to build a span
+attribute.
+
+**Rationale — the exception path is where a naive integration would leak.**
+OTel's `start_as_current_span()` defaults to attaching `str(exception)` as a span
+event and as the error status description when the wrapped call raises.
+`evidence_extractor` and `determination` are exactly the nodes the README's PHI
+section already flags as carrying FHIR fragments in their error traces. Turning on
+tracing must not reopen that leak path, so `traced()` passes
+`record_exception=False, set_status_on_exception=False` and sets a static
+`node_failed` error status itself. Tests assert that a marker string in a node's
+output, or in a raised exception's message, appears in no span attribute, event,
+or status description, and were checked by mutation (each of three deliberate
+leaks makes one test fail).
+
+**Rationale — console-first, not OTLP-first.** The default local story is a
+`ConsoleSpanExporter`, which ships with `opentelemetry-sdk`: no second package, no
+collector to run, one environment variable (`OTEL_TRACES_EXPORTER=console`).
+Wiring OTLP export by default would mean the `otel` extra silently starts trying
+to reach a network endpoint; that must be an explicit, separate opt-in
+(`opentelemetry-exporter-otlp-proto-grpc` plus swapping the exporter), not a
+plain-install default. OTLP export is not wired up or tested here.
+
+**Counter-argument.** A second sink is a second thing that can drift from the audit
+log it mirrors: if `telemetry.NodeTelemetry`'s fields change shape later,
+`otel_tracing.py` has to change in lockstep or spans silently go stale. Because
+`traced()` reads the same `NodeTelemetry` record via `telemetry.peek_last()`
+rather than re-deriving its own numbers, the two sinks cannot diverge in value,
+only in whether the span-emission code was updated for a new field. A further
+limit: `case_id` is `state["case_id"]` when the caller supplies one and a
+generated `pa-<hex>` otherwise, so a caller that passes a real patient identifier
+as `case_id` would put it in spans exactly as it already lands in the audit log.
+Span attributes are a place where that mistake would be more visible to more
+systems, and nothing here validates the format.
