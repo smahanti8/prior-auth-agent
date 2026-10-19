@@ -158,3 +158,19 @@ def test_graph_nodes_emit_spans_through_the_real_graph(exporter):
     assert "node.intake" in names
     assert all(n.startswith("node.") for n in names)
     assert all("prior_auth.case_id" in s.attributes for s in spans)
+
+
+def test_tracing_does_not_consume_the_telemetry_the_audit_log_reads(exporter):
+    # graph.run() drains the accumulator into the hash-chained audit log after
+    # the graph finishes. The span wrapper must only peek: if it drained, spans
+    # would work but the audit log would silently lose its node_telemetry.
+    def llm_node_sim(state):
+        record_llm(100, 50, "claude-opus-4-8", 3000.0)
+        return {**state, "case_id": "pa-test"}
+
+    otel_tracing.traced("criteria_mapper", llm_node_sim)({"case_id": "pa-test"})
+
+    assert len(exporter.get_finished_spans()) == 1
+    records = telemetry.drain()
+    assert [r.node_name for r in records] == ["criteria_mapper"]
+    assert records[0].input_tokens == 100
